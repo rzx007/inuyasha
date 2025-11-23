@@ -1,0 +1,37 @@
+{
+  "name": "@zth/eslint-config",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "exports": {
+    "./vue": {
+      "import": "./dist/vue/index.js",
+      "types": "./dist/vue/index.d.ts"
+    },
+    "./node": {
+      "import": "./dist/node/index.js",
+      "types": "./dist/node/index.d.ts"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@eslint/js": "^9.38.0",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint-plugin-vue": "^10.5.1",
+    "globals": "^15.14.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2",
+    "vue-eslint-parser": "^10.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.38.0"
+  }
+}
