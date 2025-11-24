@@ -23,11 +23,13 @@ import {
 import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
+import { useFormStateStore } from '@/stores/formState'
 
 interface Props {
   schema: ComponentSchema
 }
 const props = defineProps<Props>()
+const formStateStore = useFormStateStore()
 
 const resolvedProps = computed(() => {
   const newProps = { ...props.schema.props }
@@ -41,6 +43,13 @@ const resolvedProps = computed(() => {
     }
   }
   return newProps
+})
+
+const formValue = computed({
+  get: () => formStateStore.getComponentState(props.schema.id),
+  set: (value) => {
+    formStateStore.setComponentState(props.schema.id, value)
+  },
 })
 
 function handleButtonClick() {
@@ -214,11 +223,13 @@ const styleObject = computed(() => props.schema.style || {})
     <!-- 输入框 -->
     <ElInput
       v-if="schema.type === ComponentType.Input"
+      v-model="formValue"
       :placeholder="resolvedProps.placeholder"
     />
     <!-- 选择器 -->
     <ElSelect
       v-else-if="schema.type === ComponentType.Select"
+      v-model="formValue"
       placeholder="Select"
     >
       <ElOption
@@ -231,6 +242,7 @@ const styleObject = computed(() => props.schema.style || {})
     <!-- 日期选择器 -->
     <ElDatePicker
       v-else-if="schema.type === ComponentType.DatePicker"
+      v-model="formValue"
       type="date"
       placeholder="Pick a day"
     />

@@ -25,8 +25,22 @@ function handleComponentClick(event: MouseEvent) {
 }
 
 function handleDeleteComponent(event: KeyboardEvent) {
+  // 检查事件目标是否是可编辑元素
+  const target = event.target as HTMLElement
+  const isEditableElement = 
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.isContentEditable ||
+    target.closest('input, textarea, [contenteditable="true"]')
+  
+  // 如果是在可编辑元素中，不执行删除操作
+  if (isEditableElement) {
+    return
+  }
+  
   if (event.key === 'Delete' || event.key === 'Backspace') {
     event.preventDefault()
+    event.stopPropagation()
     editorStore.deleteComponent(props.schema.id)
   }
 }

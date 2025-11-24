@@ -25,6 +25,7 @@ import {
 import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
+import { useFormStateStore } from '@/stores/formState'
 
 // 循环引用问题：DynamicRenderer 引用 EditorComponentWrapper，反之亦然
 // 使用 defineAsyncComponent 解决
@@ -37,6 +38,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const editorStore = useEditorStore()
+const formStateStore = useFormStateStore()
 
 // Create a computed version of the props that resolves any bindings
 const resolvedProps = computed(() => {
@@ -51,6 +53,13 @@ const resolvedProps = computed(() => {
     }
   }
   return newProps
+})
+
+const formValue = computed({
+  get: () => formStateStore.getComponentState(props.schema.id),
+  set: (value) => {
+    formStateStore.setComponentState(props.schema.id, value)
+  },
 })
 
 const children = computed({
@@ -298,11 +307,13 @@ const styleObject = computed(() => {
     <!-- 输入框 -->
     <ElInput
       v-if="schema.type === ComponentType.Input"
+      v-model="formValue"
       :placeholder="resolvedProps.placeholder"
     />
     <!-- 选择器 -->
     <ElSelect
       v-else-if="schema.type === ComponentType.Select"
+      v-model="formValue"
       placeholder="Select"
     >
       <ElOption
@@ -315,6 +326,7 @@ const styleObject = computed(() => {
     <!-- 日期选择器 -->
     <ElDatePicker
       v-else-if="schema.type === ComponentType.DatePicker"
+      v-model="formValue"
       type="date"
       placeholder="Pick a day"
     />
