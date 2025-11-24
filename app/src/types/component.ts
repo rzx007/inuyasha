@@ -118,6 +118,6 @@ export interface ComponentPropSchema {
   options?: Array<{ label: string; value: any }>
   placeholder?: string
   description?: string
-  bindable?: boolean // New: Mark if this property can be data-bound
+  bindable?: boolean //Mark if this property can be data-bound
 }
 

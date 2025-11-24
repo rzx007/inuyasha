@@ -167,20 +167,20 @@ function handleSaveEvent() {
 <template>
   <div class="property-panel h-full flex flex-col bg-white border-l border-gray-200">
     <div class="p-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-800">Properties</h3>
+      <h3 class="text-lg font-semibold text-gray-800">属性配置</h3>
     </div>
     
     <div v-if="!selectedComponent" class="flex-1 flex items-center justify-center text-gray-400">
       <div class="text-center">
         <div class="text-4xl mb-2">⚙️</div>
-        <div>Please select a component</div>
+        <div>请选择一个组件</div>
       </div>
     </div>
     
     <div v-else class="flex-1 flex flex-col overflow-hidden">
       <!-- Component Info -->
       <div class="p-4 border-b">
-        <div class="text-sm text-gray-600 mb-1">Component Type</div>
+        <div class="text-sm text-gray-600 mb-1">组件类型</div>
         <div class="text-base font-medium">{{ componentMeta?.name }}</div>
       </div>
 
@@ -188,7 +188,7 @@ function handleSaveEvent() {
         <ElTabPane label="Properties" name="props" class="p-4 overflow-y-auto">
           <!-- Property Config -->
           <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Properties</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">属性配置</h4>
             <div class="space-y-4">
               <div
                 v-for="propSchema in propsSchema"
@@ -203,7 +203,7 @@ function handleSaveEvent() {
                     type="primary"
                     link
                     size="small"
-                    title="Bind Data"
+                    title="绑定数据"
                     @click="openDataBindingDialog(propSchema.key)"
                   />
                 </label>
@@ -220,11 +220,11 @@ function handleSaveEvent() {
           
           <!-- Style Config -->
           <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">Styles</h4>
+            <h4 class="text-sm font-medium text-gray-700 mb-3">样式配置</h4>
             <div class="space-y-4">
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Width</span>
+                  <span>宽度</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.width')" />
                 </label>
                 <ElInput
@@ -235,7 +235,7 @@ function handleSaveEvent() {
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Height</span>
+                  <span>高度</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.height')" />
                 </label>
                 <ElInput
@@ -246,7 +246,7 @@ function handleSaveEvent() {
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Padding</span>
+                  <span>内边距</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.padding')" />
                 </label>
                 <ElInput
@@ -257,7 +257,7 @@ function handleSaveEvent() {
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Margin</span>
+                  <span>外边距</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.margin')" />
                 </label>
                 <ElInput
@@ -268,7 +268,7 @@ function handleSaveEvent() {
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Background Color</span>
+                  <span>背景颜色</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.backgroundColor')" />
                 </label>
                 <ElColorPicker
@@ -278,7 +278,7 @@ function handleSaveEvent() {
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Text Color</span>
+                    <span>文字颜色</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.color')" />
                 </label>
                 <ElColorPicker
@@ -288,7 +288,7 @@ function handleSaveEvent() {
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                  <span>Font Size</span>
+                  <span>字体大小</span>
                   <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.fontSize')" />
                 </label>
                 <ElInput
@@ -303,16 +303,16 @@ function handleSaveEvent() {
 
         <ElTabPane label="Events" name="events" class="p-4">
           <div class="flex justify-end mb-4">
-            <ElButton @click="openAddEventDialog">Add Event</ElButton>
+            <ElButton @click="openAddEventDialog">添加事件</ElButton>
           </div>
           <div v-if="selectedComponent.schema.events && selectedComponent.schema.events.length > 0">
             <div v-for="eventItem in selectedComponent.schema.events" :key="eventItem.id" class="p-2 border rounded mb-2">
-              <div><strong>Trigger:</strong> {{ eventItem.trigger }}</div>
-              <div><strong>Action:</strong> {{ eventItem.action.type }}</div>
+              <div><strong>触发器:</strong> {{ eventItem.trigger }}</div>
+              <div><strong>动作:</strong> {{ eventItem.action.type }}</div>
             </div>
           </div>
           <div v-else class="text-center text-gray-400">
-            No events configured.
+            没有事件配置。
           </div>
         </ElTabPane>
       </ElTabs>
@@ -326,35 +326,35 @@ function handleSaveEvent() {
     />
 
     <!-- Event Configuration Dialog -->
-    <ElDialog v-model="isEventDialogVisible" title="Configure Event">
+    <ElDialog v-model="isEventDialogVisible" title="事件配置">
       <ElForm v-if="currentEvent.action" :model="currentEvent" label-position="top">
-        <ElFormItem label="Trigger">
+        <ElFormItem label="触发器">
           <ElSelect v-model="currentEvent.trigger">
-            <ElOption label="On Click" value="onClick" />
+            <ElOption label="点击" value="onClick" />
           </ElSelect>
         </ElFormItem>
-        <ElFormItem label="Action Type">
+        <ElFormItem label="动作类型">
           <ElSelect v-model="currentEvent.action.type">
-            <ElOption label="Show Message" value="showMessage" />
+            <ElOption label="显示消息" value="showMessage" />
           </ElSelect>
         </ElFormItem>
         
         <div v-if="currentEvent.action?.type === 'showMessage' && currentEvent.action.config">
-          <ElFormItem label="Message">
+          <ElFormItem label="消息">
             <ElInput v-model="(currentEvent.action.config as ShowMessageActionConfig).message" />
           </ElFormItem>
-          <ElFormItem label="Message Type">
+          <ElFormItem label="消息类型">
             <ElSelect v-model="(currentEvent.action.config as ShowMessageActionConfig).messageType">
-              <ElOption label="Success" value="success" />
-              <ElOption label="Warning" value="warning" />
-              <ElOption label="Error" value="error" />
+              <ElOption label="成功" value="success" />
+              <ElOption label="警告" value="warning" />
+              <ElOption label="错误" value="error" />
             </ElSelect>
           </ElFormItem>
         </div>
       </ElForm>
       <template #footer>
-        <ElButton @click="isEventDialogVisible = false">Cancel</ElButton>
-        <ElButton type="primary" @click="handleSaveEvent">Save</ElButton>
+        <ElButton @click="isEventDialogVisible = false">取消</ElButton>
+        <ElButton type="primary" @click="handleSaveEvent">保存</ElButton>
       </template>
     </ElDialog>
   </div>
