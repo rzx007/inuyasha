@@ -2,10 +2,12 @@
 import { computed } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useComponentStore } from '@/stores/component'
+import { useEditorStore } from '@/stores/editor'
 import { createComponent } from '@/utils/componentRegistry'
 import type { ComponentMeta } from '@/types/component'
 
 const componentStore = useComponentStore()
+const editorStore = useEditorStore()
 
 // 按分类获取组件
 const baseComponents = computed(() =>
@@ -26,7 +28,9 @@ const formComponents = computed(() =>
 // 克隆组件时，我们只传递组件类型。
 // 画布的 @add 事件会接收到这个对象，并用它来创建真正的组件实例。
 function cloneComponent(meta: ComponentMeta) {
-  return createComponent(meta.type)
+  // 获取现有组件列表，用于生成语义化标识
+  const existingComponents = editorStore.pageConfig.components
+  return createComponent(meta.type, undefined, existingComponents)
 }
 </script>
 

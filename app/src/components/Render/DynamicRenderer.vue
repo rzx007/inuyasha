@@ -43,6 +43,7 @@ const formStateStore = useFormStateStore()
 // Create a computed version of the props that resolves any bindings
 const resolvedProps = computed(() => {
   const newProps = { ...props.schema.props }
+
   for (const key in newProps) {
     const bindingKey = `${key}_binding`
     if (newProps[bindingKey]) {

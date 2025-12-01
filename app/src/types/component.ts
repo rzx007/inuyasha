@@ -83,6 +83,7 @@ export interface ComponentDataSource {
  */
 export interface ComponentSchema {
   id: ComponentId
+  semanticId: string // 语义化唯一标识，与 id 等效（如 button1, button2）
   type: ComponentType
   label: string
   props: ComponentProps
