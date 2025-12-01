@@ -7,6 +7,7 @@ import { useEditorStore } from '@/stores/editor'
 import { allComponents } from '@/config/components'
 import ComponentPanel from '@/components/Editor/ComponentPanel.vue'
 import DataSourcePanel from '@/components/Editor/DataSourcePanel.vue'
+import DebugPanel from '@/components/Editor/DebugPanel.vue'
 import Canvas from '@/components/Editor/Canvas.vue'
 import PropertyPanel from '@/components/Editor/PropertyPanel.vue'
 import Toolbar from '@/components/Editor/Toolbar.vue'
@@ -16,6 +17,7 @@ const componentStore = useComponentStore()
 const editorStore = useEditorStore()
 
 const activeLeftTab = ref('components')
+const showDebugPanel = ref(false)
 
 onMounted(() => {
   componentStore.registerComponents(allComponents)
@@ -36,7 +38,10 @@ onMounted(() => {
 <template>
   <div class="editor-page h-screen flex flex-col bg-gray-50">
     <!-- 工具栏 -->
-    <Toolbar />
+    <Toolbar 
+      :is-debug-mode="showDebugPanel" 
+      @toggle-debug="showDebugPanel = !showDebugPanel" 
+    />
     
     <!-- 编辑器主体 -->
     <div class="flex-1 flex overflow-hidden">
@@ -52,9 +57,10 @@ onMounted(() => {
         </ElTabs>
       </div>
       
-      <!-- 画布区域 -->
+      <!-- 画布区域 / Debug 面板 -->
       <div class="flex-1 overflow-hidden">
-        <Canvas />
+        <Canvas v-if="!showDebugPanel" />
+        <DebugPanel v-else />
       </div>
       
       <!-- 属性面板 -->

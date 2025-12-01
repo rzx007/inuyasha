@@ -71,7 +71,7 @@ function handleDeleteButtonClick() {
     <!-- 拖拽手柄和操作栏 -->
     <div
       v-if="selectedId === schema.id"
-      class="absolute -top-6 left-[-2px] bg-blue-500 text-white text-xs px-2 py-1 rounded-t z-20 flex items-center"
+      class="absolute -top-6 left-[-2px] bg-blue-500 text-white text-xs px-2 py-1 rounded-t z-100 flex items-center"
     >
       <span class="cursor-move drag-handle mr-2">⠿ {{ schema.label }}</span>
       <button

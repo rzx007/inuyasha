@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import { useEditorStore } from '@/stores/editor'
-import { EditorMode } from '@/types/editor'
 import { ElButton } from 'element-plus'
 import { useRouter } from 'vue-router'
 
 const editorStore = useEditorStore()
 const router = useRouter()
 
-const isEditMode = computed(() => editorStore.isEditMode)
+const props = defineProps<{
+  isDebugMode?: boolean
+}>()
+
+const emit = defineEmits<{
+  (e: 'toggleDebug'): void
+}>()
 
 // 切换预览模式
 function handlePreview() {
@@ -50,6 +54,12 @@ function handleClear() {
     </div>
     
     <div class="flex items-center gap-2">
+      <ElButton 
+        @click="emit('toggleDebug')" 
+        :type="props.isDebugMode ? 'success' : 'default'"
+      >
+        {{ props.isDebugMode ? '画布' : '调试' }}
+      </ElButton>
       <ElButton @click="handleSave">保存</ElButton>
       <ElButton @click="handleClear" type="warning">清空</ElButton>
       <ElButton
