@@ -125,7 +125,13 @@ function renderPropInput(schema: ComponentPropSchema, value: any, updateFn: (key
         modelValue: value,
         'onUpdate:modelValue': (val: any) => updateFn(key, val),
         style: 'width: 100%',
-      }, () => options?.map(opt => h(ElOption, { key: opt.value, label: opt.label, value: opt.value })))
+      }, () => options?.map((opt: { value: any; label: any }) => h(ElOption, { key: opt.value, label: opt.label, value: opt.value })))
+    case 'number':
+      return h(ElInputNumber, {
+        modelValue: value,
+        'onUpdate:modelValue': (val: any) => updateFn(key, val),
+      })
+   
     default:
       return h('div', `Unsupported prop type: ${type}`)
   }

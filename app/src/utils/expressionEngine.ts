@@ -30,35 +30,39 @@ export function resolveBinding(binding: DataBinding): any {
       return undefined
 
     case 'component':
-      if (binding.componentId) {
-        // 对于组件绑定，首先从表单状态存储中检查是否有实时值。
-        const formValue = formStateStore.getComponentState(binding.componentId)
-        
-        // 如果 formValue 是 undefined，检查是否是表单组件
-        // 如果是表单组件，返回空字符串而不是 fallback 到 schema
-        if (formValue === undefined) {
-          const componentSchema = findComponentById(binding.componentId, editorStore.pageConfig.components)
-          if (componentSchema) {
-            // 判断是否是表单组件
-            const isFormComponent = [
-              'input',
-              'select', 
-              'datePicker'
-            ].includes(componentSchema.type)
-            
-            // 如果是表单组件，返回空字符串（表示还没有输入）
-            if (isFormComponent) {
-              return ''
-            }
-            
-            // 对于非表单组件，才 fallback 到 schema
-            return binding.path ? get(componentSchema, binding.path) : componentSchema
-          }
+      if (binding.componentId && binding.path) {
+        const componentSchema = findComponentById(binding.componentId, editorStore.pageConfig.components)
+        if (!componentSchema) {
           return undefined
         }
-        
-        // 如果有 formValue，正常返回
-        return binding.path ? get(formValue, binding.path) : formValue
+
+        // 解析路径格式：modelValue.xxx, props.xxx, style.xxx
+        const pathParts = binding.path.split('.')
+        const category = pathParts[0] // 'modelValue', 'props', 'style'
+        const key = pathParts.slice(1).join('.') // 剩余路径
+
+        switch (category) {
+          case 'modelValue':
+            // 从 formStateStore 读取双向绑定值
+            if (key) {
+              const value = formStateStore.getComponentState(binding.componentId, key)
+              // 如果值为 undefined，返回默认的空值（避免显示 undefined）
+              return value !== undefined ? value : ''
+            }
+            return undefined
+
+          case 'props':
+            // 从组件 schema 的 props 读取
+            return key ? get(componentSchema.props, key) : componentSchema.props
+
+          case 'style':
+            // 从组件 schema 的 style 读取
+            return key ? get(componentSchema.style, key) : componentSchema.style
+
+          default:
+            // 兼容旧的路径格式（没有前缀的直接路径）
+            return get(componentSchema, binding.path)
+        }
       }
       return undefined
 

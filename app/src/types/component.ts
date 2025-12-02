@@ -103,6 +103,7 @@ export interface ComponentMeta {
   category: 'base' | 'layout' | 'data' | 'form'
   defaultProps: ComponentProps
   defaultStyle: ComponentStyle
+  defaultModelValue?: Record<string, any> // 双向绑定的默认值配置，支持多个响应式属性
   propsSchema: ComponentPropSchema[]
   canNest?: boolean // 是否支持嵌套子组件
   display?: 'block' | 'inline-block' // 组件的显示类型

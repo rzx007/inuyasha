@@ -14,6 +14,7 @@ declare global {
   const $shallowRef: typeof import('vue/macros').$shallowRef
   const $toRef: typeof import('vue/macros').$toRef
   const EffectScope: typeof import('vue').EffectScope
+  const ElInputNumber: typeof import('element-plus/es').ElInputNumber
   const asyncComputed: typeof import('@vueuse/core').asyncComputed
   const autoResetRef: typeof import('@vueuse/core').autoResetRef
   const computed: typeof import('vue').computed
@@ -334,6 +335,7 @@ declare module 'vue' {
   interface GlobalComponents {}
   interface ComponentCustomProperties {
     readonly EffectScope: UnwrapRef<typeof import('vue')['EffectScope']>
+    readonly ElInputNumber: UnwrapRef<typeof import('element-plus/es')['ElInputNumber']>
     readonly asyncComputed: UnwrapRef<typeof import('@vueuse/core')['asyncComputed']>
     readonly autoResetRef: UnwrapRef<typeof import('@vueuse/core')['autoResetRef']>
     readonly computed: UnwrapRef<typeof import('vue')['computed']>

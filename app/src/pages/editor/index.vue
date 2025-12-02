@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onMounted } from 'vue'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
@@ -18,6 +18,8 @@ const editorStore = useEditorStore()
 
 const activeLeftTab = ref('components')
 const showDebugPanel = ref(false)
+
+const currentView = computed(() => showDebugPanel.value ? DebugPanel : Canvas)
 
 onMounted(() => {
   componentStore.registerComponents(allComponents)
@@ -59,8 +61,9 @@ onMounted(() => {
       
       <!-- 画布区域 / Debug 面板 -->
       <div class="flex-1 overflow-hidden">
-        <Canvas v-if="!showDebugPanel" />
-        <DebugPanel v-else />
+        <keep-alive>
+          <component :is="currentView" />
+        </keep-alive>
       </div>
       
       <!-- 属性面板 -->

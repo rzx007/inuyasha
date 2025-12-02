@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import type { ComponentSchema } from '@/types/component'
 import { ComponentType } from '@/types/component'
+import { useComponentStore } from '@/stores/component'
 import {
   ElButton,
   ElCard,
@@ -29,7 +30,22 @@ interface Props {
   schema: ComponentSchema
 }
 const props = defineProps<Props>()
+const componentStore = useComponentStore()
 const formStateStore = useFormStateStore()
+
+// 在组件挂载时初始化 defaultModelValue
+onMounted(() => {
+  const componentMeta = componentStore.getComponentMeta(props.schema.type)
+  if (componentMeta?.defaultModelValue) {
+    // 为每个 defaultModelValue 中的 key 初始化值（如果还没有值的话）
+    Object.entries(componentMeta.defaultModelValue).forEach(([key, defaultValue]) => {
+      const existingValue = formStateStore.getComponentState(props.schema.id, key)
+      if (existingValue === undefined) {
+        formStateStore.setComponentState(props.schema.id, key, defaultValue)
+      }
+    })
+  }
+})
 
 const resolvedProps = computed(() => {
   const newProps = { ...props.schema.props }
@@ -45,10 +61,31 @@ const resolvedProps = computed(() => {
   return newProps
 })
 
+// Create a computed version of the style that resolves any style bindings
+const resolvedStyle = computed(() => {
+  const newStyle = { ...props.schema.style }
+  const propsObj = props.schema.props
+
+  // 查找 style.xxx_binding 格式的绑定
+  for (const key in propsObj) {
+    if (key.startsWith('style.') && key.endsWith('_binding')) {
+      // 提取样式属性名，例如 'style.width_binding' -> 'width'
+      const styleKey = key.substring(6, key.length - 8)
+      const binding = propsObj[key]
+      const resolvedValue = resolveBinding(binding)
+      if (resolvedValue !== undefined) {
+        newStyle[styleKey] = resolvedValue
+      }
+    }
+  }
+  return newStyle
+})
+
+// 表单组件的双向绑定值（默认使用 'value' 作为 key）
 const formValue = computed({
-  get: () => formStateStore.getComponentState(props.schema.id),
+  get: () => formStateStore.getComponentState(props.schema.id, 'value'),
   set: (value) => {
-    formStateStore.setComponentState(props.schema.id, value)
+    formStateStore.setComponentState(props.schema.id, 'value', value)
   },
 })
 
@@ -60,7 +97,7 @@ function handleButtonClick() {
   }
 }
 
-const styleObject = computed(() => props.schema.style || {})
+const styleObject = computed(() => resolvedStyle.value)
 </script>
 
 <template>
