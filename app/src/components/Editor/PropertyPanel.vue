@@ -203,7 +203,7 @@ function handleSaveEvent() {
                   v-else-if="propSchema.type === 'json'"
                   :model-value="JSON.stringify(getPropValue(propSchema), null, 2)"
                   class="min-h-[120px]"
-                  @update:model-value="(val) => handleJsonUpdate(propSchema, val)"
+                  @update:model-value="(val: string | number) => handleJsonUpdate(propSchema, String(val))"
                 />
                 
                 <!-- Color Picker -->
