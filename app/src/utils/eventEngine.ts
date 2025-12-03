@@ -1,7 +1,7 @@
 import type { EventBinding } from '@/types/event'
 import { useDataSourceStore } from '@/stores/dataSource'
 import { useEditorStore } from '@/stores/editor'
-import { ElMessage } from 'element-plus'
+import Toast from '@/components/toast'
 
 /**
  * Executes the action defined in an event binding.
@@ -14,10 +14,7 @@ export function executeEvent(event: EventBinding) {
 
   switch (action.type) {
     case 'showMessage':
-      ElMessage({
-        message: action.config.message,
-        type: action.config.messageType,
-      })
+      Toast[action.config.messageType](action.config.message)
       break
 
     case 'callDataSource':

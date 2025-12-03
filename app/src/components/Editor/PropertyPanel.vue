@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { computed, ref, h } from 'vue'
+import { computed, ref } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
 import {
-  ElInput,
-  ElSelect,
-  ElColorPicker,
-  ElSwitch,
-  ElButton,
-  ElTabs,
-  ElTabPane,
   ElForm,
   ElFormItem,
-  ElDialog,
+  ElSelect,
   ElOption,
 } from 'element-plus'
 import { Link } from '@element-plus/icons-vue'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { Button } from '@/components/ui/button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import type { ComponentPropSchema } from '@/types/component'
 import type { EventBinding, ShowMessageActionConfig } from '@/types/event'
 import { nanoid } from 'nanoid'
@@ -81,59 +81,22 @@ function updateStyle(key: string, value: any) {
   })
 }
 
-// Render prop input control dynamically
-function renderPropInput(schema: ComponentPropSchema, value: any, updateFn: (key: string, val: any) => void) {
-  const { key, type, options, placeholder } = schema
+// Helper function to get prop value
+function getPropValue(schema: ComponentPropSchema) {
+  return selectedComponent.value?.schema.props[schema.key]
+}
 
-  switch (type) {
-    case 'text':
-    case 'textarea':
-      return h(ElInput, {
-        modelValue: value,
-        type: type === 'textarea' ? 'textarea' : 'text',
-        placeholder: placeholder,
-        'onUpdate:modelValue': (val: any) => updateFn(key, val),
-      })
-    case 'json':
-      // For now, we'll use a textarea for JSON editing.
-      // A dedicated JSON editor component would be a good future enhancement.
-      return h(ElInput, {
-        modelValue: JSON.stringify(value, null, 2),
-        type: 'textarea',
-        rows: 5,
-        'onUpdate:modelValue': (val: string) => {
-          try {
-            updateFn(key, JSON.parse(val))
-          } catch (e) {
-            // Handle JSON parsing errors if needed
-            console.error("Invalid JSON format")
-          }
-        },
-      })
-    case 'color':
-      return h(ElColorPicker, {
-        modelValue: value,
-        'onUpdate:modelValue': (val: any) => updateFn(key, val),
-      })
-    case 'switch':
-      return h(ElSwitch, {
-        modelValue: value,
-        'onUpdate:modelValue': (val: any) => updateFn(key, val),
-      })
-    case 'select':
-      return h(ElSelect, {
-        modelValue: value,
-        'onUpdate:modelValue': (val: any) => updateFn(key, val),
-        style: 'width: 100%',
-      }, () => options?.map((opt: { value: any; label: any }) => h(ElOption, { key: opt.value, label: opt.label, value: opt.value })))
-    case 'number':
-      return h(ElInputNumber, {
-        modelValue: value,
-        'onUpdate:modelValue': (val: any) => updateFn(key, val),
-      })
-   
-    default:
-      return h('div', `Unsupported prop type: ${type}`)
+// Helper function to update prop value
+function handlePropUpdate(schema: ComponentPropSchema, value: any) {
+  updateProp(schema.key, value)
+}
+
+// Helper function for JSON update
+function handleJsonUpdate(schema: ComponentPropSchema, value: string) {
+  try {
+    updateProp(schema.key, JSON.parse(value))
+  } catch (e) {
+    console.error("Invalid JSON format")
   }
 }
 
@@ -190,8 +153,12 @@ function handleSaveEvent() {
         <div class="text-base font-medium">{{ componentMeta?.name }}</div>
       </div>
 
-      <ElTabs v-model="activeTab" class="flex-1 flex flex-col overflow-hidden">
-        <ElTabPane label="Properties" name="props" class="p-4 overflow-y-auto">
+      <Tabs v-model="activeTab" class="flex-1 flex flex-col overflow-hidden">
+        <TabsList class="w-full justify-start rounded-none border-b">
+          <TabsTrigger value="props">Properties</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
+        </TabsList>
+        <TabsContent value="props" class="p-4 overflow-y-auto flex-1">
           <!-- Property Config -->
           <div class="mb-6">
             <h4 class="text-sm font-medium text-gray-700 mb-3">属性配置</h4>
@@ -203,23 +170,90 @@ function handleSaveEvent() {
               >
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>{{ propSchema.label }}</span>
-                  <ElButton
+                  <Button
                     v-if="propSchema.bindable"
-                    :icon="Link"
-                    type="primary"
-                    link
-                    size="small"
+                    variant="ghost"
+                    size="sm"
                     title="绑定数据"
                     @click="openDataBindingDialog(propSchema.key)"
-                  />
+                    class="h-6 w-6 p-0"
+                  >
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <component
-                  :is="renderPropInput(
-                    propSchema,
-                    selectedComponent.schema.props[propSchema.key],
-                    updateProp
-                  )"
+                
+                <!-- Text Input -->
+                <Input
+                  v-if="propSchema.type === 'text'"
+                  :model-value="getPropValue(propSchema)"
+                  :placeholder="propSchema.placeholder"
+                  @update:model-value="(val) => handlePropUpdate(propSchema, val)"
                 />
+                
+                <!-- Textarea -->
+                <Textarea
+                  v-else-if="propSchema.type === 'textarea'"
+                  :model-value="getPropValue(propSchema)"
+                  :placeholder="propSchema.placeholder"
+                  @update:model-value="(val) => handlePropUpdate(propSchema, val)"
+                />
+                
+                <!-- JSON Textarea -->
+                <Textarea
+                  v-else-if="propSchema.type === 'json'"
+                  :model-value="JSON.stringify(getPropValue(propSchema), null, 2)"
+                  class="min-h-[120px]"
+                  @update:model-value="(val) => handleJsonUpdate(propSchema, val)"
+                />
+                
+                <!-- Color Picker -->
+                <input
+                  v-else-if="propSchema.type === 'color'"
+                  type="color"
+                  :value="getPropValue(propSchema) || '#000000'"
+                  class="w-full h-9 rounded-md border border-input cursor-pointer"
+                  @input="(e) => handlePropUpdate(propSchema, (e.target as HTMLInputElement).value)"
+                />
+                
+                <!-- Switch -->
+                <Switch
+                  v-else-if="propSchema.type === 'switch'"
+                  :checked="getPropValue(propSchema)"
+                  @update:checked="(val: any) => handlePropUpdate(propSchema, val)"
+                />
+                
+                <!-- Select -->
+                <Select
+                  v-else-if="propSchema.type === 'select'"
+                  :model-value="getPropValue(propSchema)"
+                  @update:model-value="(val) => handlePropUpdate(propSchema, val)"
+                >
+                  <SelectTrigger class="w-full">
+                    <SelectValue :placeholder="propSchema.placeholder || '请选择'" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-for="opt in propSchema.options"
+                      :key="opt.value"
+                      :value="opt.value"
+                    >
+                      {{ opt.label }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <!-- Number Input -->
+                <Input
+                  v-else-if="propSchema.type === 'number'"
+                  type="number"
+                  :model-value="getPropValue(propSchema)"
+                  @update:model-value="(val) => handlePropUpdate(propSchema, Number(val))"
+                />
+                
+                <!-- Unsupported Type -->
+                <div v-else class="text-sm text-red-500">
+                  Unsupported prop type: {{ propSchema.type }}
+                </div>
               </div>
             </div>
           </div>
@@ -231,9 +265,11 @@ function handleSaveEvent() {
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>宽度</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.width')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.width')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElInput
+                <Input
                   :model-value="selectedComponent.schema.style.width || ''"
                   placeholder="auto"
                   @update:model-value="(val) => updateStyle('width', val)"
@@ -242,9 +278,11 @@ function handleSaveEvent() {
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>高度</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.height')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.height')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElInput
+                <Input
                   :model-value="selectedComponent.schema.style.height || ''"
                   placeholder="auto"
                   @update:model-value="(val) => updateStyle('height', val)"
@@ -253,9 +291,11 @@ function handleSaveEvent() {
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>内边距</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.padding')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.padding')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElInput
+                <Input
                   :model-value="selectedComponent.schema.style.padding || ''"
                   placeholder="0"
                   @update:model-value="(val) => updateStyle('padding', val)"
@@ -264,9 +304,11 @@ function handleSaveEvent() {
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>外边距</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.margin')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.margin')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElInput
+                <Input
                   :model-value="selectedComponent.schema.style.margin || ''"
                   placeholder="0"
                   @update:model-value="(val) => updateStyle('margin', val)"
@@ -275,29 +317,39 @@ function handleSaveEvent() {
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>背景颜色</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.backgroundColor')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.backgroundColor')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElColorPicker
-                  :model-value="selectedComponent.schema.style.backgroundColor || '#fff'"
-                  @update:model-value="(val) => updateStyle('backgroundColor', val)"
+                <input
+                  type="color"
+                  :value="selectedComponent.schema.style.backgroundColor || '#ffffff'"
+                  class="w-full h-9 rounded-md border border-input cursor-pointer"
+                  @input="(e) => updateStyle('backgroundColor', (e.target as HTMLInputElement).value)"
                 />
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                     <span>文字颜色</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.color')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.color')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElColorPicker
-                  :model-value="selectedComponent.schema.style.color || '#333'"
-                  @update:model-value="(val) => updateStyle('color', val)"
+                <input
+                  type="color"
+                  :value="selectedComponent.schema.style.color || '#333333'"
+                  class="w-full h-9 rounded-md border border-input cursor-pointer"
+                  @input="(e) => updateStyle('color', (e.target as HTMLInputElement).value)"
                 />
               </div>
               <div class="property-item">
                 <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
                   <span>字体大小</span>
-                  <ElButton :icon="Link" type="primary" link size="small" title="Bind Data" @click="openDataBindingDialog('style.fontSize')" />
+                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.fontSize')" class="h-6 w-6 p-0">
+                    <Link class="h-4 w-4" />
+                  </Button>
                 </label>
-                <ElInput
+                <Input
                   :model-value="selectedComponent.schema.style.fontSize || ''"
                   placeholder="14px"
                   @update:model-value="(val) => updateStyle('fontSize', val)"
@@ -305,11 +357,11 @@ function handleSaveEvent() {
               </div>
             </div>
           </div>
-        </ElTabPane>
+        </TabsContent>
 
-        <ElTabPane label="Events" name="events" class="p-4">
+        <TabsContent value="events" class="p-4 flex-1 overflow-y-auto">
           <div class="flex justify-end mb-4">
-            <ElButton @click="openAddEventDialog">添加事件</ElButton>
+            <Button @click="openAddEventDialog">添加事件</Button>
           </div>
           <div v-if="selectedComponent.schema.events && selectedComponent.schema.events.length > 0">
             <div v-for="eventItem in selectedComponent.schema.events" :key="eventItem.id" class="p-2 border rounded mb-2">
@@ -320,8 +372,8 @@ function handleSaveEvent() {
           <div v-else class="text-center text-gray-400">
             没有事件配置。
           </div>
-        </ElTabPane>
-      </ElTabs>
+        </TabsContent>
+      </Tabs>
     </div>
 
     <!-- Data Binding Dialog -->
@@ -332,51 +384,43 @@ function handleSaveEvent() {
     />
 
     <!-- Event Configuration Dialog -->
-    <ElDialog v-model="isEventDialogVisible" title="事件配置">
-      <ElForm v-if="currentEvent.action" :model="currentEvent" label-position="top">
-        <ElFormItem label="触发器">
-          <ElSelect v-model="currentEvent.trigger">
-            <ElOption label="点击" value="onClick" />
-          </ElSelect>
-        </ElFormItem>
-        <ElFormItem label="动作类型">
-          <ElSelect v-model="currentEvent.action.type">
-            <ElOption label="显示消息" value="showMessage" />
-          </ElSelect>
-        </ElFormItem>
-        
-        <div v-if="currentEvent.action?.type === 'showMessage' && currentEvent.action.config">
-          <ElFormItem label="消息">
-            <ElInput v-model="(currentEvent.action.config as ShowMessageActionConfig).message" />
-          </ElFormItem>
-          <ElFormItem label="消息类型">
-            <ElSelect v-model="(currentEvent.action.config as ShowMessageActionConfig).messageType">
-              <ElOption label="成功" value="success" />
-              <ElOption label="警告" value="warning" />
-              <ElOption label="错误" value="error" />
+    <Dialog :open="isEventDialogVisible" @update:open="(val) => isEventDialogVisible = val">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>事件配置</DialogTitle>
+        </DialogHeader>
+        <ElForm v-if="currentEvent.action" :model="currentEvent" label-position="top">
+          <ElFormItem label="触发器">
+            <ElSelect v-model="currentEvent.trigger">
+              <ElOption label="点击" value="onClick" />
             </ElSelect>
           </ElFormItem>
-        </div>
-      </ElForm>
-      <template #footer>
-        <ElButton @click="isEventDialogVisible = false">取消</ElButton>
-        <ElButton type="primary" @click="handleSaveEvent">保存</ElButton>
-      </template>
-    </ElDialog>
+          <ElFormItem label="动作类型">
+            <ElSelect v-model="currentEvent.action.type">
+              <ElOption label="显示消息" value="showMessage" />
+            </ElSelect>
+          </ElFormItem>
+          
+          <div v-if="currentEvent.action?.type === 'showMessage' && currentEvent.action.config">
+            <ElFormItem label="消息">
+              <Input v-model="(currentEvent.action.config as ShowMessageActionConfig).message" />
+            </ElFormItem>
+            <ElFormItem label="消息类型">
+              <ElSelect v-model="(currentEvent.action.config as ShowMessageActionConfig).messageType">
+                <ElOption label="成功" value="success" />
+                <ElOption label="警告" value="warning" />
+                <ElOption label="错误" value="error" />
+              </ElSelect>
+            </ElFormItem>
+          </div>
+        </ElForm>
+        <DialogFooter>
+          <Button variant="outline" @click="isEventDialogVisible = false">取消</Button>
+          <Button @click="handleSaveEvent">保存</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>
 
-<style>
-.property-panel .el-tabs__header {
-  margin-bottom: 0;
-  padding: 0 10px;
-}
-.property-panel .el-tabs__content {
-  flex-grow: 1;
-  overflow: hidden;
-}
-.property-panel .el-tab-pane {
-  height: 100%;
-}
-</style>
 

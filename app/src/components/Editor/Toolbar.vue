@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor'
-import { ElButton } from 'element-plus'
+import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
 
 const editorStore = useEditorStore()
@@ -54,20 +54,20 @@ function handleClear() {
     </div>
     
     <div class="flex items-center gap-2">
-      <ElButton 
+      <Button 
         @click="emit('toggleDebug')" 
-        :type="props.isDebugMode ? 'success' : 'default'"
+        :variant="props.isDebugMode ? 'default' : 'outline'"
       >
         {{ props.isDebugMode ? '画布' : '调试' }}
-      </ElButton>
-      <ElButton @click="handleSave">保存</ElButton>
-      <ElButton @click="handleClear" type="warning">清空</ElButton>
-      <ElButton
-        type="primary"
+      </Button>
+      <Button @click="handleSave" variant="outline">保存</Button>
+      <Button @click="handleClear" variant="destructive">清空</Button>
+      <Button
+        variant="default"
         @click="handlePreview"
       >
         预览
-      </ElButton>
+      </Button>
     </div>
   </div>
 </template>

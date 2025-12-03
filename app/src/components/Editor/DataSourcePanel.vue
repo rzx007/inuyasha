@@ -2,7 +2,10 @@
 import { ref } from 'vue'
 import { useDataSourceStore } from '@/stores/dataSource'
 import { DataSourceType, type ApiDataSourceConfig, type DataSource } from '@/types/dataSource'
-import { ElButton, ElDialog, ElForm, ElFormItem, ElInput, ElSelect, ElOption } from 'element-plus'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 
 const dataSourceStore = useDataSourceStore()
 const isDialogVisible = ref(false)
@@ -35,9 +38,9 @@ function handleSave() {
 <template>
   <div class="data-source-panel h-full flex flex-col">
     <div class="p-2 border-b">
-      <ElButton @click="openAddDialog" type="primary" class="w-full">
+      <Button @click="openAddDialog" class="w-full">
         Add API Source
-      </ElButton>
+      </Button>
     </div>
     
     <div class="flex-1 overflow-y-auto p-2">
@@ -51,25 +54,40 @@ function handleSave() {
       </div>
     </div>
 
-    <ElDialog v-model="isDialogVisible" title="API Data Source">
-      <ElForm :model="currentDataSource" label-position="top">
-        <ElFormItem label="Name">
-          <ElInput v-model="currentDataSource.name" />
-        </ElFormItem>
-        <ElFormItem label="URL">
-          <ElInput v-model="(currentDataSource.config as ApiDataSourceConfig).url" />
-        </ElFormItem>
-        <ElFormItem label="Method">
-          <ElSelect v-model="(currentDataSource.config as ApiDataSourceConfig).method">
-            <ElOption label="GET" value="GET" />
-            <ElOption label="POST" value="POST" />
-          </ElSelect>
-        </ElFormItem>
-      </ElForm>
-      <template #footer>
-        <ElButton @click="isDialogVisible = false">Cancel</ElButton>
-        <ElButton type="primary" @click="handleSave">Save</ElButton>
-      </template>
-    </ElDialog>
+    <Dialog :open="isDialogVisible" @update:open="(val) => isDialogVisible = val">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>API Data Source</DialogTitle>
+        </DialogHeader>
+        
+        <div class="space-y-4 py-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Name</label>
+            <Input v-model="currentDataSource.name" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">URL</label>
+            <Input v-model="(currentDataSource.config as ApiDataSourceConfig).url" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Method</label>
+            <Select v-model="(currentDataSource.config as ApiDataSourceConfig).method">
+              <SelectTrigger>
+                <SelectValue placeholder="Select method" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="GET">GET</SelectItem>
+                <SelectItem value="POST">POST</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        <DialogFooter>
+          <Button variant="outline" @click="isDialogVisible = false">Cancel</Button>
+          <Button @click="handleSave">Save</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </div>
 </template>

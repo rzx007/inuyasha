@@ -3,7 +3,11 @@ import { ref, computed, watch } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useDataSourceStore } from '@/stores/dataSource'
 import { useComponentStore } from '@/stores/component'
-import { ElDialog, ElTabs, ElTabPane, ElSelect, ElOption, ElButton, ElInput, ElOptionGroup } from 'element-plus'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup, SelectLabel } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import type { ComponentSchema } from '@/types/component'
 import type { DataBinding } from '@/types/dataSource'
 
@@ -120,63 +124,91 @@ function handleSave() {
 </script>
 
 <template>
-  <ElDialog
-    :model-value="modelValue"
-    title="数据绑定"
-    width="500px"
-    @update:model-value="(val) => emit('update:modelValue', val)"
-  >
-    <ElTabs v-model="activeTab">
-      <ElTabPane label="数据源" name="dataSource">
-        <div class="p-4 space-y-4">
-          <ElSelect v-model="selectedDataSource" placeholder="选择一个数据源" class="w-full">
-            <ElOption
-              v-for="ds in allDataSources"
-              :key="ds.id"
-              :label="ds.name"
-              :value="ds.id"
-            />
-          </ElSelect>
-          <ElInput v-model="dataPath" placeholder="例如：data.user.name" />
-        </div>
-      </ElTabPane>
-      <ElTabPane label="组件状态" name="componentState">
-        <div class="p-4 space-y-4">
-          <ElSelect v-model="selectedComponent" placeholder="选择一个组件" class="w-full">
-            <ElOption
-              v-for="comp in allComponents"
-              :key="comp.id"
-              :label="`${comp.label} (${comp.semanticId})`"
-              :value="comp.id"
-            />
-          </ElSelect>
+  <Dialog :open="modelValue" @update:open="(val) => emit('update:modelValue', val)">
+    <DialogContent class="max-w-md">
+      <DialogHeader>
+        <DialogTitle>数据绑定</DialogTitle>
+      </DialogHeader>
+      
+      <Tabs v-model="activeTab" class="w-full">
+        <TabsList class="grid w-full grid-cols-2">
+          <TabsTrigger value="dataSource">数据源</TabsTrigger>
+          <TabsTrigger value="componentState">组件状态</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="dataSource" class="space-y-4 mt-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">数据源</label>
+            <Select v-model="selectedDataSource">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="选择一个数据源" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="ds in allDataSources"
+                  :key="ds.id"
+                  :value="ds.id"
+                >
+                  {{ ds.name }}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">数据路径</label>
+            <Input v-model="dataPath" placeholder="例如：data.user.name" />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="componentState" class="space-y-4 mt-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">组件</label>
+            <Select v-model="selectedComponent">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="选择一个组件" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem
+                  v-for="comp in allComponents"
+                  :key="comp.id"
+                  :value="comp.id"
+                >
+                  {{ comp.label }} ({{ comp.semanticId }})
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
-          <!-- 选择属性（分组显示） -->
-          <ElSelect
-            v-if="selectedComponent"
-            v-model="selectedPropertyPath"
-            placeholder="选择要绑定的属性"
-            class="w-full"
-          >
-            <ElOptionGroup
-              v-for="group in componentPropertyOptions"
-              :key="group.label"
-              :label="group.label"
-            >
-              <ElOption
-                v-for="option in group.options"
-                :key="option.value"
-                :label="option.label"
-                :value="option.value"
-              />
-            </ElOptionGroup>
-          </ElSelect>
-        </div>
-      </ElTabPane>
-    </ElTabs>
-    <template #footer>
-      <ElButton @click="emit('update:modelValue', false)">取消</ElButton>
-      <ElButton type="primary" @click="handleSave">保存</ElButton>
-    </template>
-  </ElDialog>
+          <div v-if="selectedComponent" class="space-y-2">
+            <label class="text-sm font-medium">属性</label>
+            <Select v-model="selectedPropertyPath">
+              <SelectTrigger class="w-full">
+                <SelectValue placeholder="选择要绑定的属性" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup
+                  v-for="group in componentPropertyOptions"
+                  :key="group.label"
+                >
+                  <SelectLabel>{{ group.label }}</SelectLabel>
+                  <SelectItem
+                    v-for="option in group.options"
+                    :key="option.value"
+                    :value="option.value"
+                  >
+                    {{ option.label }}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      <DialogFooter>
+        <Button variant="outline" @click="emit('update:modelValue', false)">取消</Button>
+        <Button @click="handleSave">保存</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
 </template>

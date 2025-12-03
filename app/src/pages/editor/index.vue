@@ -11,7 +11,7 @@ import DebugPanel from '@/components/Editor/DebugPanel.vue'
 import Canvas from '@/components/Editor/Canvas.vue'
 import PropertyPanel from '@/components/Editor/PropertyPanel.vue'
 import Toolbar from '@/components/Editor/Toolbar.vue'
-import { ElTabs, ElTabPane } from 'element-plus'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 const componentStore = useComponentStore()
 const editorStore = useEditorStore()
@@ -49,14 +49,18 @@ onMounted(() => {
     <div class="flex-1 flex overflow-hidden">
       <!-- 左侧面板 -->
       <div class="w-72 shrink-0 bg-white border-r border-gray-200">
-        <ElTabs v-model="activeLeftTab" class="h-full flex flex-col">
-          <ElTabPane label="Components" name="components" class="h-full">
+        <Tabs v-model="activeLeftTab" class="h-full flex flex-col">
+          <TabsList class="w-full justify-start rounded-none border-b">
+            <TabsTrigger value="components">Components</TabsTrigger>
+            <TabsTrigger value="data">Data Sources</TabsTrigger>
+          </TabsList>
+          <TabsContent value="components" class="h-full overflow-y-auto">
             <ComponentPanel />
-          </ElTabPane>
-          <ElTabPane label="Data Sources" name="data" class="h-full">
+          </TabsContent>
+          <TabsContent value="data" class="h-full overflow-y-auto">
             <DataSourcePanel />
-          </ElTabPane>
-        </ElTabs>
+          </TabsContent>
+        </Tabs>
       </div>
       
       <!-- 画布区域 / Debug 面板 -->
@@ -74,14 +78,4 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
-.editor-page .el-tabs__header {
-  margin-bottom: 0;
-  padding: 0 10px;
-}
-.editor-page .el-tabs__content {
-  flex-grow: 1;
-  overflow-y: auto;
-}
-</style>
 

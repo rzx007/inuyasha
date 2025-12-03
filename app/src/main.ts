@@ -11,5 +11,5 @@ const pinia = createPinia()
 
 app.use(router)
 app.use(pinia)
-app.use(ElementPlus)
+app.use(ElementPlus) // 全局注册，供低代码渲染器使用全量组件
 app.mount('#app')
