@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { Search} from 'lucide-vue-next'
+import { Input } from '@/components/ui/input'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
@@ -10,20 +12,12 @@ const componentStore = useComponentStore()
 const editorStore = useEditorStore()
 
 // 按分类获取组件
-const baseComponents = computed(() =>
-  componentStore.getComponentsByCategory('base')
-)
-const layoutComponents = computed(() =>
-  componentStore.getComponentsByCategory('layout')
-)
+const baseComponents = computed(() => componentStore.getComponentsByCategory('base'))
+const layoutComponents = computed(() => componentStore.getComponentsByCategory('layout'))
 
-const dataComponents = computed(() =>
-  componentStore.getComponentsByCategory('data')
-)
+const dataComponents = computed(() => componentStore.getComponentsByCategory('data'))
 
-const formComponents = computed(() =>
-  componentStore.getComponentsByCategory('form')
-)
+const formComponents = computed(() => componentStore.getComponentsByCategory('form'))
 
 // 克隆组件时，我们只传递组件类型。
 // 画布的 @add 事件会接收到这个对象，并用它来创建真正的组件实例。
@@ -35,15 +29,24 @@ function cloneComponent(meta: ComponentMeta) {
 </script>
 
 <template>
-  <div class="component-panel h-full flex flex-col bg-gray-50 border-r border-gray-200">
-    <div class="p-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-800">组件库</h3>
+  <div class="component-panel h-full flex flex-col border-r border-gray-200">
+    <div class="p-4 border-b border-slate-100">
+      <div class="relative">
+        <Search class="absolute left-3 top-2.5 text-slate-400" :size="16" />
+        <Input
+          type="text"
+          placeholder="Search components..."
+          class="pl-9 pr-3 py-2"
+        />
+      </div>
     </div>
-    
+
     <div class="flex-1 overflow-y-auto p-4">
       <!-- 基础组件 -->
       <div class="mb-6">
-        <h4 class="text-sm font-medium text-gray-600 mb-3">基础组件</h4>
+        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
+          基础组件
+        </h4>
         <VueDraggable
           v-model="baseComponents"
           :sort="false"
@@ -55,14 +58,20 @@ function cloneComponent(meta: ComponentMeta) {
           <div
             v-for="meta in baseComponents"
             :key="meta.type"
-            class="component-item p-3 bg-white rounded border border-gray-200 cursor-move hover:border-blue-500 hover:shadow-sm transition-all"
+            class="flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
-            <div class="text-2xl mb-1">{{ meta.icon }}</div>
-            <div class="text-xs text-gray-600">{{ meta.name }}</div>
+            <div
+              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-indigo-50 group-hover:text-green-600 transition-colors mb-2"
+            >
+              {{ meta.icon }}
+            </div>
+            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
+              {{ meta.name }}
+            </div>
           </div>
         </VueDraggable>
       </div>
-      
+
       <!-- 布局组件 -->
       <div class="mb-6">
         <h4 class="text-sm font-medium text-gray-600 mb-3">布局组件</h4>
@@ -137,4 +146,3 @@ function cloneComponent(meta: ComponentMeta) {
   user-select: none;
 }
 </style>
-
