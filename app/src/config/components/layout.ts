@@ -5,7 +5,7 @@ export const layoutComponents: ComponentMeta[] = [
   {
     type: ComponentType.Card,
     name: '卡片',
-    icon: '🃏',
+    icon: 'CreditCard',
     category: 'layout',
     canNest: true,
     display: 'block',
@@ -42,7 +42,7 @@ export const layoutComponents: ComponentMeta[] = [
   {
     type: ComponentType.Row,
     name: '栅格行',
-    icon: '⌗',
+    icon: 'Columns',
     category: 'layout',
     canNest: true,
     display: 'block',
@@ -66,7 +66,7 @@ export const layoutComponents: ComponentMeta[] = [
   {
     type: ComponentType.Col,
     name: '栅格列',
-    icon: '⎕',
+    icon: 'RectangleHorizontal',
     category: 'layout',
     canNest: true,
     display: 'block',
@@ -88,7 +88,7 @@ export const layoutComponents: ComponentMeta[] = [
   {
     type: ComponentType.Collapse,
     name: '折叠面板',
-    icon: '📦',
+    icon: 'Package',
     category: 'layout',
     canNest: true,
     display: 'block',

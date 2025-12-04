@@ -5,7 +5,7 @@ export const dataComponents: ComponentMeta[] = [
   {
     type: ComponentType.Statistic,
     name: '统计数值',
-    icon: '📊',
+    icon: 'BarChart3',
     category: 'data',
     display: 'inline-block',
     defaultProps: {
@@ -35,7 +35,7 @@ export const dataComponents: ComponentMeta[] = [
   {
     type: ComponentType.Table,
     name: '表格',
-    icon: '🧾',
+    icon: 'Table',
     category: 'data',
     display: 'block',
     defaultProps: {
@@ -79,7 +79,7 @@ export const dataComponents: ComponentMeta[] = [
   {
     type: ComponentType.List,
     name: '列表',
-    icon: '📑',
+    icon: 'List',
     category: 'data',
     display: 'block',
     defaultProps: {

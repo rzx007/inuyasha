@@ -154,9 +154,9 @@ function handleSaveEvent() {
       </div>
 
       <Tabs v-model="activeTab" class="flex-1 flex flex-col overflow-hidden">
-        <TabsList class="w-full justify-start rounded-none border-b">
-          <TabsTrigger value="props">Properties</TabsTrigger>
-          <TabsTrigger value="events">Events</TabsTrigger>
+        <TabsList class="tabs-list-editor">
+          <TabsTrigger value="props" class="tabs-trigger-editor">Properties</TabsTrigger>
+          <TabsTrigger value="events" class="tabs-trigger-editor">Events</TabsTrigger>
         </TabsList>
         <TabsContent value="props" class="p-4 overflow-y-auto flex-1">
           <!-- Property Config -->

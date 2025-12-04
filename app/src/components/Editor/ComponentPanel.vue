@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Search} from 'lucide-vue-next'
+import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
 import { createComponent } from '@/utils/componentRegistry'
 import type { ComponentMeta } from '@/types/component'
+import { getIconComponent } from '@/utils/iconMapping'
 
 const componentStore = useComponentStore()
 const editorStore = useEditorStore()
@@ -29,14 +30,14 @@ function cloneComponent(meta: ComponentMeta) {
 </script>
 
 <template>
-  <div class="component-panel h-full flex flex-col border-r border-gray-200">
+  <div class="component-panel h-full flex flex-col border-gray-200">
     <div class="p-4 border-b border-slate-100">
       <div class="relative">
         <Search class="absolute left-3 top-2.5 text-slate-400" :size="16" />
         <Input
           type="text"
           placeholder="Search components..."
-          class="pl-9 pr-3 py-2"
+          class="pl-9 pr-3 py-2 text-sm bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary transition-all"
         />
       </div>
     </div>
@@ -61,9 +62,9 @@ function cloneComponent(meta: ComponentMeta) {
             class="flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
             <div
-              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-indigo-50 group-hover:text-green-600 transition-colors mb-2"
+              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
             >
-              {{ meta.icon }}
+              <component :is="getIconComponent(meta.icon)" :size="16" />
             </div>
             <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
               {{ meta.name }}
@@ -74,7 +75,9 @@ function cloneComponent(meta: ComponentMeta) {
 
       <!-- 布局组件 -->
       <div class="mb-6">
-        <h4 class="text-sm font-medium text-gray-600 mb-3">布局组件</h4>
+        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
+          布局组件
+        </h4>
         <VueDraggable
           v-model="layoutComponents"
           :sort="false"
@@ -86,17 +89,25 @@ function cloneComponent(meta: ComponentMeta) {
           <div
             v-for="meta in layoutComponents"
             :key="meta.type"
-            class="component-item p-3 bg-white rounded border border-gray-200 cursor-move hover:border-blue-500 hover:shadow-sm transition-all"
+            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
-            <div class="text-2xl mb-1">{{ meta.icon }}</div>
-            <div class="text-xs text-gray-600">{{ meta.name }}</div>
+            <div
+              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
+            >
+              <component :is="getIconComponent(meta.icon)" :size="16" />
+            </div>
+            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
+              {{ meta.name }}
+            </div>
           </div>
         </VueDraggable>
       </div>
 
       <!-- 数据展示组件 -->
       <div class="mb-6">
-        <h4 class="text-sm font-medium text-gray-600 mb-3">数据展示</h4>
+        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
+          数据展示
+        </h4>
         <VueDraggable
           v-model="dataComponents"
           :sort="false"
@@ -108,17 +119,25 @@ function cloneComponent(meta: ComponentMeta) {
           <div
             v-for="meta in dataComponents"
             :key="meta.type"
-            class="component-item p-3 bg-white rounded border border-gray-200 cursor-move hover:border-blue-500 hover:shadow-sm transition-all"
+            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
-            <div class="text-2xl mb-1">{{ meta.icon }}</div>
-            <div class="text-xs text-gray-600">{{ meta.name }}</div>
+            <div
+              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
+            >
+              <component :is="getIconComponent(meta.icon)" :size="16" />
+            </div>
+            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
+              {{ meta.name }}
+            </div>
           </div>
         </VueDraggable>
       </div>
 
       <!-- 表单组件 -->
       <div class="mb-6">
-        <h4 class="text-sm font-medium text-gray-600 mb-3">表单组件</h4>
+        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
+          表单组件
+        </h4>
         <VueDraggable
           v-model="formComponents"
           :sort="false"
@@ -130,10 +149,16 @@ function cloneComponent(meta: ComponentMeta) {
           <div
             v-for="meta in formComponents"
             :key="meta.type"
-            class="component-item p-3 bg-white rounded border border-gray-200 cursor-move hover:border-blue-500 hover:shadow-sm transition-all"
+            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
-            <div class="text-2xl mb-1">{{ meta.icon }}</div>
-            <div class="text-xs text-gray-600">{{ meta.name }}</div>
+            <div
+              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
+            >
+              <component :is="getIconComponent(meta.icon)" :size="16" />
+            </div>
+            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
+              {{ meta.name }}
+            </div>
           </div>
         </VueDraggable>
       </div>

@@ -5,7 +5,7 @@ export const baseComponents: ComponentMeta[] = [
   {
     type: ComponentType.Container,
     name: '容器',
-    icon: '📦',
+    icon: 'Box',
     category: 'base',
     canNest: true,
     display: 'block',
@@ -33,7 +33,7 @@ export const baseComponents: ComponentMeta[] = [
   {
     type: ComponentType.Text,
     name: '文本',
-    icon: '📝',
+    icon: 'FileText',
     category: 'base',
     canNest: false,
     display: 'inline-block',
@@ -69,7 +69,7 @@ export const baseComponents: ComponentMeta[] = [
   {
     type: ComponentType.Button,
     name: '按钮',
-    icon: '🔘',
+    icon: 'Square',
     category: 'base',
     canNest: false,
     display: 'inline-block',
@@ -105,12 +105,12 @@ export const baseComponents: ComponentMeta[] = [
   {
     type: ComponentType.Image,
     name: '图片',
-    icon: '🖼️',
+    icon: 'Image',
     category: 'base',
     canNest: false,
     display: 'inline-block',
     defaultProps: {
-      src: '',
+      src: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
       alt: '图片',
     },
     defaultStyle: {
@@ -137,7 +137,7 @@ export const baseComponents: ComponentMeta[] = [
   {
     type: ComponentType.Divider,
     name: '分割线',
-    icon: '➖',
+    icon: 'Minus',
     category: 'base',
     canNest: false,
     display: 'block',

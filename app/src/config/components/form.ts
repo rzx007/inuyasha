@@ -5,7 +5,7 @@ export const formComponents: ComponentMeta[] = [
   {
     type: ComponentType.Input,
     name: '输入框',
-    icon: '⌨️',
+    icon: 'Type',
     category: 'form',
     display: 'inline-block',
     defaultProps: {
@@ -37,7 +37,7 @@ export const formComponents: ComponentMeta[] = [
   {
     type: ComponentType.Select,
     name: '选择器',
-    icon: '🖱️',
+    icon: 'MousePointer',
     category: 'form',
     display: 'inline-block',
     defaultProps: {
@@ -73,7 +73,7 @@ export const formComponents: ComponentMeta[] = [
   {
     type: ComponentType.DatePicker,
     name: '日期选择器',
-    icon: '📅',
+    icon: 'Calendar',
     category: 'form',
     display: 'inline-block',
     defaultProps: {

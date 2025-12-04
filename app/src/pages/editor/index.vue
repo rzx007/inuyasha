@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onMounted } from 'vue'
+import { Layers, Database } from 'lucide-vue-next'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
 
@@ -50,9 +51,15 @@ onMounted(() => {
       <!-- 左侧面板 -->
       <div class="w-72 shrink-0 bg-white border-r border-gray-200">
         <Tabs v-model="activeLeftTab" class="h-full flex flex-col">
-          <TabsList class="w-full justify-start rounded-none border-b">
-            <TabsTrigger value="components">Components</TabsTrigger>
-            <TabsTrigger value="data">Data Sources</TabsTrigger>
+          <TabsList class="tabs-list-editor">
+            <TabsTrigger value="components" class="tabs-trigger-editor">
+              <Layers :size="16" />
+              <span>组件库</span>
+            </TabsTrigger>
+            <TabsTrigger value="data" class="tabs-trigger-editor">
+              <Database :size="16" />
+              <span>资源库</span>
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="components" class="h-full overflow-y-auto">
             <ComponentPanel />

@@ -157,3 +157,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 编辑器标签页样式 - 可复用 */
+.tabs-list-editor {
+  @apply w-full justify-start rounded-none bg-transparent p-0 h-auto;
+}
+
+.tabs-trigger-editor {
+  @apply flex-1 py-3 text-sm font-medium flex items-center justify-center space-x-2 rounded-none transition-colors cursor-pointer;
+}
+
+.tabs-trigger-editor[data-state="active"] {
+  @apply border-b-primary shadow-none text-primary  border-b;
+}
+
+.tabs-trigger-editor[data-state="inactive"] {
+  @apply text-slate-500 border-b-border;
+}
+
+.tabs-trigger-editor:hover {
+  @apply text-slate-700;
+}
