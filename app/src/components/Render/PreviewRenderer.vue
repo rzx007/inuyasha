@@ -204,25 +204,16 @@ const styleObject = computed(() => resolvedStyle.value)
       :label="item.title"
       :name="item.name"
     >
-      <VueDraggable
-        v-model="item.children"
-        group="components"
-        :animation="200"
-        handle=".drag-handle"
-        item-key="id"
-        class="min-h-[50px] p-1"
-      >
-        <EditorComponentWrapper
-          v-for="child in item.children"
+      <div class="min-h-[50px] p-1">
+        <PreviewRenderer
+          v-for="child in item.children || []"
           :key="child.id"
           :schema="child"
         />
-        <template #footer>
-          <div v-if="item.children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
-            将组件拖到此处
-          </div>
-        </template>
-      </VueDraggable>
+        <div v-if="(item.children || []).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+          暂无内容
+        </div>
+      </div>
     </ElTabPane>
   </ElTabs>
 
