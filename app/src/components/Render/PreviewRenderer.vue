@@ -20,6 +20,8 @@ import {
   ElCol,
   ElCollapse,
   ElCollapseItem,
+  ElTabs,
+  ElTabPane,
 } from 'element-plus'
 import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
@@ -157,14 +159,73 @@ const styleObject = computed(() => resolvedStyle.value)
     v-else-if="schema.type === ComponentType.Collapse"
     :style="styleObject"
   >
-    <ElCollapseItem :title="resolvedProps.title || 'Collapse Title'" name="1">
-      <PreviewRenderer
-        v-for="child in schema.children"
-        :key="child.id"
-        :schema="child"
-      />
+    <ElCollapseItem
+      v-for="item in resolvedProps.items || []"
+      :key="item.name"
+      :title="item.title"
+      :name="item.name"
+    >
+      <VueDraggable
+        v-model="item.children"
+        group="components"
+        :animation="200"
+        handle=".drag-handle"
+        item-key="id"
+        class="min-h-[50px] p-1"
+      >
+        <EditorComponentWrapper
+          v-for="child in item.children"
+          :key="child.id"
+          :schema="child"
+        />
+        <template #footer>
+          <div v-if="item.children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+            将组件拖到此处
+          </div>
+        </template>
+      </VueDraggable>
     </ElCollapseItem>
   </ElCollapse>
+
+    <!-- 标签页 -->
+    <ElTabs
+    v-else-if="schema.type === ComponentType.Tabs"
+    :model-value="resolvedProps.activeName"
+    :type="resolvedProps.type || 'line'"
+    :tab-position="resolvedProps.tabPosition || 'top'"
+    :closable="resolvedProps.closable || false"
+    :addable="resolvedProps.addable || false"
+    :editable="resolvedProps.editable || false"
+    :style="styleObject"
+  >
+    <ElTabPane
+      v-for="item in resolvedProps.items || []"
+      :key="item.name"
+      :label="item.title"
+      :name="item.name"
+    >
+      <VueDraggable
+        v-model="item.children"
+        group="components"
+        :animation="200"
+        handle=".drag-handle"
+        item-key="id"
+        class="min-h-[50px] p-1"
+      >
+        <EditorComponentWrapper
+          v-for="child in item.children"
+          :key="child.id"
+          :schema="child"
+        />
+        <template #footer>
+          <div v-if="item.children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+            将组件拖到此处
+          </div>
+        </template>
+      </VueDraggable>
+    </ElTabPane>
+  </ElTabs>
+
 
   <!-- 文本组件 -->
   <div v-else-if="schema.type === ComponentType.Text" :style="styleObject">

@@ -93,15 +93,131 @@ export const layoutComponents: ComponentMeta[] = [
     canNest: true,
     display: 'block',
     defaultProps: {
-      title: 'Collapse Title',
+      items: [
+        {
+          name: '1',
+          title: '折叠项 1',
+          children: [],
+        },
+      ],
     },
     defaultStyle: {},
     propsSchema: [
       {
-        key: 'title',
-        label: '标题',
+        key: 'items',
+        label: '折叠项',
+        type: 'json',
+        defaultValue: [
+          {
+            name: '1',
+            title: '折叠项 1',
+            children: [],
+          },
+        ],
+        bindable: true,
+      },
+    ],
+  },
+  {
+    type: ComponentType.Tabs,
+    name: '标签页',
+    icon: 'Tabs',
+    category: 'layout',
+    canNest: true,
+    display: 'block',
+    defaultProps: {
+      activeName: '1',
+      type: 'line',
+      closable: false,
+      addable: false,
+      editable: false,
+      tabPosition: 'top',
+      items: [
+        {
+          name: '1',
+          title: '标签项 1',
+          children: [],
+        },
+        {
+          name: '2',
+          title: '标签项 2',
+          children: [],
+        },
+      ],
+    },
+    defaultStyle: {
+      minHeight: '100px',
+    },
+    propsSchema: [
+      {
+        key: 'items',
+        label: '标签项',
+        type: 'json',
+        defaultValue: [
+          {
+            name: '1',
+            title: '标签项 1',
+            children: [],
+          },
+          {
+            name: '2',
+            title: '标签项 2',
+            children: [],
+          },
+        ],
+        bindable: true,
+      },
+      {
+        key: 'activeName',
+        label: '默认激活标签',
         type: 'text',
-        defaultValue: 'Collapse Title',
+        defaultValue: '1',
+        bindable: true,
+        description: '默认激活的标签页名称',
+      },
+      {
+        key: 'type',
+        label: '标签类型',
+        type: 'select',
+        defaultValue: 'line',
+        options: [
+          { label: '线条', value: 'line' },
+          { label: '卡片', value: 'card' },
+          { label: '边框卡片', value: 'border-card' },
+        ],
+      },
+      {
+        key: 'tabPosition',
+        label: '标签位置',
+        type: 'select',
+        defaultValue: 'top',
+        options: [
+          { label: '顶部', value: 'top' },
+          { label: '底部', value: 'bottom' },
+          { label: '左侧', value: 'left' },
+          { label: '右侧', value: 'right' },
+        ],
+      },
+      {
+        key: 'closable',
+        label: '可关闭',
+        type: 'switch',
+        defaultValue: false,
+        description: '标签是否可关闭',
+      },
+      {
+        key: 'addable',
+        label: '可添加',
+        type: 'switch',
+        defaultValue: false,
+        description: '是否可添加标签',
+      },
+      {
+        key: 'editable',
+        label: '可编辑',
+        type: 'switch',
+        defaultValue: false,
+        description: '标签是否可编辑',
       },
     ],
   },
