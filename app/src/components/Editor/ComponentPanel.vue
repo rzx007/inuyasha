@@ -27,31 +27,19 @@ function filterComponents(components: ComponentMeta[], keyword: string): Compone
   )
 }
 
-// 按分类获取组件（带搜索过滤）
-const baseComponents = computed({
-  get: () => filterComponents(componentStore.getComponentsByCategory('base'), searchKeyword.value),
-  set: () => {} 
-})
-const layoutComponents = computed({
-  get: () => filterComponents(componentStore.getComponentsByCategory('layout'), searchKeyword.value),
-  set: () => {}
-})
-const dataComponents = computed({
-  get: () => filterComponents(componentStore.getComponentsByCategory('data'), searchKeyword.value),
-  set: () => {}
-})
-const formComponents = computed({
-  get: () => filterComponents(componentStore.getComponentsByCategory('form'), searchKeyword.value),
-  set: () => {}
+// 按分类获取组件（搜索过滤）
+const categorizedComponents = computed(() => {
+  const categories = componentStore.getCategorizedComponents()
+  return categories
+    .map(category => ({
+      ...category,
+      components: filterComponents(category.components, searchKeyword.value),
+    }))
+    .filter(category => category.components.length > 0) // 过滤掉空的分组
 })
 
 // 判断是否有搜索结果
-const hasSearchResults = computed(() => 
-  baseComponents.value.length > 0 ||
-  layoutComponents.value.length > 0 ||
-  dataComponents.value.length > 0 ||
-  formComponents.value.length > 0
-)
+const hasSearchResults = computed(() => categorizedComponents.value.length > 0)
 
 //克隆组件时，我们只传递组件类型。 画布接收到这个对象，并用它来创建真正的组件实例。
 function cloneComponent(meta: ComponentMeta) {
@@ -82,13 +70,18 @@ function cloneComponent(meta: ComponentMeta) {
         <p class="text-sm">未找到匹配的组件</p>
       </div>
 
-      <!-- 基础组件 -->
-      <div v-if="baseComponents.length > 0" class="mb-6">
+      <!-- 动态渲染分类组件 -->
+      <div
+        v-for="category in categorizedComponents"
+        :key="category.key"
+        class="mb-6"
+      >
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
-          基础组件
+          {{ category.label }}
         </h4>
         <VueDraggable
-          v-model="baseComponents"
+          :model-value="category.components"
+          @update:model-value="() => {}"
           :sort="false"
           :group="{ name: 'components', pull: 'clone', put: false }"
           :clone="cloneComponent"
@@ -96,97 +89,7 @@ function cloneComponent(meta: ComponentMeta) {
           class="grid grid-cols-2 gap-2"
         >
           <div
-            v-for="meta in baseComponents"
-            :key="meta.type"
-            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
-          >
-            <div
-              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
-            >
-              <component :is="getIconComponent(meta.icon)" :size="16" />
-            </div>
-            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
-              {{ meta.name }}
-            </div>
-          </div>
-        </VueDraggable>
-      </div>
-
-      <!-- 布局组件 -->
-      <div v-if="layoutComponents.length > 0" class="mb-6">
-        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
-          布局组件
-        </h4>
-        <VueDraggable
-          v-model="layoutComponents"
-          :sort="false"
-          :group="{ name: 'components', pull: 'clone', put: false }"
-          :clone="cloneComponent"
-          item-key="type"
-          class="grid grid-cols-2 gap-2"
-        >
-          <div
-            v-for="meta in layoutComponents"
-            :key="meta.type"
-            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
-          >
-            <div
-              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
-            >
-              <component :is="getIconComponent(meta.icon)" :size="16" />
-            </div>
-            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
-              {{ meta.name }}
-            </div>
-          </div>
-        </VueDraggable>
-      </div>
-
-      <!-- 数据展示组件 -->
-      <div v-if="dataComponents.length > 0" class="mb-6">
-        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
-          数据展示
-        </h4>
-        <VueDraggable
-          v-model="dataComponents"
-          :sort="false"
-          :group="{ name: 'components', pull: 'clone', put: false }"
-          :clone="cloneComponent"
-          item-key="type"
-          class="grid grid-cols-2 gap-2"
-        >
-          <div
-            v-for="meta in dataComponents"
-            :key="meta.type"
-            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
-          >
-            <div
-              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
-            >
-              <component :is="getIconComponent(meta.icon)" :size="16" />
-            </div>
-            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
-              {{ meta.name }}
-            </div>
-          </div>
-        </VueDraggable>
-      </div>
-
-      <!-- 表单组件 -->
-      <div v-if="formComponents.length > 0" class="mb-6">
-        <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
-          表单组件
-        </h4>
-        <VueDraggable
-          v-model="formComponents"
-          :sort="false"
-          :group="{ name: 'components', pull: 'clone', put: false }"
-          :clone="cloneComponent"
-          item-key="type"
-          class="grid grid-cols-2 gap-2"
-        >
-          <div
-            v-for="meta in formComponents"
+            v-for="meta in category.components"
             :key="meta.type"
             class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >

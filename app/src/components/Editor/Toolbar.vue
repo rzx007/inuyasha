@@ -2,6 +2,7 @@
 import { useEditorStore } from '@/stores/editor'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
+import { Trash2, Play, Save, Bug } from 'lucide-vue-next'
 
 const editorStore = useEditorStore()
 const router = useRouter()
@@ -48,25 +49,46 @@ function handleClear() {
 </script>
 
 <template>
-  <div class="toolbar h-14 flex items-center justify-between px-4 bg-white border-b border-gray-200">
+  <div
+    class="toolbar h-14 flex items-center justify-between px-4 bg-background border-b sticky top-0 z-30"
+  >
+    <!-- 左侧：标题 -->
     <div class="flex items-center gap-2">
-      <h2 class="text-lg font-semibold text-gray-800">低代码编辑器</h2>
+      <div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center text-sm font-semibold shadow-sm">
+        LC
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="font-bold text-lg tracking-tight text-slate-900">Inuyasha</span>
+      </div>
     </div>
-    
+
+    <!-- 右侧：操作按钮 -->
     <div class="flex items-center gap-2">
-      <Button 
-        @click="emit('toggleDebug')" 
+      <Button
+        @click="emit('toggleDebug')"
         :variant="props.isDebugMode ? 'default' : 'outline'"
+        size="sm"
+        class="px-3 "
       >
+        <Bug class="w-4 h-4" />
         {{ props.isDebugMode ? '画布' : '调试' }}
       </Button>
-      <Button @click="handleSave" variant="outline">保存</Button>
-      <Button @click="handleClear" variant="destructive">清空</Button>
+      <Button @click="handleSave" variant="outline" size="sm" class="px-3 text-slate-600 shadow-none">
+        <Save class="w-4 h-4" />
+        保存
+      </Button>
+      <Button @click="handleClear" variant="outline" size="sm" class="px-3 text-slate-600 shadow-none">
+        <Trash2 class="w-4 h-4" />
+        清空
+      </Button>
       <Button
         variant="default"
+        size="sm"
+        class="px-5!"
         @click="handlePreview"
       >
-        预览
+      <Play class="w-4 h-4"/>
+      预览
       </Button>
     </div>
   </div>

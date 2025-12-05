@@ -2,20 +2,27 @@
 import { computed, ref } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
-import {
-  ElForm,
-  ElFormItem,
-  ElSelect,
-  ElOption,
-} from 'element-plus'
+import { ElForm, ElFormItem, ElSelect, ElOption } from 'element-plus'
 import { Link } from '@element-plus/icons-vue'
+import { MousePointer2, Copy, Trash2, ChevronDown, Sparkles } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog'
 import type { ComponentPropSchema } from '@/types/component'
 import type { EventBinding, ShowMessageActionConfig } from '@/types/event'
 import { nanoid } from 'nanoid'
@@ -38,11 +45,11 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
   // on the component schema.
   const updatedProps = {
     ...selectedComponent.value.schema.props,
-    [`${propKey}_binding`]: binding,
+    [`${propKey}_binding`]: binding
   }
-  
+
   editorStore.updateComponent(selectedComponent.value.id, {
-    props: updatedProps,
+    props: updatedProps
   })
 }
 
@@ -57,27 +64,27 @@ const propsSchema = computed(() => componentMeta.value?.propsSchema || [])
 
 function updateProp(key: string, value: any) {
   if (!selectedComponent.value) return
-  
+
   const updatedProps = {
     ...selectedComponent.value.schema.props,
-    [key]: value,
+    [key]: value
   }
-  
+
   editorStore.updateComponent(selectedComponent.value.id, {
-    props: updatedProps,
+    props: updatedProps
   })
 }
 
 function updateStyle(key: string, value: any) {
   if (!selectedComponent.value) return
-  
+
   const updatedStyle = {
     ...selectedComponent.value.schema.style,
-    [key]: value,
+    [key]: value
   }
-  
+
   editorStore.updateComponent(selectedComponent.value.id, {
-    style: updatedStyle,
+    style: updatedStyle
   })
 }
 
@@ -96,7 +103,7 @@ function handleJsonUpdate(schema: ComponentPropSchema, value: string) {
   try {
     updateProp(schema.key, JSON.parse(value))
   } catch (e) {
-    console.error("Invalid JSON format")
+    console.error('Invalid JSON format')
   }
 }
 
@@ -106,8 +113,8 @@ function openAddEventDialog() {
     trigger: 'onClick',
     action: {
       type: 'showMessage',
-      config: { message: 'Hello!', messageType: 'success' } as ShowMessageActionConfig,
-    },
+      config: { message: 'Hello!', messageType: 'success' } as ShowMessageActionConfig
+    }
   }
   isEventDialogVisible.value = true
 }
@@ -131,26 +138,80 @@ function handleSaveEvent() {
   editorStore.updateComponent(selectedComponent.value.id, { events })
   isEventDialogVisible.value = false
 }
+
+function handleCopyComponent() {
+  // TODO: 实现复制组件功能
+  console.log('复制组件')
+}
+
+function handleDeleteComponent() {
+  if (!selectedComponent.value) return
+  if (confirm('确定要删除这个组件吗？')) {
+    editorStore.deleteComponent(selectedComponent.value.id)
+  }
+}
+
+// 颜色选择器相关状态
+const colorPickerRefs = ref<Record<string, HTMLInputElement | null>>({})
+
+function openColorPicker(key: string) {
+  const colorInput = colorPickerRefs.value[key]
+  if (colorInput) {
+    colorInput.click()
+  }
+}
+
+function copyToClipboard(text: string) {
+  if (window.navigator && window.navigator.clipboard) {
+    window.navigator.clipboard.writeText(text).catch(err => {
+      console.error('Failed to copy text:', err)
+    })
+  }
+}
 </script>
 
 <template>
-  <div class="property-panel h-full flex flex-col bg-white border-l border-gray-200">
-    <div class="p-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-800">属性配置</h3>
-    </div>
-    
-    <div v-if="!selectedComponent" class="flex-1 flex items-center justify-center text-gray-400">
+  <div
+    class="property-panel w-80 h-full flex flex-col bg-white border-l border-slate-200 shrink-0"
+    style="box-shadow: -4px 0 24px rgba(0, 0, 0, 0.02)"
+  >
+    <div v-if="!selectedComponent" class="flex-1 flex items-center justify-center text-slate-400">
       <div class="text-center">
-        <div class="text-4xl mb-2">⚙️</div>
-        <div>请选择一个组件</div>
+        <MousePointer2 :size="48" class="mb-4 text-slate-200 mx-auto" />
+        <p class="text-sm font-medium">Select a component to edit</p>
       </div>
     </div>
-    
+
     <div v-else class="flex-1 flex flex-col overflow-hidden">
-      <!-- Component Info -->
-      <div class="p-4 border-b">
-        <div class="text-sm text-gray-600 mb-1">组件类型</div>
-        <div class="text-base font-medium">{{ componentMeta?.name }}</div>
+      <!-- Header -->
+      <div class="px-4 py-4 border-b border-slate-100 bg-white">
+        <div class="flex items-center justify-between mb-1">
+          <Badge variant="secondary" class="font-semibold bg-slate-100 text-primary border border-slate-200">
+            {{ selectedComponent.schema.type.toUpperCase() }}
+          </Badge>
+
+          <div class="flex gap-2 text-slate-400">
+            <button
+              @click="handleCopyComponent"
+              class="hover:text-slate-600 transition-colors"
+              title="复制组件"
+            >
+              <Copy :size="14" />
+            </button>
+            <button
+              @click="handleDeleteComponent"
+              class="hover:text-red-500 transition-colors"
+              title="删除组件"
+            >
+              <Trash2 :size="14" />
+            </button>
+          </div>
+        </div>
+        <h2 class="text-lg font-semibold tracking-wider text-slate-900 truncate flex items-center gap-2.5">
+          {{ componentMeta?.name || selectedComponent.schema.label }}
+          <p class="text-xs font-thin font-mono text-slate-400 mt-1">ID: {{ selectedComponent.schema.semanticId }}</p>
+        </h2>
+        
       </div>
 
       <Tabs v-model="activeTab" class="flex-1 flex flex-col overflow-hidden">
@@ -158,17 +219,49 @@ function handleSaveEvent() {
           <TabsTrigger value="props" class="tabs-trigger-editor">Properties</TabsTrigger>
           <TabsTrigger value="events" class="tabs-trigger-editor">Events</TabsTrigger>
         </TabsList>
-        <TabsContent value="props" class="p-4 overflow-y-auto flex-1">
-          <!-- Property Config -->
-          <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">属性配置</h4>
-            <div class="space-y-4">
+        <TabsContent value="props" class="overflow-y-auto flex-1 bg-white">
+          <div class="space-y-0">
+            <!-- 属性配置标题 -->
+            <div
+              v-if="propsSchema.length > 0"
+              class="px-4 py-3 bg-slate-50/50 border-b border-slate-100"
+            >
+              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                属性配置
+              </h4>
+            </div>
+            <div
+              v-for="propSchema in propsSchema"
+              :key="propSchema.key"
+              class="group border-b border-slate-100 last:border-0 px-4 py-4"
+            >
+              <!-- Switch 类型：标签和开关在同一行 -->
               <div
-                v-for="propSchema in propsSchema"
-                :key="propSchema.key"
-                class="property-item"
+                v-if="propSchema.type === 'switch'"
+                class="flex items-center justify-between py-1"
               >
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+                <div class="text-xs font-medium text-slate-500">{{ propSchema.label }}</div>
+                <button
+                  @click="handlePropUpdate(propSchema, !getPropValue(propSchema))"
+                  :class="[
+                    'relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
+                    getPropValue(propSchema) ? 'bg-primary-600' : 'bg-slate-200'
+                  ]"
+                >
+                  <span
+                    :class="[
+                      'inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform',
+                      getPropValue(propSchema) ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                    ]"
+                  />
+                </button>
+              </div>
+
+              <!-- 其他类型 -->
+              <div v-else class="space-y-1.5">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>{{ propSchema.label }}</span>
                   <Button
                     v-if="propSchema.bindable"
@@ -176,183 +269,348 @@ function handleSaveEvent() {
                     size="sm"
                     title="绑定数据"
                     @click="openDataBindingDialog(propSchema.key)"
-                    class="h-6 w-6 p-0"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <Link class="h-4 w-4" />
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
-                
+                </div>
+
                 <!-- Text Input -->
                 <Input
                   v-if="propSchema.type === 'text'"
                   :model-value="getPropValue(propSchema)"
                   :placeholder="propSchema.placeholder"
-                  @update:model-value="(val) => handlePropUpdate(propSchema, val)"
+                  @update:model-value="val => handlePropUpdate(propSchema, val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
-                
+
                 <!-- Textarea -->
                 <Textarea
                   v-else-if="propSchema.type === 'textarea'"
                   :model-value="getPropValue(propSchema)"
                   :placeholder="propSchema.placeholder"
-                  @update:model-value="(val) => handlePropUpdate(propSchema, val)"
+                  @update:model-value="val => handlePropUpdate(propSchema, val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
-                
+
                 <!-- JSON Textarea -->
-                <Textarea
-                  v-else-if="propSchema.type === 'json'"
-                  :model-value="JSON.stringify(getPropValue(propSchema), null, 2)"
-                  class="min-h-[120px]"
-                  @update:model-value="(val: string | number) => handleJsonUpdate(propSchema, String(val))"
-                />
-                
-                <!-- Color Picker -->
-                <input
-                  v-else-if="propSchema.type === 'color'"
-                  type="color"
-                  :value="getPropValue(propSchema) || '#000000'"
-                  class="w-full h-9 rounded-md border border-input cursor-pointer"
-                  @input="(e) => handlePropUpdate(propSchema, (e.target as HTMLInputElement).value)"
-                />
-                
-                <!-- Switch -->
-                <Switch
-                  v-else-if="propSchema.type === 'switch'"
-                  :checked="getPropValue(propSchema)"
-                  @update:checked="(val: any) => handlePropUpdate(propSchema, val)"
-                />
-                
-                <!-- Select -->
-                <Select
-                  v-else-if="propSchema.type === 'select'"
-                  :model-value="getPropValue(propSchema)"
-                  @update:model-value="(val) => handlePropUpdate(propSchema, val)"
-                >
-                  <SelectTrigger class="w-full">
-                    <SelectValue :placeholder="propSchema.placeholder || '请选择'" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem
-                      v-for="opt in propSchema.options"
-                      :key="opt.value"
-                      :value="opt.value"
+                <div v-else-if="propSchema.type === 'json'" class="relative group">
+                  <Textarea
+                    :model-value="JSON.stringify(getPropValue(propSchema), null, 2)"
+                    class="w-full h-32 p-3 bg-slate-900 text-slate-300 rounded-md text-xs font-mono resize-none focus:outline-none focus:ring-1 focus:ring-primary-500 border border-slate-800"
+                    @update:model-value="
+                      (val: string | number) => handleJsonUpdate(propSchema, String(val))
+                    "
+                  />
+                  <div
+                    class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1"
+                  >
+                    <button
+                      @click="copyToClipboard(JSON.stringify(getPropValue(propSchema), null, 2))"
+                      class="p-1 bg-slate-700 hover:bg-slate-600 rounded text-white"
+                      title="复制"
                     >
-                      {{ opt.label }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                
+                      <Copy :size="12" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Color Picker -->
+                <div
+                  v-else-if="propSchema.type === 'color'"
+                  class="flex items-center gap-2 border border-slate-200 rounded-md p-1 bg-white focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500"
+                >
+                  <div
+                    class="w-6 h-6 rounded border border-slate-200 shadow-sm shrink-0"
+                    :style="{ backgroundColor: getPropValue(propSchema) || '#000000' }"
+                  />
+                  <input
+                    type="text"
+                    :value="getPropValue(propSchema) || '#000000'"
+                    @input="e => handlePropUpdate(propSchema, (e.target as HTMLInputElement).value)"
+                    class="flex-1 min-w-0 bg-transparent border-none text-sm text-slate-700 focus:ring-0 p-0"
+                    placeholder="#000000"
+                  />
+                  <input
+                    :ref="el => (colorPickerRefs[propSchema.key] = el as HTMLInputElement)"
+                    type="color"
+                    :value="getPropValue(propSchema) || '#000000'"
+                    @input="e => handlePropUpdate(propSchema, (e.target as HTMLInputElement).value)"
+                    class="opacity-0 absolute w-0 h-0"
+                    :id="`color-picker-${propSchema.key}`"
+                  />
+                  <div
+                    :for="`color-picker-${propSchema.key}`"
+                    @click="openColorPicker(propSchema.key)"
+                    class="cursor-pointer p-1 hover:bg-slate-100 rounded shrink-0"
+                  >
+                    <Sparkles :size="14" class="text-slate-400" />
+                  </div>
+                </div>
+
+                <!-- Select -->
+                <div v-else-if="propSchema.type === 'select'" class="relative">
+                  <Select
+                    :model-value="getPropValue(propSchema)"
+                    @update:model-value="val => handlePropUpdate(propSchema, val)"
+                  >
+                    <SelectTrigger
+                      class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 appearance-none focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+                    >
+                      <SelectValue :placeholder="propSchema.placeholder || '请选择'" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem
+                        v-for="opt in propSchema.options"
+                        :key="opt.value"
+                        :value="opt.value"
+                      >
+                        {{ opt.label }}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <ChevronDown
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                    :size="14"
+                  />
+                </div>
+
                 <!-- Number Input -->
                 <Input
                   v-else-if="propSchema.type === 'number'"
                   type="number"
                   :model-value="getPropValue(propSchema)"
-                  @update:model-value="(val) => handlePropUpdate(propSchema, Number(val))"
+                  @update:model-value="val => handlePropUpdate(propSchema, Number(val))"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
-                
+
                 <!-- Unsupported Type -->
                 <div v-else class="text-sm text-red-500">
                   Unsupported prop type: {{ propSchema.type }}
                 </div>
+
+                <!-- Description -->
+                <p v-if="propSchema.description" class="text-[10px] text-slate-400 mt-1">
+                  {{ propSchema.description }}
+                </p>
               </div>
             </div>
           </div>
-          
+
           <!-- Style Config -->
-          <div class="mb-6">
-            <h4 class="text-sm font-medium text-gray-700 mb-3">样式配置</h4>
-            <div class="space-y-4">
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+          <div class="space-y-0 border-t border-slate-100">
+            <div class="px-4 py-3 bg-slate-50/50 border-b border-slate-100">
+              <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                样式配置
+              </h4>
+            </div>
+            <div class="space-y-0">
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4 group">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>宽度</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.width')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.width')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
+                </div>
                 <Input
                   :model-value="selectedComponent.schema.style.width || ''"
                   placeholder="auto"
-                  @update:model-value="(val) => updateStyle('width', val)"
+                  @update:model-value="val => updateStyle('width', val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
               </div>
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>高度</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.height')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.height')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
+                </div>
                 <Input
                   :model-value="selectedComponent.schema.style.height || ''"
                   placeholder="auto"
-                  @update:model-value="(val) => updateStyle('height', val)"
+                  @update:model-value="val => updateStyle('height', val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
               </div>
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>内边距</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.padding')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.padding')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
+                </div>
                 <Input
                   :model-value="selectedComponent.schema.style.padding || ''"
                   placeholder="0"
-                  @update:model-value="(val) => updateStyle('padding', val)"
+                  @update:model-value="val => updateStyle('padding', val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
               </div>
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>外边距</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.margin')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.margin')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
+                </div>
                 <Input
                   :model-value="selectedComponent.schema.style.margin || ''"
                   placeholder="0"
-                  @update:model-value="(val) => updateStyle('margin', val)"
+                  @update:model-value="val => updateStyle('margin', val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
               </div>
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>背景颜色</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.backgroundColor')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.backgroundColor')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
-                <input
-                  type="color"
-                  :value="selectedComponent.schema.style.backgroundColor || '#ffffff'"
-                  class="w-full h-9 rounded-md border border-input cursor-pointer"
-                  @input="(e) => updateStyle('backgroundColor', (e.target as HTMLInputElement).value)"
-                />
+                </div>
+                <div
+                  class="flex items-center gap-2 border border-slate-200 rounded-md p-1 bg-white focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500"
+                >
+                  <div
+                    class="w-6 h-6 rounded border border-slate-200 shadow-sm shrink-0"
+                    :style="{
+                      backgroundColor: selectedComponent.schema.style.backgroundColor || '#ffffff'
+                    }"
+                  />
+                  <input
+                    type="text"
+                    :value="selectedComponent.schema.style.backgroundColor || '#ffffff'"
+                    @input="
+                      e => updateStyle('backgroundColor', (e.target as HTMLInputElement).value)
+                    "
+                    class="flex-1 min-w-0 bg-transparent border-none text-sm text-slate-700 focus:ring-0 p-0"
+                    placeholder="#ffffff"
+                  />
+                  <input
+                    :ref="el => (colorPickerRefs['style.backgroundColor'] = el as HTMLInputElement)"
+                    type="color"
+                    :value="selectedComponent.schema.style.backgroundColor || '#ffffff'"
+                    @input="
+                      e => updateStyle('backgroundColor', (e.target as HTMLInputElement).value)
+                    "
+                    class="opacity-0 absolute w-0 h-0"
+                    id="color-picker-style-backgroundColor"
+                  />
+                  <div
+                    for="color-picker-style-backgroundColor"
+                    @click="openColorPicker('style.backgroundColor')"
+                    class="cursor-pointer p-1 hover:bg-slate-100 rounded shrink-0"
+                  >
+                    <Sparkles :size="14" class="text-slate-400" />
+                  </div>
+                </div>
               </div>
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                    <span>文字颜色</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.color')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
+                  <span>文字颜色</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.color')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
-                <input
-                  type="color"
-                  :value="selectedComponent.schema.style.color || '#333333'"
-                  class="w-full h-9 rounded-md border border-input cursor-pointer"
-                  @input="(e) => updateStyle('color', (e.target as HTMLInputElement).value)"
-                />
+                </div>
+                <div
+                  class="flex items-center gap-2 border border-slate-200 rounded-md p-1 bg-white focus-within:ring-1 focus-within:ring-primary-500 focus-within:border-primary-500"
+                >
+                  <div
+                    class="w-6 h-6 rounded border border-slate-200 shadow-sm shrink-0"
+                    :style="{ backgroundColor: selectedComponent.schema.style.color || '#333333' }"
+                  />
+                  <input
+                    type="text"
+                    :value="selectedComponent.schema.style.color || '#333333'"
+                    @input="e => updateStyle('color', (e.target as HTMLInputElement).value)"
+                    class="flex-1 min-w-0 bg-transparent border-none text-sm text-slate-700 focus:ring-0 p-0"
+                    placeholder="#333333"
+                  />
+                  <input
+                    :ref="el => (colorPickerRefs['style.color'] = el as HTMLInputElement)"
+                    type="color"
+                    :value="selectedComponent.schema.style.color || '#333333'"
+                    @input="e => updateStyle('color', (e.target as HTMLInputElement).value)"
+                    class="opacity-0 absolute w-0 h-0"
+                    id="color-picker-style-color"
+                  />
+                  <div
+                    for="color-picker-style-color"
+                    @click="openColorPicker('style.color')"
+                    class="cursor-pointer p-1 hover:bg-slate-100 rounded shrink-0"
+                  >
+                    <Sparkles :size="14" class="text-slate-400" />
+                  </div>
+                </div>
               </div>
-              <div class="property-item">
-                <label class="flex items-center justify-between text-sm text-gray-600 mb-1">
+              <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+                <div
+                  class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5"
+                >
                   <span>字体大小</span>
-                  <Button variant="ghost" size="sm" title="Bind Data" @click="openDataBindingDialog('style.fontSize')" class="h-6 w-6 p-0">
-                    <Link class="h-4 w-4" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    title="绑定数据"
+                    @click="openDataBindingDialog('style.fontSize')"
+                    class="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Link class="h-3 w-3 text-slate-300" />
                   </Button>
-                </label>
+                </div>
                 <Input
                   :model-value="selectedComponent.schema.style.fontSize || ''"
                   placeholder="14px"
-                  @update:model-value="(val) => updateStyle('fontSize', val)"
+                  @update:model-value="val => updateStyle('fontSize', val)"
+                  class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
                 />
               </div>
             </div>
@@ -364,14 +622,16 @@ function handleSaveEvent() {
             <Button @click="openAddEventDialog">添加事件</Button>
           </div>
           <div v-if="selectedComponent.schema.events && selectedComponent.schema.events.length > 0">
-            <div v-for="eventItem in selectedComponent.schema.events" :key="eventItem.id" class="p-2 border rounded mb-2">
+            <div
+              v-for="eventItem in selectedComponent.schema.events"
+              :key="eventItem.id"
+              class="p-2 border rounded mb-2"
+            >
               <div><strong>触发器:</strong> {{ eventItem.trigger }}</div>
               <div><strong>动作:</strong> {{ eventItem.action.type }}</div>
             </div>
           </div>
-          <div v-else class="text-center text-gray-400">
-            没有事件配置。
-          </div>
+          <div v-else class="text-center text-gray-400">没有事件配置。</div>
         </TabsContent>
       </Tabs>
     </div>
@@ -384,7 +644,7 @@ function handleSaveEvent() {
     />
 
     <!-- Event Configuration Dialog -->
-    <Dialog :open="isEventDialogVisible" @update:open="(val) => isEventDialogVisible = val">
+    <Dialog :open="isEventDialogVisible" @update:open="val => (isEventDialogVisible = val)">
       <DialogContent>
         <DialogHeader>
           <DialogTitle>事件配置</DialogTitle>
@@ -400,13 +660,15 @@ function handleSaveEvent() {
               <ElOption label="显示消息" value="showMessage" />
             </ElSelect>
           </ElFormItem>
-          
+
           <div v-if="currentEvent.action?.type === 'showMessage' && currentEvent.action.config">
             <ElFormItem label="消息">
               <Input v-model="(currentEvent.action.config as ShowMessageActionConfig).message" />
             </ElFormItem>
             <ElFormItem label="消息类型">
-              <ElSelect v-model="(currentEvent.action.config as ShowMessageActionConfig).messageType">
+              <ElSelect
+                v-model="(currentEvent.action.config as ShowMessageActionConfig).messageType"
+              >
                 <ElOption label="成功" value="success" />
                 <ElOption label="警告" value="warning" />
                 <ElOption label="错误" value="error" />
@@ -422,5 +684,3 @@ function handleSaveEvent() {
     </Dialog>
   </div>
 </template>
-
-

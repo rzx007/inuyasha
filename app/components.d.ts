@@ -12,8 +12,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Accordion: typeof import('./src/components/ui/accordion/Accordion.vue')['default']
+    AccordionContent: typeof import('./src/components/ui/accordion/AccordionContent.vue')['default']
+    AccordionItem: typeof import('./src/components/ui/accordion/AccordionItem.vue')['default']
+    AccordionTrigger: typeof import('./src/components/ui/accordion/AccordionTrigger.vue')['default']
     ApiTestInterface: typeof import('./src/components/ApiRequest/ApiTestInterface.vue')['default']
     ApiTestPage: typeof import('./src/components/ApiRequest/ApiTestPage.vue')['default']
+    Badge: typeof import('./src/components/ui/badge/Badge.vue')['default']
     BodyTab: typeof import('./src/components/ApiRequest/BodyTab.vue')['default']
     Button: typeof import('./src/components/ui/button/Button.vue')['default']
     Canvas: typeof import('./src/components/Editor/Canvas.vue')['default']
@@ -78,6 +83,7 @@ declare module 'vue' {
     SelectSeparator: typeof import('./src/components/ui/select/SelectSeparator.vue')['default']
     SelectTrigger: typeof import('./src/components/ui/select/SelectTrigger.vue')['default']
     SelectValue: typeof import('./src/components/ui/select/SelectValue.vue')['default']
+    Separator: typeof import('./src/components/ui/separator/Separator.vue')['default']
     SplitTrigger: typeof import('./src/components/SplitTrigger/index.vue')['default']
     Switch: typeof import('./src/components/ui/switch/Switch.vue')['default']
     Tabs: typeof import('./src/components/ui/tabs/Tabs.vue')['default']
@@ -92,8 +98,13 @@ declare module 'vue' {
 
 // For TSX support
 declare global {
+  const Accordion: typeof import('./src/components/ui/accordion/Accordion.vue')['default']
+  const AccordionContent: typeof import('./src/components/ui/accordion/AccordionContent.vue')['default']
+  const AccordionItem: typeof import('./src/components/ui/accordion/AccordionItem.vue')['default']
+  const AccordionTrigger: typeof import('./src/components/ui/accordion/AccordionTrigger.vue')['default']
   const ApiTestInterface: typeof import('./src/components/ApiRequest/ApiTestInterface.vue')['default']
   const ApiTestPage: typeof import('./src/components/ApiRequest/ApiTestPage.vue')['default']
+  const Badge: typeof import('./src/components/ui/badge/Badge.vue')['default']
   const BodyTab: typeof import('./src/components/ApiRequest/BodyTab.vue')['default']
   const Button: typeof import('./src/components/ui/button/Button.vue')['default']
   const Canvas: typeof import('./src/components/Editor/Canvas.vue')['default']
@@ -158,6 +169,7 @@ declare global {
   const SelectSeparator: typeof import('./src/components/ui/select/SelectSeparator.vue')['default']
   const SelectTrigger: typeof import('./src/components/ui/select/SelectTrigger.vue')['default']
   const SelectValue: typeof import('./src/components/ui/select/SelectValue.vue')['default']
+  const Separator: typeof import('./src/components/ui/separator/Separator.vue')['default']
   const SplitTrigger: typeof import('./src/components/SplitTrigger/index.vue')['default']
   const Switch: typeof import('./src/components/ui/switch/Switch.vue')['default']
   const Tabs: typeof import('./src/components/ui/tabs/Tabs.vue')['default']

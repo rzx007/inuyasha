@@ -20,17 +20,6 @@ const displayType = computed(() => {
 })
 
 function handleComponentClick(event: MouseEvent) {
-  // 检查点击的目标是否在子组件的 EditorComponentWrapper 内
-  const target = event.target as HTMLElement
-  const clickedWrapper = target.closest('.component-wrapper') as HTMLElement
-  const currentWrapper = event.currentTarget as HTMLElement
-  
-  // 如果点击的是子组件（找到的 wrapper 不是当前组件），则不选中当前组件
-  // 让子组件自己处理选中
-  if (clickedWrapper && clickedWrapper !== currentWrapper) {
-    return
-  }
-  
   event.stopPropagation()
   editorStore.selectComponent(props.schema.id)
 }
@@ -82,7 +71,7 @@ function handleDeleteButtonClick() {
     <!-- 拖拽手柄和操作栏 -->
     <div
       v-if="selectedId === schema.id"
-      class="absolute -top-6 left-[-2px] bg-blue-500 text-white text-xs px-2 py-1 rounded-t z-100 flex items-center whitespace-nowrap min-w-fit"
+      class="absolute -top-1 left-[-2px] bg-blue-500 text-white text-xs px-2 py-1 rounded-t z-100 flex items-center whitespace-nowrap min-w-fit"
     >
       <span class="cursor-move drag-handle mr-2 whitespace-nowrap">⠿ {{ schema.semanticId }}</span>
       <button
