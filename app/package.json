@@ -9,7 +9,7 @@
   "scripts": {
     "preinstall": "echo 111",
     "postinstall": "echo 123",
-    "dev": "vite --port 3334 --open",
+    "dev": "vite --port 3890 --open",
     "preview": "vite preview",
     "build": "vite build",
     "typecheck": "vue-tsc",

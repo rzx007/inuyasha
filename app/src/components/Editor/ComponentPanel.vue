@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { VueDraggable } from 'vue-draggable-plus'
@@ -12,16 +12,48 @@ import { getIconComponent } from '@/utils/iconMapping'
 const componentStore = useComponentStore()
 const editorStore = useEditorStore()
 
-// 按分类获取组件
-const baseComponents = computed(() => componentStore.getComponentsByCategory('base'))
-const layoutComponents = computed(() => componentStore.getComponentsByCategory('layout'))
+// 搜索关键词
+const searchKeyword = ref('')
 
-const dataComponents = computed(() => componentStore.getComponentsByCategory('data'))
+// 过滤组件函数
+function filterComponents(components: ComponentMeta[], keyword: string): ComponentMeta[] {
+  if (!keyword.trim()) {
+    return components
+  }
+  const lowerKeyword = keyword.toLowerCase().trim()
+  return components.filter(meta => 
+    meta.name.toLowerCase().includes(lowerKeyword) ||
+    meta.type.toLowerCase().includes(lowerKeyword)
+  )
+}
 
-const formComponents = computed(() => componentStore.getComponentsByCategory('form'))
+// 按分类获取组件（带搜索过滤）
+const baseComponents = computed({
+  get: () => filterComponents(componentStore.getComponentsByCategory('base'), searchKeyword.value),
+  set: () => {} 
+})
+const layoutComponents = computed({
+  get: () => filterComponents(componentStore.getComponentsByCategory('layout'), searchKeyword.value),
+  set: () => {}
+})
+const dataComponents = computed({
+  get: () => filterComponents(componentStore.getComponentsByCategory('data'), searchKeyword.value),
+  set: () => {}
+})
+const formComponents = computed({
+  get: () => filterComponents(componentStore.getComponentsByCategory('form'), searchKeyword.value),
+  set: () => {}
+})
 
-// 克隆组件时，我们只传递组件类型。
-// 画布的 @add 事件会接收到这个对象，并用它来创建真正的组件实例。
+// 判断是否有搜索结果
+const hasSearchResults = computed(() => 
+  baseComponents.value.length > 0 ||
+  layoutComponents.value.length > 0 ||
+  dataComponents.value.length > 0 ||
+  formComponents.value.length > 0
+)
+
+//克隆组件时，我们只传递组件类型。 画布接收到这个对象，并用它来创建真正的组件实例。
 function cloneComponent(meta: ComponentMeta) {
   // 获取现有组件列表，用于生成语义化标识
   const existingComponents = editorStore.pageConfig.components
@@ -35,16 +67,23 @@ function cloneComponent(meta: ComponentMeta) {
       <div class="relative">
         <Search class="absolute left-3 top-2.5 text-slate-400" :size="16" />
         <Input
+          v-model="searchKeyword"
           type="text"
-          placeholder="Search components..."
+          placeholder="搜索组件..."
           class="pl-9 pr-3 py-2 text-sm bg-slate-50 border-slate-200 focus:bg-white focus:ring-2 focus:ring-primary transition-all"
         />
       </div>
     </div>
 
     <div class="flex-1 overflow-y-auto p-4">
+      <!-- 无搜索结果提示 -->
+      <div v-if="searchKeyword.trim() && !hasSearchResults" class="flex flex-col items-center justify-center py-12 text-slate-400">
+        <Search class="mb-3 opacity-50" :size="32" />
+        <p class="text-sm">未找到匹配的组件</p>
+      </div>
+
       <!-- 基础组件 -->
-      <div class="mb-6">
+      <div v-if="baseComponents.length > 0" class="mb-6">
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
           基础组件
         </h4>
@@ -59,7 +98,7 @@ function cloneComponent(meta: ComponentMeta) {
           <div
             v-for="meta in baseComponents"
             :key="meta.type"
-            class="flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
+            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
             <div
               class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
@@ -74,7 +113,7 @@ function cloneComponent(meta: ComponentMeta) {
       </div>
 
       <!-- 布局组件 -->
-      <div class="mb-6">
+      <div v-if="layoutComponents.length > 0" class="mb-6">
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
           布局组件
         </h4>
@@ -104,7 +143,7 @@ function cloneComponent(meta: ComponentMeta) {
       </div>
 
       <!-- 数据展示组件 -->
-      <div class="mb-6">
+      <div v-if="dataComponents.length > 0" class="mb-6">
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
           数据展示
         </h4>
@@ -134,7 +173,7 @@ function cloneComponent(meta: ComponentMeta) {
       </div>
 
       <!-- 表单组件 -->
-      <div class="mb-6">
+      <div v-if="formComponents.length > 0" class="mb-6">
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
           表单组件
         </h4>

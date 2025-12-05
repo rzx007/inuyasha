@@ -97,7 +97,6 @@ export const layoutComponents: ComponentMeta[] = [
         {
           name: '1',
           title: '折叠项 1',
-          children: [],
         },
       ],
     },
@@ -111,7 +110,6 @@ export const layoutComponents: ComponentMeta[] = [
           {
             name: '1',
             title: '折叠项 1',
-            children: [],
           },
         ],
         bindable: true,
@@ -136,12 +134,10 @@ export const layoutComponents: ComponentMeta[] = [
         {
           name: '1',
           title: '标签项 1',
-          children: [],
         },
         {
           name: '2',
           title: '标签项 2',
-          children: [],
         },
       ],
     },
@@ -157,12 +153,10 @@ export const layoutComponents: ComponentMeta[] = [
           {
             name: '1',
             title: '标签项 1',
-            children: [],
           },
           {
             name: '2',
             title: '标签项 2',
-            children: [],
           },
         ],
         bindable: true,

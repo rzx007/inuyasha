@@ -100,6 +100,11 @@ function handleButtonClick() {
 }
 
 const styleObject = computed(() => resolvedStyle.value)
+
+// 辅助函数：获取指定插槽的子组件
+function getSlotChildren(slotName: string) {
+  return props.schema.children?.filter(child => child.props?._slot === slotName) || []
+}
 </script>
 
 <template>
@@ -165,25 +170,16 @@ const styleObject = computed(() => resolvedStyle.value)
       :title="item.title"
       :name="item.name"
     >
-      <VueDraggable
-        v-model="item.children"
-        group="components"
-        :animation="200"
-        handle=".drag-handle"
-        item-key="id"
-        class="min-h-[50px] p-1"
-      >
-        <EditorComponentWrapper
-          v-for="child in item.children"
-          :key="child.id"
-          :schema="child"
-        />
-        <template #footer>
-          <div v-if="item.children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
-            将组件拖到此处
-          </div>
-        </template>
-      </VueDraggable>
+      <PreviewRenderer
+        v-for="child in getSlotChildren(item.name)"
+        :key="child.id"
+        :schema="child"
+      />
+      <template #footer>
+        <div v-if="getSlotChildren(item.name).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+          将组件拖到此处
+        </div>
+      </template>
     </ElCollapseItem>
   </ElCollapse>
 
@@ -206,11 +202,11 @@ const styleObject = computed(() => resolvedStyle.value)
     >
       <div class="min-h-[50px] p-1">
         <PreviewRenderer
-          v-for="child in item.children || []"
+          v-for="child in getSlotChildren(item.name)"
           :key="child.id"
           :schema="child"
         />
-        <div v-if="(item.children || []).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+        <div v-if="getSlotChildren(item.name).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
           暂无内容
         </div>
       </div>

@@ -117,6 +117,36 @@ function handleButtonClick() {
   }
 }
 
+// 获取指定插槽的子组件（用于 Tabs, Collapse 等）
+function getSlotChildren(slotName: string) {
+  return props.schema.children?.filter(child => child.props?._slot === slotName) || []
+}
+
+// 更新指定插槽的子组件
+function updateSlotChildren(slotName: string, newChildren: ComponentSchema[]) {
+  // 1. 保留不属于当前 slot 的组件
+  const otherChildren = props.schema.children?.filter(child => child.props?._slot !== slotName) || []
+  
+  // 2. 标记新组件
+  const updatedNewChildren = newChildren.map(child => {
+    // 如果已经是当前 slot，直接返回
+    if (child.props?._slot === slotName) return child
+    // 否则（新拖入的，或从其他 slot 移过来的），更新 _slot
+    return {
+      ...child,
+      props: {
+        ...child.props,
+        _slot: slotName
+      }
+    }
+  })
+  
+  // 3. 更新组件
+  editorStore.updateComponent(props.schema.id, {
+    children: [...otherChildren, ...updatedNewChildren]
+  })
+}
+
 const styleObject = computed(() => resolvedStyle.value)
 </script>
 
@@ -235,7 +265,8 @@ const styleObject = computed(() => resolvedStyle.value)
       :name="item.name"
     >
       <VueDraggable
-        v-model="item.children"
+        :model-value="getSlotChildren(item.name)"
+        @update:model-value="updateSlotChildren(item.name, $event)"
         group="components"
         :animation="200"
         handle=".drag-handle"
@@ -243,12 +274,12 @@ const styleObject = computed(() => resolvedStyle.value)
         class="min-h-[50px] p-1"
       >
         <EditorComponentWrapper
-          v-for="child in item.children"
+          v-for="child in getSlotChildren(item.name)"
           :key="child.id"
           :schema="child"
         />
         <template #footer>
-          <div v-if="item.children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+          <div v-if="getSlotChildren(item.name).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
             将组件拖到此处
           </div>
         </template>
@@ -274,7 +305,8 @@ const styleObject = computed(() => resolvedStyle.value)
       :name="item.name"
     >
       <VueDraggable
-        v-model="item.children"
+        :model-value="getSlotChildren(item.name)"
+        @update:model-value="updateSlotChildren(item.name, $event)"
         group="components"
         :animation="200"
         handle=".drag-handle"
@@ -282,12 +314,12 @@ const styleObject = computed(() => resolvedStyle.value)
         class="min-h-[50px] p-1"
       >
         <EditorComponentWrapper
-          v-for="child in item.children"
+          v-for="child in getSlotChildren(item.name)"
           :key="child.id"
           :schema="child"
         />
         <template #footer>
-          <div v-if="item.children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+          <div v-if="getSlotChildren(item.name).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
             将组件拖到此处
           </div>
         </template>

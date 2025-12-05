@@ -72,6 +72,27 @@ export const useEditorStore = defineStore('editor', () => {
   function updateComponent(id: ComponentId, updates: Partial<ComponentSchema>) {
     const component = findComponentById(id, pageConfig.value.components)
     if (component) {
+      // 自动清理孤儿组件逻辑（针对 Tabs/Collapse 等使用 _slot 标记子组件的情况）
+      if (updates.props && Array.isArray(updates.props.items) && component.children) {
+        // 获取所有有效的 slot 名称
+        const validSlotNames = updates.props.items
+          .map((item: any) => item.name)
+          .filter((name: any) => name !== undefined && name !== null)
+        
+        // 保留那些 _slot 为空（非 slot 组件）或者 _slot 在有效列表中的组件
+        const cleanChildren = component.children.filter(child => {
+          const slot = child.props?._slot
+          if (!slot) return true // 不是 slot 子组件，保留
+          return validSlotNames.includes(slot)
+        })
+        
+        // 如果 children 发生了变化，且 updates 中没有显式指定 children，则更新 children
+        if (cleanChildren.length !== component.children.length && !updates.children) {
+            updates.children = cleanChildren
+        }
+        console.log('cleanChildren', cleanChildren)
+      }
+
       Object.assign(component, updates)
       pageConfig.value.updatedAt = Date.now()
     }
