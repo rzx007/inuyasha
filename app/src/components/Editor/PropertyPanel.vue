@@ -37,12 +37,10 @@ const isDataBindingDialogVisible = ref(false)
 const currentEvent = ref<Partial<EventBinding>>({})
 const currentBindingProp = ref<string | null>(null)
 
+// 更新属性绑定
 function updatePropBinding(propKey: string, binding: DataBinding | null) {
   if (!selectedComponent.value) return
 
-  // This is a simplified implementation. A more robust solution
-  // would merge bindings with props, e.g., in a `bindings` property
-  // on the component schema.
   const updatedProps = {
     ...selectedComponent.value.schema.props,
     [`${propKey}_binding`]: binding
@@ -62,6 +60,7 @@ const componentMeta = computed(() => {
 
 const propsSchema = computed(() => componentMeta.value?.propsSchema || [])
 
+// 更新属性值
 function updateProp(key: string, value: any) {
   if (!selectedComponent.value) return
 
@@ -75,6 +74,7 @@ function updateProp(key: string, value: any) {
   })
 }
 
+// 更新样式值
 function updateStyle(key: string, value: any) {
   if (!selectedComponent.value) return
 
@@ -88,17 +88,17 @@ function updateStyle(key: string, value: any) {
   })
 }
 
-// Helper function to get prop value
+// 获取属性值
 function getPropValue(schema: ComponentPropSchema) {
   return selectedComponent.value?.schema.props[schema.key]
 }
 
-// Helper function to update prop value
+// 处理属性值更新
 function handlePropUpdate(schema: ComponentPropSchema, value: any) {
   updateProp(schema.key, value)
 }
 
-// Helper function for JSON update
+// 更新JSON属性值
 function handleJsonUpdate(schema: ComponentPropSchema, value: string) {
   try {
     updateProp(schema.key, JSON.parse(value))
@@ -107,6 +107,7 @@ function handleJsonUpdate(schema: ComponentPropSchema, value: string) {
   }
 }
 
+// 打开添加事件对话框
 function openAddEventDialog() {
   currentEvent.value = {
     id: nanoid(),
@@ -119,11 +120,13 @@ function openAddEventDialog() {
   isEventDialogVisible.value = true
 }
 
+// 打开数据绑定对话框
 function openDataBindingDialog(propKey: string) {
   currentBindingProp.value = propKey
   isDataBindingDialogVisible.value = true
 }
 
+// 保存事件
 function handleSaveEvent() {
   if (!selectedComponent.value) return
   const events = [...(selectedComponent.value.schema.events || [])]
@@ -139,11 +142,13 @@ function handleSaveEvent() {
   isEventDialogVisible.value = false
 }
 
+// 复制组件
 function handleCopyComponent() {
   // TODO: 实现复制组件功能
   console.log('复制组件')
 }
 
+// 删除组件
 function handleDeleteComponent() {
   if (!selectedComponent.value) return
   if (confirm('确定要删除这个组件吗？')) {
@@ -154,6 +159,7 @@ function handleDeleteComponent() {
 // 颜色选择器相关状态
 const colorPickerRefs = ref<Record<string, HTMLInputElement | null>>({})
 
+// 打开颜色选择器
 function openColorPicker(key: string) {
   const colorInput = colorPickerRefs.value[key]
   if (colorInput) {
@@ -161,6 +167,7 @@ function openColorPicker(key: string) {
   }
 }
 
+// 复制到剪贴板
 function copyToClipboard(text: string) {
   if (window.navigator && window.navigator.clipboard) {
     window.navigator.clipboard.writeText(text).catch(err => {
@@ -216,8 +223,8 @@ function copyToClipboard(text: string) {
 
       <Tabs v-model="activeTab" class="flex-1 flex flex-col overflow-hidden">
         <TabsList class="tabs-list-editor">
-          <TabsTrigger value="props" class="tabs-trigger-editor">Properties</TabsTrigger>
-          <TabsTrigger value="events" class="tabs-trigger-editor">Events</TabsTrigger>
+          <TabsTrigger value="props" class="tabs-trigger-editor">属性面板</TabsTrigger>
+          <TabsTrigger value="events" class="tabs-trigger-editor">事件面板</TabsTrigger>
         </TabsList>
         <TabsContent value="props" class="overflow-y-auto flex-1 bg-white">
           <div class="space-y-0">

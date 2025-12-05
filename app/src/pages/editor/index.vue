@@ -12,6 +12,7 @@ import DebugPanel from '@/components/Editor/DebugPanel.vue'
 import Canvas from '@/components/Editor/Canvas.vue'
 import PropertyPanel from '@/components/Editor/PropertyPanel.vue'
 import Toolbar from '@/components/Editor/Toolbar.vue'
+import LayersPanel from '@/components/Editor/LayersPanel.vue'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 const componentStore = useComponentStore()
@@ -52,15 +53,23 @@ onMounted(() => {
       <div class="w-72 shrink-0 bg-white border-r border-gray-200">
         <Tabs v-model="activeLeftTab" class="h-full flex flex-col">
           <TabsList class="tabs-list-editor">
-            <TabsTrigger value="components" class="tabs-trigger-editor">
+           
+            <TabsTrigger value="components" class="tabs-trigger-editor" title="组件库">
               <Layers :size="16" />
-              <span>组件库</span>
+              <!-- <span>组件库</span> -->
             </TabsTrigger>
-            <TabsTrigger value="data" class="tabs-trigger-editor">
+            <TabsTrigger value="data" class="tabs-trigger-editor" title="资源库">
               <Database :size="16" />
-              <span>资源库</span>
+              <!-- <span>资源库</span> -->
+            </TabsTrigger>
+            <TabsTrigger value="layers" class="tabs-trigger-editor" title="层级树">
+              <Layers :size="16" />
+              <!-- <span>层级</span> -->
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="layers" class="h-full overflow-y-auto">
+            <LayersPanel />
+          </TabsContent>
           <TabsContent value="components" class="h-full overflow-y-auto">
             <ComponentPanel />
           </TabsContent>

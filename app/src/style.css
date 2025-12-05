@@ -169,7 +169,7 @@
 }
 
 .tabs-trigger-editor[data-state="active"] {
-  @apply border-b-primary shadow-none text-primary  border-b;
+  @apply border-b-primary shadow-none text-primary  border-b-2;
 }
 
 .tabs-trigger-editor[data-state="inactive"] {
