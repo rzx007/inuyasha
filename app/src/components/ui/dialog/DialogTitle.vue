@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils"
 const props = defineProps<DialogTitleProps & { class?: HTMLAttributes["class"] }>()
 
 const delegatedProps = reactiveOmit(props, "class")
+
 const forwardedProps = useForwardProps(delegatedProps)
 </script>
 
@@ -15,7 +16,7 @@ const forwardedProps = useForwardProps(delegatedProps)
   <DialogTitle
     data-slot="dialog-title"
     v-bind="forwardedProps"
-    :class="cn('text-lg font-semibold leading-none tracking-tight', props.class)"
+    :class="cn('text-lg leading-none font-semibold', props.class)"
   >
     <slot />
   </DialogTitle>

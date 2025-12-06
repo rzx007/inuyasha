@@ -87,7 +87,11 @@ function makeNode(schema: ComponentSchema): LayerNode {
   }
 }
 
-const rootNodes = computed<LayerNode[]>(() => buildNodes(editorStore.pageConfig.components))
+const rootNodes = computed<LayerNode[]>(() => {
+  const rootComponent = editorStore.pageConfig.rootComponent
+  // 直接返回 PageRoot 节点
+  return [makeNode(rootComponent)]
+})
 
 function handleSelect(node: LayerNode) {
   if (!node.schema) return

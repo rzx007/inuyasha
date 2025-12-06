@@ -26,6 +26,7 @@ export enum ComponentType {
   Card = 'card',
   Collapse = 'collapse',
   Tabs = 'tabs',
+  PageRoot = 'pageRoot',
   
   // 数据展示组件
   Table = 'table',

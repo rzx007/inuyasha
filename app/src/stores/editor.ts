@@ -3,18 +3,46 @@ import { ref, computed } from 'vue'
 import type { ComponentId, ComponentSchema } from '@/types/component'
 import type { SelectedComponent, PageConfig } from '@/types/editor'
 import { EditorMode } from '@/types/editor'
+import { ComponentType } from '@/types/component'
 import { findComponentById, removeComponentById } from '@/utils/tree'
+import { pageRootMeta } from '@/config/components/pageRoot'
+import { nanoid } from 'nanoid'
 
 export const useEditorStore = defineStore('editor', () => {
   // 编辑器模式
   const mode = ref<EditorMode>(EditorMode.Edit)
   
+  // 创建默认的 PageRoot
+  function createDefaultPageRoot(): ComponentSchema {
+    return {
+      id: nanoid(),
+      semanticId: 'pageRoot1',
+      type: ComponentType.PageRoot,
+      label: pageRootMeta.name,
+      props: { ...pageRootMeta.defaultProps },
+      style: { ...pageRootMeta.defaultStyle },
+      children: [],
+    }
+  }
+
+  // 在整个组件树中查找组件（包括 rootComponent 本身）
+  function findComponentInTree(id: ComponentId): ComponentSchema | null {
+    const root = pageConfig.value.rootComponent
+    if (root.id === id) {
+      return root
+    }
+    if (root.children) {
+      return findComponentById(id, root.children)
+    }
+    return null
+  }
+
   // 当前页面配置
   const pageConfig = ref<PageConfig>({
     id: '',
     name: '未命名页面',
     title: '新页面',
-    components: [],
+    rootComponent: createDefaultPageRoot(),
     createdAt: Date.now(),
     updatedAt: Date.now(),
   })
@@ -41,27 +69,49 @@ export const useEditorStore = defineStore('editor', () => {
   
   // 设置页面配置
   function setPageConfig(config: PageConfig) {
+    // 确保 rootComponent 存在
+    if (!config.rootComponent) {
+      config.rootComponent = createDefaultPageRoot()
+    }
     pageConfig.value = config
+  }
+
+  // 获取 PageRoot
+  function getPageRoot(): ComponentSchema {
+    return pageConfig.value.rootComponent
   }
   
   // 添加组件
   function addComponent(component: ComponentSchema, parentId?: ComponentId) {
     if (parentId) {
       // 添加到指定父组件
-      const parent = findComponentById(parentId, pageConfig.value.components)
+      const parent = findComponentInTree(parentId)
       if (parent && parent.children) {
         parent.children.push(component)
       }
     } else {
-      // 添加到根级别
-      pageConfig.value.components.push(component)
+      // 添加到 PageRoot 的 children
+      if (!pageConfig.value.rootComponent.children) {
+        pageConfig.value.rootComponent.children = []
+      }
+      pageConfig.value.rootComponent.children.push(component)
     }
     pageConfig.value.updatedAt = Date.now()
   }
   
-  // 删除组件
+  // 删除组件（不能删除 PageRoot）
   function deleteComponent(id: ComponentId) {
-    removeComponentById(id, pageConfig.value.components)
+    // 防止删除 PageRoot
+    if (id === pageConfig.value.rootComponent.id) {
+      console.warn('Cannot delete PageRoot component')
+      return
+    }
+    
+    const root = pageConfig.value.rootComponent
+    if (root.children) {
+      removeComponentById(id, root.children)
+    }
+    
     if (selectedComponent.value?.id === id) {
       selectedComponent.value = null
     }
@@ -70,7 +120,7 @@ export const useEditorStore = defineStore('editor', () => {
   
   // 更新组件
   function updateComponent(id: ComponentId, updates: Partial<ComponentSchema>) {
-    const component = findComponentById(id, pageConfig.value.components)
+    const component = findComponentInTree(id)
     if (component) {
       // 自动清理孤儿组件逻辑（针对 Tabs/Collapse 等使用 _slot 标记子组件的情况）
       if (updates.props && Array.isArray(updates.props.items) && component.children) {
@@ -104,7 +154,7 @@ export const useEditorStore = defineStore('editor', () => {
       selectedComponent.value = null
       return
     }
-    const component = findComponentById(id, pageConfig.value.components)
+    const component = findComponentInTree(id)
     if (component) {
       selectedComponent.value = {
         id,
@@ -119,9 +169,10 @@ export const useEditorStore = defineStore('editor', () => {
     toIndex: number,
     parentId?: ComponentId
   ) {
+    const root = pageConfig.value.rootComponent
     const components = parentId
-      ? findComponentById(parentId, pageConfig.value.components)?.children
-      : pageConfig.value.components
+      ? findComponentInTree(parentId)?.children
+      : root.children
     
     if (components) {
       const [moved] = components.splice(fromIndex, 1)
@@ -146,6 +197,7 @@ export const useEditorStore = defineStore('editor', () => {
     // actions
     setMode,
     setPageConfig,
+    getPageRoot,
     addComponent,
     deleteComponent,
     updateComponent,

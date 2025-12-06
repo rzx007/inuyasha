@@ -5,6 +5,7 @@ import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
 
 import { allComponents } from '@/config/components'
+import { pageRootMeta } from '@/config/components/pageRoot'
 import PreviewRenderer from '@/components/Render/PreviewRenderer.vue'
 import type { PageConfig } from '@/types/editor'
 
@@ -18,8 +19,10 @@ onMounted(() => {
 
   // Register all components, so the renderer knows about them
   componentStore.registerComponents(allComponents)
+  componentStore.registerComponent(pageRootMeta)
 
-  const pageId = route.params.id as string
+  // @ts-ignore - route.params type issue
+  const pageId = String(route.params.id || '')
   if (pageId) {
     const savedConfig = localStorage.getItem(`page-config-${pageId}`)
     if (savedConfig) {
@@ -38,12 +41,7 @@ onMounted(() => {
 
 <template>
   <div v-if="pageConfig" class="preview-page">
-    <div
-      v-for="component in pageConfig.components"
-      :key="component.id"
-    >
-      <PreviewRenderer :schema="component" />
-    </div>
+    <PreviewRenderer :schema="pageConfig.rootComponent" />
   </div>
   <div v-else class="flex items-center justify-center h-screen text-gray-500">
     Loading preview or page configuration not found...

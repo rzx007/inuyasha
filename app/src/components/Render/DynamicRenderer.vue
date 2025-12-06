@@ -23,7 +23,7 @@ import {
   ElCollapse,
   ElCollapseItem,
   ElTabs,
-  ElTabPane,
+  ElTabPane
 } from 'element-plus'
 import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
@@ -32,8 +32,9 @@ import { useFormStateStore } from '@/stores/formState'
 
 // 循环引用问题：DynamicRenderer 引用 EditorComponentWrapper，反之亦然
 // 使用 defineAsyncComponent 解决
-const EditorComponentWrapper = defineAsyncComponent(() => import('@/components/Editor/EditorComponentWrapper.vue'))
-
+const EditorComponentWrapper = defineAsyncComponent(
+  () => import('@/components/Editor/EditorComponentWrapper.vue')
+)
 
 interface Props {
   schema: ComponentSchema
@@ -97,16 +98,16 @@ const resolvedStyle = computed(() => {
 // 表单组件的双向绑定值（默认使用 'value' 作为 key）
 const formValue = computed({
   get: () => formStateStore.getComponentState(props.schema.id, 'value'),
-  set: (value) => {
+  set: value => {
     formStateStore.setComponentState(props.schema.id, 'value', value)
-  },
+  }
 })
 
 const children = computed({
   get: () => props.schema.children || [],
-  set: (newChildren) => {
+  set: newChildren => {
     editorStore.updateComponent(props.schema.id, { children: newChildren })
-  },
+  }
 })
 
 function handleButtonClick() {
@@ -125,8 +126,9 @@ function getSlotChildren(slotName: string) {
 // 更新指定插槽的子组件
 function updateSlotChildren(slotName: string, newChildren: ComponentSchema[]) {
   // 1. 保留不属于当前 slot 的组件
-  const otherChildren = props.schema.children?.filter(child => child.props?._slot !== slotName) || []
-  
+  const otherChildren =
+    props.schema.children?.filter(child => child.props?._slot !== slotName) || []
+
   // 2. 标记新组件
   const updatedNewChildren = newChildren.map(child => {
     // 如果已经是当前 slot，直接返回
@@ -140,7 +142,7 @@ function updateSlotChildren(slotName: string, newChildren: ComponentSchema[]) {
       }
     }
   })
-  
+
   // 3. 更新组件
   editorStore.updateComponent(props.schema.id, {
     children: [...otherChildren, ...updatedNewChildren]
@@ -151,8 +153,31 @@ const styleObject = computed(() => resolvedStyle.value)
 </script>
 
 <template>
+  <!-- PageRoot 组件 -->
+<!-- {{ styleObject }} -->
+  <VueDraggable
+    v-if="schema.type === ComponentType.PageRoot"
+    v-model="children"
+    group="components"
+    :animation="200"
+    handle=".drag-handle"
+    item-key="id"
+    :style="styleObject"
+    class="page-root min-h-full"
+  >
+    <EditorComponentWrapper v-for="child in children" :key="child.id" :schema="child" />
+    <template #footer>
+      <div
+        v-if="children.length === 0"
+        class="empty-placeholder text-center text-gray-400 text-sm py-4"
+      >
+        将组件拖到此处
+      </div>
+    </template>
+  </VueDraggable>
+
   <!-- 容器组件 -->
-  <div v-if="schema.type === ComponentType.Container" :style="styleObject">
+  <div v-else-if="schema.type === ComponentType.Container" :style="styleObject">
     <VueDraggable
       v-model="children"
       group="components"
@@ -161,13 +186,12 @@ const styleObject = computed(() => resolvedStyle.value)
       item-key="id"
       class="min-h-[100px] p-1 border border-dashed border-gray-400"
     >
-      <EditorComponentWrapper
-        v-for="child in children"
-        :key="child.id"
-        :schema="child"
-      />
+      <EditorComponentWrapper v-for="child in children" :key="child.id" :schema="child" />
       <template #footer>
-        <div v-if="children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-4">
+        <div
+          v-if="children.length === 0"
+          class="empty-placeholder text-center text-gray-400 text-sm py-4"
+        >
           将组件拖到此处
         </div>
       </template>
@@ -186,18 +210,17 @@ const styleObject = computed(() => resolvedStyle.value)
     <VueDraggable
       v-model="children"
       group="components"
-      :animation="200"
+      :animation="150"
       handle=".drag-handle"
       item-key="id"
       class="min-h-[50px]"
     >
-      <EditorComponentWrapper
-        v-for="child in children"
-        :key="child.id"
-        :schema="child"
-      />
+      <EditorComponentWrapper v-for="child in children" :key="child.id" :schema="child" />
       <template #footer>
-        <div v-if="children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+        <div
+          v-if="children.length === 0"
+          class="empty-placeholder text-center text-gray-400 text-sm py-2"
+        >
           将组件拖到此处
         </div>
       </template>
@@ -213,16 +236,12 @@ const styleObject = computed(() => resolvedStyle.value)
     <VueDraggable
       v-model="children"
       group="components"
-      :animation="200"
+      :animation="150"
       handle=".drag-handle"
       item-key="id"
       class="flex min-h-[50px] w-full"
     >
-      <EditorComponentWrapper
-        v-for="child in children"
-        :key="child.id"
-        :schema="child"
-      />
+      <EditorComponentWrapper v-for="child in children" :key="child.id" :schema="child" />
     </VueDraggable>
   </ElRow>
 
@@ -240,13 +259,12 @@ const styleObject = computed(() => resolvedStyle.value)
       item-key="id"
       class="min-h-[50px] p-1 border border-dashed border-gray-400"
     >
-      <EditorComponentWrapper
-        v-for="child in children"
-        :key="child.id"
-        :schema="child"
-      />
+      <EditorComponentWrapper v-for="child in children" :key="child.id" :schema="child" />
       <template #footer>
-        <div v-if="children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+        <div
+          v-if="children.length === 0"
+          class="empty-placeholder text-center text-gray-400 text-sm py-2"
+        >
           将组件拖到此处
         </div>
       </template>
@@ -254,10 +272,7 @@ const styleObject = computed(() => resolvedStyle.value)
   </ElCol>
 
   <!-- 折叠面板 -->
-  <ElCollapse
-    v-else-if="schema.type === ComponentType.Collapse"
-    :style="styleObject"
-  >
+  <ElCollapse v-else-if="schema.type === ComponentType.Collapse" :style="styleObject">
     <ElCollapseItem
       v-for="item in resolvedProps.items || []"
       :key="item.name"
@@ -279,7 +294,10 @@ const styleObject = computed(() => resolvedStyle.value)
           :schema="child"
         />
         <template #footer>
-          <div v-if="getSlotChildren(item.name).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+          <div
+            v-if="getSlotChildren(item.name).length === 0"
+            class="empty-placeholder text-center text-gray-400 text-sm py-2"
+          >
             将组件拖到此处
           </div>
         </template>
@@ -319,7 +337,10 @@ const styleObject = computed(() => resolvedStyle.value)
           :schema="child"
         />
         <template #footer>
-          <div v-if="getSlotChildren(item.name).length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-2">
+          <div
+            v-if="getSlotChildren(item.name).length === 0"
+            class="empty-placeholder text-center text-gray-400 text-sm py-2"
+          >
             将组件拖到此处
           </div>
         </template>
@@ -414,7 +435,9 @@ const styleObject = computed(() => resolvedStyle.value)
 
   <!-- 表单项容器 -->
   <ElFormItem
-    v-else-if="[ComponentType.Input, ComponentType.Select, ComponentType.DatePicker].includes(schema.type)"
+    v-else-if="
+      [ComponentType.Input, ComponentType.Select, ComponentType.DatePicker].includes(schema.type)
+    "
     :label="resolvedProps.label"
     :style="styleObject"
   >
@@ -447,11 +470,7 @@ const styleObject = computed(() => resolvedStyle.value)
   </ElFormItem>
 
   <!-- 未知组件 -->
-  <div
-    v-else
-    :style="styleObject"
-    class="p-4 border border-dashed border-red-400 bg-red-50"
-  >
+  <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
     <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
   </div>
 </template>

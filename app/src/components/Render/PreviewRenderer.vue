@@ -80,6 +80,7 @@ const resolvedStyle = computed(() => {
       }
     }
   }
+
   return newStyle
 })
 
@@ -108,8 +109,17 @@ function getSlotChildren(slotName: string) {
 </script>
 
 <template>
+  <!-- PageRoot 组件 -->
+  <div v-if="schema.type === ComponentType.PageRoot" :style="styleObject" class="page-root min-h-full">
+    <PreviewRenderer
+      v-for="child in schema.children"
+      :key="child.id"
+      :schema="child"
+    />
+  </div>
+
   <!-- 容器组件 -->
-  <div v-if="schema.type === ComponentType.Container" :style="styleObject">
+  <div v-else-if="schema.type === ComponentType.Container" :style="styleObject">
     <PreviewRenderer
       v-for="child in schema.children"
       :key="child.id"

@@ -37,7 +37,7 @@ export interface PageConfig {
   id: string
   name: string
   title: string
-  components: ComponentSchema[]
+  rootComponent: ComponentSchema
   createdAt: number
   updatedAt: number
 }

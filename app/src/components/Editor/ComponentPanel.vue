@@ -7,6 +7,7 @@ import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
 import { createComponent } from '@/utils/componentRegistry'
 import type { ComponentMeta } from '@/types/component'
+import { ComponentType } from '@/types/component'
 import { getIconComponent } from '@/utils/iconMapping'
 
 const componentStore = useComponentStore()
@@ -17,11 +18,14 @@ const searchKeyword = ref('')
 
 // 过滤组件函数
 function filterComponents(components: ComponentMeta[], keyword: string): ComponentMeta[] {
+  // 过滤掉 PageRoot 组件
+  let filtered = components.filter(meta => meta.type !== ComponentType.PageRoot)
+  
   if (!keyword.trim()) {
-    return components
+    return filtered
   }
   const lowerKeyword = keyword.toLowerCase().trim()
-  return components.filter(meta => 
+  return filtered.filter(meta => 
     meta.name.toLowerCase().includes(lowerKeyword) ||
     meta.type.toLowerCase().includes(lowerKeyword)
   )
@@ -43,8 +47,9 @@ const hasSearchResults = computed(() => categorizedComponents.value.length > 0)
 
 //克隆组件时，我们只传递组件类型。 画布接收到这个对象，并用它来创建真正的组件实例。
 function cloneComponent(meta: ComponentMeta) {
-  // 获取现有组件列表，用于生成语义化标识
-  const existingComponents = editorStore.pageConfig.components
+  // 获取 PageRoot 的 children 用于生成语义化标识
+  const rootComponent = editorStore.pageConfig.rootComponent
+  const existingComponents = rootComponent.children || []
   return createComponent(meta.type, undefined, existingComponents)
 }
 </script>

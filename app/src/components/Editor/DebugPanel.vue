@@ -13,7 +13,7 @@ const isLoading = ref(false)
 const initError = ref<string | null>(null)
 
 const jsonContent = computed(() => {
-  return JSON.stringify(editorStore.pageConfig.components, null, 2)
+  return JSON.stringify(editorStore.pageConfig.rootComponent, null, 2)
 })
 
 let initPromise: Promise<void> | null = null
@@ -139,7 +139,7 @@ onUnmounted(() => {
   <div class="debug-panel h-full flex flex-col bg-white overflow-hidden">
     <div class="p-4 border-b border-gray-200 shrink-0">
       <h3 class="text-lg font-semibold text-gray-800">组件配置 JSON</h3>
-      <p class="text-sm text-gray-500 mt-1">实时显示 pageConfig.components 的 JSON 数据</p>
+      <p class="text-sm text-gray-500 mt-1">实时显示 pageConfig.rootComponent 的 JSON 数据</p>
     </div>
     <!-- 容器始终存在，使用 v-show 控制显示 -->
     <div ref="editorContainer" class="flex-1 min-h-0 w-full" v-show="!isLoading && !initError"></div>

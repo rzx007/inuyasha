@@ -4,13 +4,14 @@ import { onMounted } from 'vue'
 import { Layers, Database } from 'lucide-vue-next'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
+import { pageRootMeta } from '@/config/components/pageRoot'
 
 import { allComponents } from '@/config/components'
 import ComponentPanel from '@/components/Editor/ComponentPanel.vue'
-import DataSourcePanel from '@/components/Editor/DataSourcePanel.vue'
+import DataSourcePanel from '@/components/Editor/DataSourcePanel/index.vue'
 import DebugPanel from '@/components/Editor/DebugPanel.vue'
 import Canvas from '@/components/Editor/Canvas.vue'
-import PropertyPanel from '@/components/Editor/PropertyPanel.vue'
+import PropertyPanel from '@/components/Editor/PropertyPanel/index.vue'
 import Toolbar from '@/components/Editor/Toolbar.vue'
 import LayersPanel from '@/components/Editor/LayersPanel.vue'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -24,7 +25,9 @@ const showDebugPanel = ref(false)
 const currentView = computed(() => showDebugPanel.value ? DebugPanel : Canvas)
 
 onMounted(() => {
+  // 注册所有组件（包括 PageRoot）
   componentStore.registerComponents(allComponents)
+  componentStore.registerComponent(pageRootMeta)
   
   // 尝试从本地存储加载配置
   const savedConfig = localStorage.getItem('page-config')
@@ -36,6 +39,7 @@ onMounted(() => {
       console.error('加载配置失败', e)
     }
   }
+  // 注意：不需要手动创建 PageRoot，因为 editorStore 初始化时已经创建了
 })
 </script>
 

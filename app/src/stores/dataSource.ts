@@ -26,14 +26,31 @@ export const useDataSourceStore = defineStore('dataSource', () => {
     const ds = dataSources.value[id]
     if (!ds || ds.type !== 'api') return
 
+    const config = ds.config as import('@/types/dataSource').ApiDataSourceConfig
+
     try {
       // Basic fetch implementation.
-      // In a real-world scenario, you would use a more robust HTTP client.
-      const response = await fetch(ds.config.url, {
-        method: ds.config.method,
-        headers: ds.config.headers,
-        // For GET requests, params should be in the URL.
-        // For POST, they should be in the body. This is a simplified example.
+      // Convert array headers to object
+      const headersObject = config.headers.reduce((acc: Record<string, string>, curr) => {
+        if (curr.key) acc[curr.key] = curr.value
+        return acc
+      }, {} as Record<string, string>)
+
+      let url = config.url
+      if (config.params && config.params.length > 0) {
+        const queryString = config.params
+          .filter(p => p.key)
+          .map(p => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`)
+          .join('&')
+        if (queryString) {
+          url += (url.includes('?') ? '&' : '?') + queryString
+        }
+      }
+
+      const response = await fetch(url, {
+        method: config.method,
+        headers: headersObject,
+        body: ['GET', 'HEAD'].includes(config.method) ? undefined : config.body,
       })
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)

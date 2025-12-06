@@ -31,7 +31,15 @@ export function resolveBinding(binding: DataBinding): any {
 
     case 'component':
       if (binding.componentId && binding.path) {
-        const componentSchema = findComponentById(binding.componentId, editorStore.pageConfig.components)
+        // 在 rootComponent 树中查找组件
+        const rootComponent = editorStore.pageConfig.rootComponent
+        let componentSchema = null
+        if (rootComponent.id === binding.componentId) {
+          componentSchema = rootComponent
+        } else if (rootComponent.children) {
+          componentSchema = findComponentById(binding.componentId, rootComponent.children)
+        }
+        
         if (!componentSchema) {
           return undefined
         }

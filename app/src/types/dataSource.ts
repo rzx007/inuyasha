@@ -20,9 +20,10 @@ export interface DataSource {
 
 export interface ApiDataSourceConfig {
   url: string
-  method: 'GET' | 'POST'
-  params: Record<string, any>
-  headers: Record<string, string>
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE'
+  params: { key: string; value: string }[]
+  headers: { key: string; value: string }[]
+  body?: string
 }
 
 export interface StaticDataSourceConfig {

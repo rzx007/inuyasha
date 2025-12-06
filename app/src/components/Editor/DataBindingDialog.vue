@@ -35,7 +35,11 @@ const allComponents = computed(() => {
       schema.children.forEach(traverse)
     }
   }
-  editorStore.pageConfig.components.forEach(traverse)
+  // 从 rootComponent 开始遍历
+  const rootComponent = editorStore.pageConfig.rootComponent
+  if (rootComponent) {
+    traverse(rootComponent)
+  }
   return components
 })
 
@@ -96,10 +100,46 @@ const componentPropertyOptions = computed(() => {
 
 const allDataSources = computed(() => dataSourceStore.dataSources)
 
-// 当选择的组件改变时，清空已选择的属性路径
-watch(selectedComponent, () => {
-  selectedPropertyPath.value = ''
-})
+
+// Initialize state when dialog opens or propKey changes
+watch(
+  [() => props.modelValue, () => props.propKey],
+  ([isOpen, propKey]) => {
+    if (isOpen && propKey) {
+      const selectedComp = editorStore.selectedComponent
+      if (!selectedComp) return
+
+      let binding: DataBinding | undefined
+      
+      // Check if it's a style binding
+      if (propKey.startsWith('style.')) {
+        binding = selectedComp.schema.props[`${propKey}_binding`]
+      } else {
+        binding = selectedComp.schema.props[`${propKey}_binding`]
+      }
+
+      if (binding) {
+        if (binding.type === 'dataSource' && binding.dataSourceId) {
+          activeTab.value = 'dataSource'
+          selectedDataSource.value = binding.dataSourceId
+          dataPath.value = binding.path || ''
+        } else if (binding.type === 'component' && binding.componentId) {
+          activeTab.value = 'componentState'
+          selectedComponent.value = binding.componentId
+          selectedPropertyPath.value = binding.path || ''
+        }
+      } else {
+        // Reset if no binding
+        activeTab.value = 'dataSource'
+        selectedDataSource.value = null
+        dataPath.value = ''
+        selectedComponent.value = null
+        selectedPropertyPath.value = ''
+      }
+    }
+  },
+  { immediate: true }
+)
 
 function handleSave() {
   let binding: DataBinding | null = null
