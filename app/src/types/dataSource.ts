@@ -24,6 +24,7 @@ export interface ApiDataSourceConfig {
   params: { key: string; value: string }[]
   headers: { key: string; value: string }[]
   body?: string
+  autoFetch?: boolean
 }
 
 export interface StaticDataSourceConfig {

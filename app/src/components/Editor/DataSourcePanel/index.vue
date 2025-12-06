@@ -234,11 +234,20 @@ const formatVariableName = (name: string) => {
                 </button>
               </div>
             </div>
-            <div class="flex items-center gap-2 pl-1">
+            <div class="flex items-center gap-2 pl-1 mb-1">
               <LinkIcon :size="12" class="text-slate-300 shrink-0" />
               <span class="text-xs font-mono text-slate-500 truncate w-full leading-none" :title="(api.config as ApiDataSourceConfig).url">
                 {{ (api.config as ApiDataSourceConfig).url }}
               </span>
+            </div>
+            <!-- Status Preview -->
+            <div v-if="api.lastFetched" class="flex items-center gap-2 pl-1 mt-2 pt-2 border-t border-slate-50">
+               <span class="w-1.5 h-1.5 rounded-full" :class="api.data?.error ? 'bg-red-400' : 'bg-emerald-400'"></span>
+               <span class="text-[10px] text-slate-400">
+                 上次更新: {{ new Date(api.lastFetched).toLocaleTimeString() }}
+               </span>
+               <span v-if="api.data?.error" class="text-[10px] text-red-400 ml-auto">Request Failed</span>
+               <span v-else class="text-[10px] text-slate-400 ml-auto">Success</span>
             </div>
           </div>
         </div>

@@ -69,9 +69,9 @@ export default defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: 'localhost',
+        target: 'https://uapis.cn',
         changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '')
+        // rewrite: path => path.replace(/^\/api/, '')
       }
     }
   },
