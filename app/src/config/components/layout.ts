@@ -9,6 +9,7 @@ export const layoutComponents: ComponentMeta[] = [
     category: 'layout',
     canNest: true,
     display: 'block',
+    componentName: 'ElCard',
     defaultProps: {
       title: '卡片标题',
       shadow: 'always',
@@ -18,6 +19,10 @@ export const layoutComponents: ComponentMeta[] = [
       borderRadius: '4px',
       backgroundColor: '#fff',
     },
+    slots: [
+      { name: 'header', label: 'Header', allowDrag: false },
+      { name: 'default', label: 'Default', allowDrag: true }
+    ],
     propsSchema: [
       {
         key: 'title',
@@ -46,6 +51,7 @@ export const layoutComponents: ComponentMeta[] = [
     category: 'layout',
     canNest: true,
     display: 'block',
+    componentName: 'ElRow',
     defaultProps: {
       gutter: 20,
       children: [
@@ -54,6 +60,9 @@ export const layoutComponents: ComponentMeta[] = [
       ],
     },
     defaultStyle: {},
+    slots: [
+      { name: 'default', label: 'Default', allowDrag: true }
+    ],
     propsSchema: [
       {
         key: 'gutter',
@@ -70,12 +79,16 @@ export const layoutComponents: ComponentMeta[] = [
     category: 'layout',
     canNest: true,
     display: 'block',
+    componentName: 'ElCol',
     defaultProps: {
       span: 12,
     },
     defaultStyle: {
       minHeight: '50px',
     },
+    slots: [
+      { name: 'default', label: 'Default', allowDrag: true }
+    ],
     propsSchema: [
       {
         key: 'span',
@@ -92,7 +105,10 @@ export const layoutComponents: ComponentMeta[] = [
     category: 'layout',
     canNest: true,
     display: 'block',
+    componentName: 'ZCollapse',
+    useDynamicSlots: true,
     defaultProps: {
+      'model-value': '1',
       items: [
         {
           name: '1',
@@ -101,7 +117,15 @@ export const layoutComponents: ComponentMeta[] = [
       ],
     },
     defaultStyle: {},
+    slots: [], // No static slots, use dynamic slots based on items
     propsSchema: [
+      {
+        key: 'model-value',
+        label: '默认激活折叠项',
+        type: 'text',
+        defaultValue: '1',
+        bindable: true,
+      },
       {
         key: 'items',
         label: '折叠项',
@@ -123,9 +147,11 @@ export const layoutComponents: ComponentMeta[] = [
     category: 'layout',
     canNest: true,
     display: 'block',
+    componentName: 'ZTabs',
+    useDynamicSlots: true,
     defaultProps: {
-      activeName: '1',
-      type: 'line',
+      'model-value': '1',
+      type: 'card',
       closable: false,
       addable: false,
       editable: false,
@@ -144,6 +170,7 @@ export const layoutComponents: ComponentMeta[] = [
     defaultStyle: {
       minHeight: '100px',
     },
+    slots: [], // No static slots, use dynamic slots based on items
     propsSchema: [
       {
         key: 'items',
@@ -162,7 +189,7 @@ export const layoutComponents: ComponentMeta[] = [
         bindable: true,
       },
       {
-        key: 'activeName',
+        key: 'model-value',
         label: '默认激活标签',
         type: 'text',
         defaultValue: '1',
@@ -173,9 +200,9 @@ export const layoutComponents: ComponentMeta[] = [
         key: 'type',
         label: '标签类型',
         type: 'select',
-        defaultValue: 'line',
+        defaultValue: 'card',
         options: [
-          { label: '线条', value: 'line' },
+          { label: '线条', value: '' },
           { label: '卡片', value: 'card' },
           { label: '边框卡片', value: 'border-card' },
         ],

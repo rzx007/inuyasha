@@ -3,7 +3,7 @@
  */
 export interface EventBinding {
   id: string
-  trigger: 'onClick' | 'onValueChange' | 'onSubmit'
+  trigger: string
   action: ActionConfig
 }
 

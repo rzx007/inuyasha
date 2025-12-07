@@ -9,12 +9,16 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: true,
     display: 'block',
+    componentName: 'div', // Use div for generic container
     defaultProps: {},
     defaultStyle: {
       padding: '16px',
       backgroundColor: '#fff',
       minHeight: '100px',
     },
+    slots: [
+      { name: 'default', label: 'Default', allowDrag: true }
+    ],
     propsSchema: [
       {
         key: 'padding',
@@ -37,6 +41,7 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: false,
     display: 'inline-block',
+    componentName: 'span', // Use span for simple text
     defaultProps: {
       content: '这是一段文本',
     },
@@ -73,6 +78,7 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: false,
     display: 'inline-block',
+    componentName: 'ZButton',
     defaultProps: {
       text: '按钮',
       type: 'primary',
@@ -80,6 +86,9 @@ export const baseComponents: ComponentMeta[] = [
     defaultStyle: {
       padding: '8px 16px',
     },
+    triggers: [
+      { label: '点击', value: 'onClick', event: 'click' },
+    ],
     propsSchema: [
       {
         key: 'text',
@@ -109,6 +118,7 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: false,
     display: 'inline-block',
+    componentName: 'ElImage',
     defaultProps: {
       src: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
       alt: '图片',
@@ -141,6 +151,7 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: false,
     display: 'block',
+    componentName: 'ElDivider',
     defaultProps: {
       direction: 'horizontal',
     },

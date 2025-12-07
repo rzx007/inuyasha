@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useEditorStore } from '@/stores/editor'
+import { useComponentStore } from '@/stores/component'
 import { ElForm, ElFormItem, ElSelect, ElOption } from 'element-plus'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -20,6 +21,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const editorStore = useEditorStore()
+const componentStore = useComponentStore()
 const isEventDialogVisible = ref(false)
 const currentEvent = ref<Partial<EventBinding>>({})
 
@@ -27,11 +29,22 @@ const selectedComponent = computed(() => {
   return editorStore.selectedComponent
 })
 
+// 获取当前组件支持的触发器列表
+const triggerOptions = computed(() => {
+  if (!selectedComponent.value) return []
+  const meta = componentStore.getComponentMeta(selectedComponent.value.schema.type)
+  return meta?.triggers || []
+})
+
 // 打开添加事件对话框
 function openAddEventDialog() {
+  const defaultTrigger = triggerOptions.value.length > 0 
+    ? triggerOptions.value[0].value 
+    : 'onClick'
+  
   currentEvent.value = {
     id: nanoid(),
-    trigger: 'onClick',
+    trigger: defaultTrigger,
     action: {
       type: 'showMessage',
       config: { message: 'Hello!', messageType: 'success' } as ShowMessageActionConfig
@@ -83,7 +96,12 @@ function handleSaveEvent() {
         <ElForm v-if="currentEvent.action" :model="currentEvent" label-position="top">
           <ElFormItem label="触发器">
             <ElSelect v-model="currentEvent.trigger">
-              <ElOption label="点击" value="onClick" />
+              <ElOption
+                v-for="trigger in triggerOptions"
+                :key="trigger.value"
+                :label="trigger.label"
+                :value="trigger.value"
+              />
             </ElSelect>
           </ElFormItem>
           <ElFormItem label="动作类型">

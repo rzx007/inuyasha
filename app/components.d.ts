@@ -101,6 +101,9 @@ declare module 'vue' {
     Toast: typeof import('./src/components/toast/Toast.vue')['default']
     Toolbar: typeof import('./src/components/Editor/Toolbar.vue')['default']
     VariablePicker: typeof import('./src/components/Editor/VariablePicker.vue')['default']
+    ZButton: typeof import('./src/components/Materials/z-button/ZButton.vue')['default']
+    ZCollapse: typeof import('./src/components/Materials/layout/ZCollapse.vue')['default']
+    ZTabs: typeof import('./src/components/Materials/layout/ZTabs.vue')['default']
   }
 }
 
@@ -195,4 +198,7 @@ declare global {
   const Toast: typeof import('./src/components/toast/Toast.vue')['default']
   const Toolbar: typeof import('./src/components/Editor/Toolbar.vue')['default']
   const VariablePicker: typeof import('./src/components/Editor/VariablePicker.vue')['default']
+  const ZButton: typeof import('./src/components/Materials/z-button/ZButton.vue')['default']
+  const ZCollapse: typeof import('./src/components/Materials/layout/ZCollapse.vue')['default']
+  const ZTabs: typeof import('./src/components/Materials/layout/ZTabs.vue')['default']
 }

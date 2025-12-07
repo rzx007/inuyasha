@@ -109,6 +109,11 @@ export interface ComponentMeta {
   propsSchema: ComponentPropSchema[]
   canNest?: boolean // 是否支持嵌套子组件
   display?: 'block' | 'inline-block' // 组件的显示类型
+  componentName?: string // Corresponding Vue component name (e.g., 'ElButton', 'ElInput')
+  triggers?: ComponentTrigger[] // 组件支持的事件触发器列表
+  slots?: ComponentSlot[] // Supported slots
+  methods?: ComponentMethod[] // Exposed methods
+  useDynamicSlots?: boolean // Whether to generate slots dynamically based on items prop
 }
 
 /**
@@ -123,5 +128,32 @@ export interface ComponentPropSchema {
   placeholder?: string
   description?: string
   bindable?: boolean //Mark if this property can be data-bound
+}
+
+/**
+ * 组件支持的触发器定义
+ */
+export interface ComponentTrigger {
+  label: string
+  value: string // e.g., 'onClick', 'onValueChange', 'onClose'
+  event: string // Vue native event name, e.g., 'click', 'update:modelValue'
+}
+
+/**
+ * 组件插槽定义
+ */
+export interface ComponentSlot {
+  name: string // Slot name, e.g., 'default', 'header'
+  label: string 
+  allowDrag?: boolean // Whether components can be dragged into this slot (for editor)
+}
+
+/**
+ * 组件方法定义
+ */
+export interface ComponentMethod {
+  name: string // Method name, e.g., 'validate', 'resetFields'
+  label: string 
+  params?: string[] // Parameter names
 }
 

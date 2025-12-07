@@ -8,6 +8,7 @@ export const formComponents: ComponentMeta[] = [
     icon: 'Type',
     category: 'form',
     display: 'inline-block',
+    componentName: 'ElInput',
     defaultProps: {
       label: 'Label',
       placeholder: 'Please input',
@@ -18,6 +19,11 @@ export const formComponents: ComponentMeta[] = [
     defaultModelValue: {
       value: 'hi', // 输入框的双向绑定值
     },
+    triggers: [
+      { label: '值改变', value: 'onValueChange', event: 'input' }, // ElInput emits 'input' or 'update:modelValue'
+      { label: '聚焦', value: 'onFocus', event: 'focus' },
+      { label: '失焦', value: 'onBlur', event: 'blur' },
+    ],
     propsSchema: [
       {
         key: 'label',
@@ -40,6 +46,7 @@ export const formComponents: ComponentMeta[] = [
     icon: 'MousePointer',
     category: 'form',
     display: 'inline-block',
+    componentName: 'ElSelect',
     defaultProps: {
       label: 'Label',
       options: [
@@ -53,6 +60,9 @@ export const formComponents: ComponentMeta[] = [
     defaultModelValue: {
       value: '', // 选择器的双向绑定值
     },
+    triggers: [
+      { label: '值改变', value: 'onValueChange', event: 'change' },
+    ],
     propsSchema: [
       {
         key: 'label',
@@ -76,6 +86,7 @@ export const formComponents: ComponentMeta[] = [
     icon: 'Calendar',
     category: 'form',
     display: 'inline-block',
+    componentName: 'ElDatePicker',
     defaultProps: {
       label: 'Label',
     },
@@ -85,6 +96,9 @@ export const formComponents: ComponentMeta[] = [
     defaultModelValue: {
       value: null, // 日期选择器的双向绑定值
     },
+    triggers: [
+      { label: '值改变', value: 'onValueChange', event: 'change' },
+    ],
     propsSchema: [
       {
         key: 'label',
