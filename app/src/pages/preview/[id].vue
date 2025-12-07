@@ -33,30 +33,8 @@ onMounted(async () => { // Make it async
         const config = JSON.parse(savedConfig)
         pageConfig.value = config
         // Also set it in the store so data sources and event engine can access it
+        // setPageConfig will also sync dataSources into the dataSourceStore (with default {} for compatibility)
         editorStore.setPageConfig(config)
-        
-        // 恢复数据源 (如果需要)
-        // 注意：目前 dataSourceStore 没有与 pageConfig 一起持久化，
-        // 假设在真实应用中，dataSources 应该从服务端加载或存储在 pageConfig 中。
-        // 这里我们假设 dataSources 已经在内存中 (因为是预览模式，通常在同一会话中)
-        // 但如果是在新标签页打开预览，dataSources 将丢失。
-        // 为了演示，我们需要将 dataSources 也保存到 localStorage。
-        
-        // 尝试从 localStorage 恢复 dataSources
-        const savedDataSources = localStorage.getItem(`data-sources-${pageId}`)
-        if (savedDataSources) {
-          try {
-             const sources = JSON.parse(savedDataSources)
-             // 批量添加到 store
-             Object.values(sources).forEach((ds: any) => {
-               if (ds.id) {
-                 dataSourceStore.updateDataSource(ds.id, ds)
-               } else {
-                 dataSourceStore.addDataSource(ds)
-               }
-             })
-          } catch(e) { console.error('Failed to load data sources', e) }
-        }
 
         // 自动触发 AutoFetch 的 API
         Object.values(dataSourceStore.dataSources).forEach(ds => {

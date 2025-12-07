@@ -7,6 +7,7 @@ import { ComponentType } from '@/types/component'
 import { findComponentById, removeComponentById } from '@/utils/tree'
 import { pageRootMeta } from '@/config/components/pageRoot'
 import { nanoid } from 'nanoid'
+import { useDataSourceStore } from '@/stores/dataSource'
 
 export const useEditorStore = defineStore('editor', () => {
   // 编辑器模式
@@ -43,6 +44,7 @@ export const useEditorStore = defineStore('editor', () => {
     name: '未命名页面',
     title: '新页面',
     rootComponent: createDefaultPageRoot(),
+    dataSources: {},
     createdAt: Date.now(),
     updatedAt: Date.now(),
   })
@@ -73,7 +75,16 @@ export const useEditorStore = defineStore('editor', () => {
     if (!config.rootComponent) {
       config.rootComponent = createDefaultPageRoot()
     }
+    // 确保 dataSources 字段存在（向后兼容）
+    if (!config.dataSources) {
+      config.dataSources = {}
+    }
+
     pageConfig.value = config
+
+    // 同步 dataSources 到 dataSourceStore
+    const dataSourceStore = useDataSourceStore()
+    dataSourceStore.importDataSources(config.dataSources)
   }
 
   // 获取 PageRoot

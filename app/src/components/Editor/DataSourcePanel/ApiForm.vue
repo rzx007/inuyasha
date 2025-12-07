@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import VariablePicker from '../VariablePicker.vue'
+import { resolveVariablesInConfig } from '@/utils/expressionEngine'
 import type { ApiDataSourceConfig, DataSource } from '@/types/dataSource'
 
 const props = defineProps<{
@@ -93,11 +94,23 @@ const handleSend = async () => {
   const startTime = Date.now()
 
   try {
-    let finalUrl = url.value
+    // 构造临时配置对象进行解析
+    const tempConfig: ApiDataSourceConfig = {
+      url: url.value,
+      method: method.value,
+      params: params.value,
+      headers: headers.value,
+      body: body.value
+    }
+    
+    // 使用工具函数解析变量
+    const config = resolveVariablesInConfig(tempConfig)
+
+    let finalUrl = config.url
 
     // Append params to URL for GET requests or if they exist
-    if (params.value.length > 0) {
-      const queryString = params.value
+    if (config.params && config.params.length > 0) {
+      const queryString = config.params
         .filter(p => p.key)
         .map(p => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`)
         .join('&')
@@ -108,14 +121,16 @@ const handleSend = async () => {
     }
 
     const headersObj: Record<string, string> = {}
-    headers.value.forEach(h => {
-      if (h.key) headersObj[h.key] = h.value
-    })
+    if (config.headers) {
+      config.headers.forEach(h => {
+        if (h.key) headersObj[h.key] = h.value
+      })
+    }
 
     const res = await fetch(finalUrl, {
-      method: method.value,
+      method: config.method,
       headers: headersObj,
-      body: ['GET', 'HEAD'].includes(method.value) ? undefined : body.value
+      body: ['GET', 'HEAD'].includes(config.method) ? undefined : config.body
     })
 
     const data = await res.json().catch(() => ({ error: 'Could not parse JSON' }))

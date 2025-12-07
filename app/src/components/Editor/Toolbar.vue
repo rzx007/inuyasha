@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { useEditorStore } from '@/stores/editor'
+import { useDataSourceStore } from '@/stores/dataSource'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
 import { Trash2, Play, Save, Bug } from 'lucide-vue-next'
 
 const editorStore = useEditorStore()
+const dataSourceStore = useDataSourceStore()
 const router = useRouter()
 
 const props = defineProps<{
@@ -21,6 +23,9 @@ function handlePreview() {
   const pageId = editorStore.pageConfig.id || 'current-page'
   editorStore.pageConfig.id = pageId
 
+  // Sync dataSources into pageConfig before saving
+  editorStore.pageConfig.dataSources = dataSourceStore.exportDataSources()
+
   // 2. Save the current config to localStorage
   localStorage.setItem(`page-config-${pageId}`, JSON.stringify(editorStore.pageConfig))
 
@@ -31,6 +36,8 @@ function handlePreview() {
 // 保存配置
 function handleSave() {
   const config = editorStore.pageConfig
+  // Sync dataSources into pageConfig before saving
+  config.dataSources = dataSourceStore.exportDataSources()
   localStorage.setItem('page-config', JSON.stringify(config))
   // 这里可以添加提示消息
   console.log('配置已保存', config)
@@ -39,9 +46,14 @@ function handleSave() {
 // 清空画布
 function handleClear() {
   if (confirm('确定要清空画布吗？')) {
+    const clearedRoot = {
+      ...editorStore.pageConfig.rootComponent,
+      children: [],
+    }
     editorStore.setPageConfig({
       ...editorStore.pageConfig,
-      components: [],
+      rootComponent: clearedRoot,
+      dataSources: {},
       updatedAt: Date.now(),
     })
   }

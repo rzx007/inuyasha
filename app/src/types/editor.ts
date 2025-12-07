@@ -3,6 +3,7 @@
  */
 
 import type { ComponentId, ComponentSchema } from './component'
+import type { DataSource, DataSourceId } from './dataSource'
 
 /**
  * 编辑器模式
@@ -38,6 +39,7 @@ export interface PageConfig {
   name: string
   title: string
   rootComponent: ComponentSchema
+  dataSources?: Record<DataSourceId, DataSource>
   createdAt: number
   updatedAt: number
 }

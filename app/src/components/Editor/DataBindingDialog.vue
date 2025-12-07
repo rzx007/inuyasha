@@ -104,7 +104,7 @@ const componentPropertyOptions = computed(() => {
   if (componentMeta?.defaultModelValue) {
     const modelValueOptions = Object.keys(componentMeta.defaultModelValue).map(key => ({
       label: key,
-      value: `modelValue.${key}`
+      value: key
     }))
     if (modelValueOptions.length > 0) {
       options.push({
@@ -117,7 +117,7 @@ const componentPropertyOptions = computed(() => {
   // Props 分组
   const propsOptions = Object.keys(component.props).map(key => ({
     label: key,
-    value: `props.${key}`
+    value: key
   }))
   if (propsOptions.length > 0) {
     options.push({
@@ -129,7 +129,7 @@ const componentPropertyOptions = computed(() => {
   // Style 分组
   const styleOptions = Object.keys(component.style).map(key => ({
     label: key,
-    value: `style.${key}`
+    value: key
   }))
   if (styleOptions.length > 0) {
     options.push({
@@ -168,7 +168,15 @@ watch(
         } else if (binding.type === 'component' && binding.componentId) {
           activeTab.value = 'componentState'
           selectedComponent.value = binding.componentId
-          selectedPropertyPath.value = binding.path || ''
+          
+          let simplifiedPath = binding.path || ''
+          // 兼容旧格式：去除前缀
+          simplifiedPath = simplifiedPath
+            .replace(/^modelValue\./, '')
+            .replace(/^props\./, '')
+            .replace(/^style\./, '')
+            
+          selectedPropertyPath.value = simplifiedPath
         }
       } else {
         // Reset if no binding
