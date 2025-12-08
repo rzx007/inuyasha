@@ -103,6 +103,7 @@ declare module 'vue' {
     VariablePicker: typeof import('./src/components/Editor/VariablePicker.vue')['default']
     ZButton: typeof import('./src/components/Materials/z-button/ZButton.vue')['default']
     ZCollapse: typeof import('./src/components/Materials/layout/ZCollapse.vue')['default']
+    ZRow: typeof import('./src/components/Materials/layout/ZRow.vue')['default']
     ZSelect: typeof import('./src/components/Materials/z-select/ZSelect.vue')['default']
     ZTabs: typeof import('./src/components/Materials/layout/ZTabs.vue')['default']
   }
@@ -201,6 +202,7 @@ declare global {
   const VariablePicker: typeof import('./src/components/Editor/VariablePicker.vue')['default']
   const ZButton: typeof import('./src/components/Materials/z-button/ZButton.vue')['default']
   const ZCollapse: typeof import('./src/components/Materials/layout/ZCollapse.vue')['default']
+  const ZRow: typeof import('./src/components/Materials/layout/ZRow.vue')['default']
   const ZSelect: typeof import('./src/components/Materials/z-select/ZSelect.vue')['default']
   const ZTabs: typeof import('./src/components/Materials/layout/ZTabs.vue')['default']
 }

@@ -51,18 +51,17 @@ export const layoutComponents: ComponentMeta[] = [
     category: 'layout',
     canNest: true,
     display: 'block',
-    componentName: 'ElRow',
+    componentName: 'ZRow',
+    useDynamicSlots: true,
     defaultProps: {
       gutter: 20,
-      children: [
-        { type: ComponentType.Col, span: 12 },
-        { type: ComponentType.Col, span: 12 },
+      items: [
+        { name: 'col-1', span: 12 },
+        { name: 'col-2', span: 12 },
       ],
     },
     defaultStyle: {},
-    slots: [
-      { name: 'default', label: 'Default', allowDrag: true }
-    ],
+    slots: [], // No static slots, use dynamic slots based on children
     propsSchema: [
       {
         key: 'gutter',
@@ -70,31 +69,40 @@ export const layoutComponents: ComponentMeta[] = [
         type: 'number',
         defaultValue: 20,
       },
-    ],
-  },
-  {
-    type: ComponentType.Col,
-    name: '栅格列',
-    icon: 'RectangleHorizontal',
-    category: 'layout',
-    canNest: true,
-    display: 'block',
-    componentName: 'ElCol',
-    defaultProps: {
-      span: 12,
-    },
-    defaultStyle: {
-      minHeight: '50px',
-    },
-    slots: [
-      { name: 'default', label: 'Default', allowDrag: true }
-    ],
-    propsSchema: [
       {
-        key: 'span',
-        label: '栅格占据的列数',
-        type: 'number',
-        defaultValue: 12,
+        key: 'justify',
+        label: '水平排列方式',
+        type: 'select',
+        defaultValue: 'start',
+        options: [
+          { label: '开始', value: 'start' },
+          { label: '结束', value: 'end' },
+          { label: '居中', value: 'center' },
+          { label: '均匀分布', value: 'space-around' },
+          { label: '两端对齐', value: 'space-between' },
+          { label: '均匀对齐', value: 'space-evenly' },
+        ],
+      },
+      {
+        key: 'align',
+        label: '垂直排列方式',
+        type: 'select',
+        defaultValue: 'top',
+        options: [
+          { label: '顶部', value: 'top' },
+          { label: '居中', value: 'middle' },
+          { label: '底部', value: 'bottom' },
+        ],
+      },
+      {
+        key: 'items',
+        label: '栅格列',
+        type: 'json',
+        defaultValue: [
+          { name: 'col-1', span: 12 },
+          { name: 'col-2', span: 12 },
+        ],
+        bindable: true,
       },
     ],
   },
