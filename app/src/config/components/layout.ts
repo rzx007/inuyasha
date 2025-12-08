@@ -202,7 +202,7 @@ export const layoutComponents: ComponentMeta[] = [
         type: 'select',
         defaultValue: 'card',
         options: [
-          { label: '线条', value: '' },
+          { label: '线条', value: 'line' },
           { label: '卡片', value: 'card' },
           { label: '边框卡片', value: 'border-card' },
         ],

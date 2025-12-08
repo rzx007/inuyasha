@@ -46,9 +46,10 @@ export const formComponents: ComponentMeta[] = [
     icon: 'MousePointer',
     category: 'form',
     display: 'inline-block',
-    componentName: 'ElSelect',
+    componentName: 'ZSelect',
     defaultProps: {
       label: 'Label',
+      clearable: true,
       options: [
         { label: 'Option 1', value: '1' },
         { label: 'Option 2', value: '2' },
