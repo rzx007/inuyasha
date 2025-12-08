@@ -5,7 +5,7 @@ import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
 import type { ComponentSchema } from '@/types/component'
 import { ComponentType } from '@/types/component'
-import { ElCard, ElStatistic, ElTable, ElTableColumn, ElOption } from 'element-plus'
+import { ElCard, ElStatistic,  ElOption } from 'element-plus'
 import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
@@ -85,14 +85,31 @@ function handleEvent(trigger: string) {
   }
 }
 
-// 表单组件的双向绑定值（默认使用 'value' 作为 key）
-const formValue = computed({
-  get: () => formStateStore.getComponentState(props.schema.id, 'value'),
-  set: value => {
-    formStateStore.setComponentState(props.schema.id, 'value', value)
-    // 触发值变化事件
-    handleEvent('onValueChange')
+// 动态计算所有双向绑定值
+const modelValueBindings = computed(() => {
+  const bindings: Record<string, any> = {}
+  if (componentMeta.value?.defaultModelValue) {
+    Object.keys(componentMeta.value.defaultModelValue).forEach(key => {
+      bindings[key] = formStateStore.getComponentState(props.schema.id, key)
+    })
   }
+  return bindings
+})
+
+// 动态计算所有双向绑定事件
+const modelValueEvents = computed(() => {
+  const events: Record<string, (value: any) => void> = {}
+  if (componentMeta.value?.defaultModelValue) {
+    Object.keys(componentMeta.value.defaultModelValue).forEach(key => {
+      console.log("🚀 ~ `update:${key}`:", `update:${key}`)
+      events[`update:${key}`] = (value: any) => {
+       
+        formStateStore.setComponentState(props.schema.id, key, value)
+        handleEvent('onValueChange')
+      }
+    })
+  }
+  return events
 })
 
 // 获取指定插槽的子组件
@@ -196,10 +213,9 @@ const dynamicSlotItems = computed(() => {
     <component
       v-if="needsModelValue"
       :is="componentMeta?.componentName"
-      v-bind="resolvedProps"
+      v-bind="{ ...resolvedProps, ...modelValueBindings }"
       :style="styleObject"
-      v-model="formValue"
-      v-on="dynamicEvents"
+      v-on="{ ...dynamicEvents, ...modelValueEvents }"
     >
       <!-- 动态插槽渲染 (Static definition from meta.slots) -->
       <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
@@ -367,21 +383,6 @@ const dynamicSlotItems = computed(() => {
       </template>
     </ElCard>
 
-    <!-- 表格组件 -->
-    <ElTable
-      v-else-if="schema.type === ComponentType.Table"
-      :data="resolvedProps.data || []"
-      :style="styleObject"
-      border
-      stripe
-    >
-      <ElTableColumn
-        v-for="col in resolvedProps.columns"
-        :key="col.prop"
-        :prop="col.prop"
-        :label="col.label"
-      />
-    </ElTable>
 
     <!-- 图表组件 -->
     <ChartRenderer

@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import VariablePicker from '../VariablePicker.vue'
 import { resolveVariablesInConfig } from '@/utils/expressionEngine'
 import type { ApiDataSourceConfig, DataSource } from '@/types/dataSource'
+import { useDataSourceStore } from '@/stores/dataSource'
 
 const props = defineProps<{
   open: boolean
@@ -28,6 +29,9 @@ const params = ref<{ id: string; key: string; value: string }[]>([])
 const headers = ref<{ id: string; key: string; value: string }[]>([])
 const body = ref('')
 const activeTab = ref('params')
+
+// Store
+const dataSourceStore = useDataSourceStore()
 
 // Variable Picker State
 const activePicker = ref<{ type: 'url' | 'body' | 'param' | 'header', index?: number, target?: HTMLElement } | null>(null)
@@ -92,6 +96,7 @@ const handleSend = async () => {
   loading.value = true
   response.value = null
   const startTime = Date.now()
+  let success = false
 
   try {
     // 构造临时配置对象进行解析
@@ -134,7 +139,8 @@ const handleSend = async () => {
     })
 
     const data = await res.json().catch(() => ({ error: 'Could not parse JSON' }))
-
+    success = res.ok
+    
     response.value = {
       status: res.status,
       statusText: res.statusText,
@@ -147,6 +153,10 @@ const handleSend = async () => {
       data: { error: err.message }
     }
   } finally {
+    // 测试成功且是已保存的数据源时，刷新 store 中的数据，方便画布立刻使用
+    if (success && props.api?.id) {
+      dataSourceStore.fetchDataSource(props.api.id)
+    }
     responseTime.value = Date.now() - startTime
     loading.value = false
   }

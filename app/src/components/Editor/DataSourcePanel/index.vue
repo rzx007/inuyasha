@@ -95,6 +95,7 @@ const handleSaveApi = (data: { name: string; config: ApiDataSourceConfig }) => {
 const handleRunTest = async (api: DataSource) => {
   const config = api.config as ApiDataSourceConfig
   try {
+    let success = false
     // Construct headers object
     const headers: Record<string, string> = {}
     if (Array.isArray(config.headers)) {
@@ -122,11 +123,16 @@ const handleRunTest = async (api: DataSource) => {
       body: ['GET', 'HEAD'].includes(config.method) ? undefined : config.body
     })
     const data = await res.json().catch(() => ({ error: 'Parse Error' }))
+    success = res.ok
     
     testResult.value = {
       status: res.status,
       statusText: res.statusText,
       data
+    }
+    // 测试成功后同步到 store，方便画布立即使用数据
+    if (success) {
+      await dataSourceStore.fetchDataSource(api.id)
     }
     showTestResult.value = true
   } catch (e: any) {

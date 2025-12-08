@@ -17,7 +17,7 @@ export const formComponents: ComponentMeta[] = [
       width: '300px',
     },
     defaultModelValue: {
-      value: 'hi', // 输入框的双向绑定值
+      modelValue: 'hi', // 输入框的双向绑定值
     },
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'input' }, // ElInput emits 'input' or 'update:modelValue'
@@ -59,7 +59,7 @@ export const formComponents: ComponentMeta[] = [
       width: '300px',
     },
     defaultModelValue: {
-      value: '', // 选择器的双向绑定值
+      modelValue: '', // 选择器的双向绑定值
     },
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'change' },
@@ -95,7 +95,7 @@ export const formComponents: ComponentMeta[] = [
       width: '300px',
     },
     defaultModelValue: {
-      value: null, // 日期选择器的双向绑定值
+      modelValue: null, // 日期选择器的双向绑定值
     },
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'change' },

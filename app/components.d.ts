@@ -105,6 +105,7 @@ declare module 'vue' {
     ZCollapse: typeof import('./src/components/Materials/layout/ZCollapse.vue')['default']
     ZRow: typeof import('./src/components/Materials/layout/ZRow.vue')['default']
     ZSelect: typeof import('./src/components/Materials/z-select/ZSelect.vue')['default']
+    ZTable: typeof import('./src/components/Materials/data/ZTable.vue')['default']
     ZTabs: typeof import('./src/components/Materials/layout/ZTabs.vue')['default']
   }
 }
@@ -204,5 +205,6 @@ declare global {
   const ZCollapse: typeof import('./src/components/Materials/layout/ZCollapse.vue')['default']
   const ZRow: typeof import('./src/components/Materials/layout/ZRow.vue')['default']
   const ZSelect: typeof import('./src/components/Materials/z-select/ZSelect.vue')['default']
+  const ZTable: typeof import('./src/components/Materials/data/ZTable.vue')['default']
   const ZTabs: typeof import('./src/components/Materials/layout/ZTabs.vue')['default']
 }
