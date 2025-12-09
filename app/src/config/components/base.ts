@@ -42,9 +42,7 @@ export const baseComponents: ComponentMeta[] = [
     canNest: false,
     display: 'inline-block',
     componentName: 'span', // Use span for simple text
-    defaultProps: {
-      content: '这是一段文本',
-    },
+    defaultProps: {},
     defaultStyle: {
       fontSize: '14px',
       color: '#333',
@@ -79,10 +77,7 @@ export const baseComponents: ComponentMeta[] = [
     canNest: false,
     display: 'inline-block',
     componentName: 'ZButton',
-    defaultProps: {
-      text: '按钮',
-      type: 'primary',
-    },
+    defaultProps: {},
     defaultStyle: {
       padding: '8px 16px',
     },

@@ -8,10 +8,7 @@ export const dataComponents: ComponentMeta[] = [
     icon: 'BarChart3',
     category: 'data',
     display: 'inline-block',
-    defaultProps: {
-      title: 'Title',
-      value: '123,456',
-    },
+    defaultProps: {},
     defaultStyle: {
       padding: '16px',
     },
@@ -39,15 +36,7 @@ export const dataComponents: ComponentMeta[] = [
     category: 'data',
     display: 'block',
     componentName: 'ZTable',
-    defaultProps: {
-      data: [
-        { date: '2016-05-03', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' },
-        { date: '2016-05-02', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' },
-        { date: '2016-05-04', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' },
-      ],
-      stripe: true,
-      border: true,
-    },
+    defaultProps: {},
     defaultStyle: {},
     propsSchema: [
       {
@@ -117,16 +106,7 @@ export const dataComponents: ComponentMeta[] = [
     icon: 'List',
     category: 'data',
     display: 'block',
-    defaultProps: {
-      header: 'List Header',
-      footer: 'List Footer',
-      bordered: true,
-      items: [
-        { title: 'List item 1', description: 'description 1' },
-        { title: 'List item 2', description: 'description 2' },
-        { title: 'List item 3', description: 'description 3' },
-      ],
-    },
+    defaultProps: {},
     defaultStyle: {},
     propsSchema: [
       {
@@ -153,7 +133,11 @@ export const dataComponents: ComponentMeta[] = [
         key: 'items',
         label: '列表项',
         type: 'json',
-        defaultValue: [],
+        defaultValue: [
+          { title: 'List item 1', description: 'description 1' },
+          { title: 'List item 2', description: 'description 2' },
+          { title: 'List item 3', description: 'description 3' },
+        ],
         bindable: true,
       },
     ],

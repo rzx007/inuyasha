@@ -101,12 +101,20 @@ export function createComponent(
   // 生成语义化标识
   const semanticId = generateSemanticId(type, existingComponents)
   
+  // 从propsSchema中提取defaultValue
+  const schemaDefaults = (meta.propsSchema || []).reduce((acc, prop) => {
+    if (prop.defaultValue !== undefined) {
+      acc[prop.key] = prop.defaultValue
+    }
+    return acc
+  }, {} as Record<string, any>)
+
   const component: ComponentSchema = {
     id: nanoid(),
     semanticId,
     type,
     label: meta.name,
-    props: { ...meta.defaultProps },
+    props: { ...schemaDefaults, ...meta.defaultProps },
     style: { ...meta.defaultStyle },
     ...overrides,
   }

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { Link } from '@element-plus/icons-vue'
-import { Copy, Sparkles, ChevronDown, Unlink } from 'lucide-vue-next'
+import { Copy, ChevronDown, Unlink } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -12,6 +12,7 @@ import {
   SelectItem
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { useComponentProps } from './useComponentProps'
 
 interface PropConfig {
@@ -91,20 +92,11 @@ function copyToClipboard(text: string) {
     <!-- Switch 特殊布局：Label 和 Control 在同一行 -->
     <div v-if="config.type === 'switch'" class="flex items-center justify-between py-1">
       <div class="text-xs font-medium text-slate-500">{{ config.label }}</div>
-      <button
-        @click="handleUpdate(!currentValue)"
-        :class="[
-          'relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
-          currentValue ? 'bg-primary-600' : 'bg-slate-200'
-        ]"
-      >
-        <span
-          :class="[
-            'inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform',
-            currentValue ? 'translate-x-[18px]' : 'translate-x-[2px]'
-          ]"
-        />
-      </button>
+      <Switch
+        :model-value="currentValue"
+        @update:model-value="handleUpdate"
+        :disabled="isBound"
+      />
     </div>
 
     <!-- 标准布局 -->
@@ -234,7 +226,7 @@ function copyToClipboard(text: string) {
           :value="isBound ? (bindingValue || '#000000') : (currentValue || '#000000')"
           :disabled="isBound"
           @input="e => handleUpdate((e.target as HTMLInputElement).value)"
-          class="opacity-0 absolute w-0 h-0"
+          class="opacity-0"
         />
       </div>
 
