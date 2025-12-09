@@ -107,6 +107,7 @@ export function resolveVariable(variablePath: string): any {
       comp = findComp(rootComp.children)
     }
     
+    console.log("🚀 ~ resolveVariable ~ comp:", comp)
     if (comp) {
         // 组件找到了，获取值
         const formStateStore = useFormStateStore()

@@ -49,6 +49,8 @@ export const dataComponents: ComponentMeta[] = [
           { prop: 'address', label: 'Address' },
         ],
         bindable: true,
+        vModel: true,
+        storeInProps: true,
       },
       {
         key: 'data',

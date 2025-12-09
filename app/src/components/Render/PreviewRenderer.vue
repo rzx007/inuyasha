@@ -3,6 +3,7 @@ import { computed, onMounted } from 'vue'
 import type { ComponentSchema } from '@/types/component'
 import { ComponentType } from '@/types/component'
 import { useComponentStore } from '@/stores/component'
+import { useEditorStore } from '@/stores/editor'
 import { ElCard, ElStatistic, ElOption } from 'element-plus'
 import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
@@ -14,15 +15,16 @@ interface Props {
 }
 const props = defineProps<Props>()
 const componentStore = useComponentStore()
+const editorStore = useEditorStore()
 const formStateStore = useFormStateStore()
 
 // 在组件挂载时初始化 vModel 属性
 onMounted(() => {
   const componentMeta = componentStore.getComponentMeta(props.schema.type)
   if (componentMeta?.propsSchema) {
-    // 为每个 vModel: true 的属性初始化值（如果还没有值的话）
+    // 为每个 vModel: true 且 storeInProps: false 的属性初始化值（如果还没有值的话）
     componentMeta.propsSchema
-      .filter(schema => schema.vModel)
+      .filter(schema => schema.vModel && !schema.storeInProps)
       .forEach(schema => {
         const existingValue = formStateStore.getComponentState(props.schema.id, schema.key)
         if (existingValue === undefined && schema.defaultValue !== undefined) {
@@ -106,7 +108,13 @@ const modelValueBindings = computed(() => {
     componentMeta.value.propsSchema
       .filter(schema => schema.vModel)
       .forEach(schema => {
-        bindings[schema.key] = formStateStore.getComponentState(props.schema.id, schema.key)
+        if (schema.storeInProps) {
+          // 从 resolvedProps 读取（已经处理了数据绑定）
+          bindings[schema.key] = resolvedProps.value[schema.key]
+        } else {
+          // 从 formStateStore 读取
+          bindings[schema.key] = formStateStore.getComponentState(props.schema.id, schema.key)
+        }
       })
   }
   return bindings
@@ -120,7 +128,15 @@ const modelValueEvents = computed(() => {
       .filter(schema => schema.vModel)
       .forEach(schema => {
         events[`update:${schema.key}`] = (value: any) => {
-          formStateStore.setComponentState(props.schema.id, schema.key, value)
+          if (schema.storeInProps) {
+            // 更新 ComponentSchema.props
+            editorStore.updateComponent(props.schema.id, {
+              props: { ...props.schema.props, [schema.key]: value }
+            })
+          } else {
+            // 更新 formStateStore
+            formStateStore.setComponentState(props.schema.id, schema.key, value)
+          }
           handleEvent('onValueChange')
         }
       })

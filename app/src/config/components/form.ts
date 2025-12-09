@@ -39,7 +39,7 @@ export const formComponents: ComponentMeta[] = [
         key: 'modelValue',
         label: '值',
         type: 'text',
-        defaultValue: 'hi',
+        defaultValue: '',
         vModel: true,
         bindable: true,
       },

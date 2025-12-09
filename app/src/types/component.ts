@@ -128,6 +128,7 @@ export interface ComponentPropSchema {
   description?: string
   bindable?: boolean //标记是否可以进行数据绑定
   vModel?: boolean //标记是否支持双向绑定
+  storeInProps?: boolean //当 vModel 为 true 时，标记是否存储在 props 中（而非 formStateStore）。有些组件的配置项在画布阶段可能需要双向绑定， 但是它发布时只是一个静态的配置
 }
 
 /**
