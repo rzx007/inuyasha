@@ -16,6 +16,12 @@ export const formComponents: ComponentMeta[] = [
     defaultStyle: {
       width: '300px',
     },
+    exposedMethods: [
+      { name: 'focus', label: '聚焦 (focus)' },
+      { name: 'blur', label: '失焦 (blur)' },
+      { name: 'select', label: '选择文本 (select)' },
+      { name: 'clear', label: '清空 (clear)' },
+    ],
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'input' }, // ElInput emits 'input' or 'update:modelValue'
       { label: '聚焦', value: 'onFocus', event: 'focus' },
@@ -63,6 +69,11 @@ export const formComponents: ComponentMeta[] = [
     defaultStyle: {
       width: '300px',
     },
+    exposedMethods: [
+      { name: 'focus', label: '聚焦 (focus)' },
+      { name: 'blur', label: '失焦 (blur)' },
+      { name: 'clear', label: '清空 (clear)' },
+    ],
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'change' },
     ],
@@ -104,6 +115,10 @@ export const formComponents: ComponentMeta[] = [
     defaultStyle: {
       width: '300px',
     },
+    exposedMethods: [
+      { name: 'focus', label: '聚焦 (focus)' },
+      { name: 'blur', label: '失焦 (blur)' },
+    ],
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'change' },
     ],

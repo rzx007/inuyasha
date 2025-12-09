@@ -4,15 +4,49 @@
 export interface EventBinding {
   id: string
   trigger: string
-  action: ActionConfig
+  /**
+   * List of actions to execute
+   */
+  actions?: ActionConfig[]
+  /**
+   * @deprecated Use actions instead
+   */
+  action?: ActionConfig
 }
 
 /**
  * Action Configuration
  */
 export interface ActionConfig {
-  type: 'updateProperty' | 'callDataSource' | 'showMessage'
-  config: UpdatePropertyActionConfig | CallDataSourceActionConfig | ShowMessageActionConfig
+  type: ActionType
+  config: ActionConfigMap[ActionType]
+}
+
+export type ActionType = 
+  | 'updateProperty' 
+  | 'callDataSource' 
+  | 'showMessage' 
+  | 'runScript' 
+  | 'controlComponent' 
+  | 'goToUrl' 
+  | 'navigateTo'
+  | 'copyToClipboard'
+  | 'setGlobalData'
+  | 'setLocalStorage'
+  | 'download'
+
+export interface ActionConfigMap {
+  updateProperty: UpdatePropertyActionConfig
+  callDataSource: CallDataSourceActionConfig
+  showMessage: ShowMessageActionConfig
+  runScript: RunScriptActionConfig
+  controlComponent: ControlComponentActionConfig
+  goToUrl: GoToUrlActionConfig
+  navigateTo: NavigateToActionConfig
+  copyToClipboard: CopyToClipboardActionConfig
+  setGlobalData: SetGlobalDataActionConfig
+  setLocalStorage: SetLocalStorageActionConfig
+  download: DownloadActionConfig
 }
 
 export interface UpdatePropertyActionConfig {
@@ -29,4 +63,45 @@ export interface CallDataSourceActionConfig {
 export interface ShowMessageActionConfig {
   message: string
   messageType: 'success' | 'warning' | 'error'
+}
+
+export interface RunScriptActionConfig {
+  code: string // JavaScript code to execute
+}
+
+export interface ControlComponentActionConfig {
+  componentId: string
+  method: string
+  args?: any[]
+}
+
+export interface GoToUrlActionConfig {
+  url: string
+  newTab?: boolean
+}
+
+export interface NavigateToActionConfig {
+  path?: string
+  name?: string
+  params?: Record<string, any>
+  query?: Record<string, any>
+}
+
+export interface CopyToClipboardActionConfig {
+  text: string
+}
+
+export interface SetGlobalDataActionConfig {
+  key: string
+  value: any
+}
+
+export interface SetLocalStorageActionConfig {
+  key: string
+  value: any
+}
+
+export interface DownloadActionConfig {
+  url: string
+  filename?: string
 }

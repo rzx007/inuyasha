@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed, onMounted } from 'vue'
+import { defineAsyncComponent, computed, onMounted, onUnmounted, ref } from 'vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
@@ -10,6 +10,7 @@ import ChartRenderer from './widgets/ChartRenderer.vue'
 import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
 import { useFormStateStore } from '@/stores/formState'
+import { useComponentRegistry } from '@/stores/componentRegistry'
 
 // 循环引用问题：DynamicRenderer 引用 EditorComponentWrapper，反之亦然
 // 使用 defineAsyncComponent 解决
@@ -25,8 +26,12 @@ const props = defineProps<Props>()
 const editorStore = useEditorStore()
 const componentStore = useComponentStore()
 const formStateStore = useFormStateStore()
+const componentRegistry = useComponentRegistry()
 
-// 在组件挂载时初始化 vModel 属性
+// 组件实例引用
+const componentRef = ref(null)
+
+// 在组件挂载时初始化 vModel 属性，并注册组件实例
 onMounted(() => {
   const componentMeta = componentStore.getComponentMeta(props.schema.type)
   if (componentMeta?.propsSchema) {
@@ -40,6 +45,15 @@ onMounted(() => {
         }
       })
   }
+
+  // 注册组件实例
+  if (componentRef.value) {
+    componentRegistry.register(props.schema.id, componentRef.value)
+  }
+})
+
+onUnmounted(() => {
+  componentRegistry.unregister(props.schema.id)
 })
 
 // Create a computed version of the props that resolves any bindings
@@ -228,6 +242,7 @@ const dynamicSlotItems = computed(() => {
     <!-- 需要双向绑定的组件（表单组件） -->
     <component
       v-if="needsModelValue"
+      ref="componentRef"
       :is="componentMeta?.componentName"
       v-bind="{ ...resolvedProps, ...modelValueBindings }"
       :style="styleObject"
@@ -286,6 +301,7 @@ const dynamicSlotItems = computed(() => {
     <!-- 不需要双向绑定的组件 -->
     <component
       v-else
+      ref="componentRef"
       :is="componentMeta?.componentName"
       v-bind="resolvedProps"
       :style="styleObject"
@@ -371,6 +387,7 @@ const dynamicSlotItems = computed(() => {
     <!-- 统计数值组件 -->
     <ElStatistic
       v-if="schema.type === ComponentType.Statistic"
+      ref="componentRef"
       :title="resolvedProps.title || 'Title'"
       :value="resolvedProps.value || 0"
       :style="styleObject"
@@ -379,6 +396,7 @@ const dynamicSlotItems = computed(() => {
     <!-- 列表组件 -->
     <ElCard
       v-else-if="schema.type === ComponentType.List"
+      ref="componentRef"
       class="component-list"
       :style="styleObject"
     >
@@ -403,6 +421,7 @@ const dynamicSlotItems = computed(() => {
     <!-- 图表组件 -->
     <ChartRenderer
       v-else-if="schema.type === ComponentType.Chart"
+      ref="componentRef"
       :option="resolvedProps.option || {}"
       :style="styleObject"
     />

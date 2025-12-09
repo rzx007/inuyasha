@@ -158,6 +158,7 @@ declare global {
   const useClipboardItems: typeof import('@vueuse/core').useClipboardItems
   const useCloned: typeof import('@vueuse/core').useCloned
   const useColorMode: typeof import('@vueuse/core').useColorMode
+  const useComponentRegistry: typeof import('./src/stores/componentRegistry').useComponentRegistry
   const useComponentStore: typeof import('./src/stores/component').useComponentStore
   const useConfirmDialog: typeof import('@vueuse/core').useConfirmDialog
   const useCountdown: typeof import('@vueuse/core').useCountdown

@@ -81,6 +81,10 @@ export const baseComponents: ComponentMeta[] = [
     defaultStyle: {
       padding: '8px 16px',
     },
+    exposedMethods: [
+      { name: 'focus', label: '聚焦 (focus)' },
+      { name: 'click', label: '触发点击 (click)' },
+    ],
     triggers: [
       { label: '点击', value: 'onClick', event: 'click' },
     ],

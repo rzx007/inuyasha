@@ -112,6 +112,7 @@ export interface ComponentMeta {
   triggers?: ComponentTrigger[] // 组件支持的事件触发器列表
   slots?: ComponentSlot[] // 插槽定义
   methods?: ComponentMethod[] // 组件方法
+  exposedMethods?: Array<{ name: string; label: string }> // 可供控制动作调用的方法
   useDynamicSlots?: boolean // 是否根据 items 属性动态生成插槽 (e.g: ElTabs, ElCollapse)
 }
 

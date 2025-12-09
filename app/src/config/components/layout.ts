@@ -20,7 +20,7 @@ export const layoutComponents: ComponentMeta[] = [
       backgroundColor: '#fff',
     },
     slots: [
-      { name: 'header', label: 'Header', allowDrag: false },
+      { name: 'header', label: 'Header', allowDrag: true },
       { name: 'default', label: 'Default', allowDrag: true }
     ],
     propsSchema: [
