@@ -101,11 +101,13 @@ const componentPropertyOptions = computed(() => {
   }> = []
   
   // ModelValue 分组
-  if (componentMeta?.defaultModelValue) {
-    const modelValueOptions = Object.keys(componentMeta.defaultModelValue).map(key => ({
-      label: key,
-      value: key
-    }))
+  if (componentMeta?.propsSchema) {
+    const modelValueOptions = componentMeta.propsSchema
+      .filter(schema => schema.vModel)
+      .map(schema => ({
+        label: schema.key,
+        value: schema.key
+      }))
     if (modelValueOptions.length > 0) {
       options.push({
         label: 'ModelValue (双向绑定)',

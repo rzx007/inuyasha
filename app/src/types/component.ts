@@ -105,15 +105,14 @@ export interface ComponentMeta {
   category: 'base' | 'layout' | 'data' | 'form'
   defaultProps: ComponentProps
   defaultStyle: ComponentStyle
-  defaultModelValue?: Record<string, any> // 双向绑定的默认值配置，支持多个响应式属性
   propsSchema: ComponentPropSchema[]
   canNest?: boolean // 是否支持嵌套子组件
   display?: 'block' | 'inline-block' // 组件的显示类型
-  componentName?: string // Corresponding Vue component name (e.g., 'ElButton', 'ElInput')
+  componentName?: string //  对应的 Vue 组件名称 (e.g：'ElButton', 'ElInput')
   triggers?: ComponentTrigger[] // 组件支持的事件触发器列表
-  slots?: ComponentSlot[] // Supported slots
-  methods?: ComponentMethod[] // Exposed methods
-  useDynamicSlots?: boolean // Whether to generate slots dynamically based on items prop
+  slots?: ComponentSlot[] // 插槽定义
+  methods?: ComponentMethod[] // 组件方法
+  useDynamicSlots?: boolean // 是否根据 items 属性动态生成插槽 (e.g: ElTabs, ElCollapse)
 }
 
 /**
@@ -127,7 +126,8 @@ export interface ComponentPropSchema {
   options?: Array<{ label: string; value: any }>
   placeholder?: string
   description?: string
-  bindable?: boolean //Mark if this property can be data-bound
+  bindable?: boolean //标记是否可以进行数据绑定
+  vModel?: boolean //标记是否支持双向绑定
 }
 
 /**
@@ -135,25 +135,25 @@ export interface ComponentPropSchema {
  */
 export interface ComponentTrigger {
   label: string
-  value: string // e.g., 'onClick', 'onValueChange', 'onClose'
-  event: string // Vue native event name, e.g., 'click', 'update:modelValue'
+  value: string // 事件名称，如：'onClick', 'onValueChange', 'onClose'
+  event: string // 原生事件名称，如：'click', 'update:modelValue'
 }
 
 /**
  * 组件插槽定义
  */
 export interface ComponentSlot {
-  name: string // Slot name, e.g., 'default', 'header'
+  name: string // 插槽名称，如：'default', 'header'
   label: string 
-  allowDrag?: boolean // Whether components can be dragged into this slot (for editor)
+  allowDrag?: boolean // 是否允许拖拽组件到此插槽 (用于编辑器)
 }
 
 /**
  * 组件方法定义
  */
 export interface ComponentMethod {
-  name: string // Method name, e.g., 'validate', 'resetFields'
+  name: string // 方法名称，如：'validate', 'resetFields'
   label: string 
-  params?: string[] // Parameter names
+  params?: string[] // 参数名称
 }
 

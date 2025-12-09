@@ -96,7 +96,7 @@ function cloneComponent(meta: ComponentMeta) {
           <div
             v-for="meta in category.components"
             :key="meta.type"
-            class="component-item flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
+            class="user-select-none flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
           >
             <div
               class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
@@ -113,8 +113,4 @@ function cloneComponent(meta: ComponentMeta) {
   </div>
 </template>
 
-<style scoped>
-.component-item {
-  user-select: none;
-}
-</style>
+

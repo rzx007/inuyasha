@@ -16,17 +16,19 @@ const props = defineProps<Props>()
 const componentStore = useComponentStore()
 const formStateStore = useFormStateStore()
 
-// 在组件挂载时初始化 defaultModelValue
+// 在组件挂载时初始化 vModel 属性
 onMounted(() => {
   const componentMeta = componentStore.getComponentMeta(props.schema.type)
-  if (componentMeta?.defaultModelValue) {
-    // 为每个 defaultModelValue 中的 key 初始化值（如果还没有值的话）
-    Object.entries(componentMeta.defaultModelValue).forEach(([key, defaultValue]) => {
-      const existingValue = formStateStore.getComponentState(props.schema.id, key)
-      if (existingValue === undefined) {
-        formStateStore.setComponentState(props.schema.id, key, defaultValue)
-      }
-    })
+  if (componentMeta?.propsSchema) {
+    // 为每个 vModel: true 的属性初始化值（如果还没有值的话）
+    componentMeta.propsSchema
+      .filter(schema => schema.vModel)
+      .forEach(schema => {
+        const existingValue = formStateStore.getComponentState(props.schema.id, schema.key)
+        if (existingValue === undefined && schema.defaultValue !== undefined) {
+          formStateStore.setComponentState(props.schema.id, schema.key, schema.defaultValue)
+        }
+      })
   }
 })
 
@@ -100,10 +102,12 @@ const dynamicEvents = computed(() => {
 // 动态计算所有双向绑定值
 const modelValueBindings = computed(() => {
   const bindings: Record<string, any> = {}
-  if (componentMeta.value?.defaultModelValue) {
-    Object.keys(componentMeta.value.defaultModelValue).forEach(key => {
-      bindings[key] = formStateStore.getComponentState(props.schema.id, key)
-    })
+  if (componentMeta.value?.propsSchema) {
+    componentMeta.value.propsSchema
+      .filter(schema => schema.vModel)
+      .forEach(schema => {
+        bindings[schema.key] = formStateStore.getComponentState(props.schema.id, schema.key)
+      })
   }
   return bindings
 })
@@ -111,13 +115,15 @@ const modelValueBindings = computed(() => {
 // 动态计算所有双向绑定事件
 const modelValueEvents = computed(() => {
   const events: Record<string, (value: any) => void> = {}
-  if (componentMeta.value?.defaultModelValue) {
-    Object.keys(componentMeta.value.defaultModelValue).forEach(key => {
-      events[`update:${key}`] = (value: any) => {
-        formStateStore.setComponentState(props.schema.id, key, value)
-        handleEvent('onValueChange')
-      }
-    })
+  if (componentMeta.value?.propsSchema) {
+    componentMeta.value.propsSchema
+      .filter(schema => schema.vModel)
+      .forEach(schema => {
+        events[`update:${schema.key}`] = (value: any) => {
+          formStateStore.setComponentState(props.schema.id, schema.key, value)
+          handleEvent('onValueChange')
+        }
+      })
   }
   return events
 })
@@ -125,8 +131,8 @@ const modelValueEvents = computed(() => {
 // 是否使用 componentName 渲染
 const canUseDynamicRender = computed(() => !!componentMeta.value?.componentName)
 
-// 是否需要双向绑定（根据 defaultModelValue 判断）
-const needsModelValue = computed(() => !!componentMeta.value?.defaultModelValue)
+// 是否需要双向绑定（根据 propsSchema 中是否存在 vModel 属性判断）
+const needsModelValue = computed(() => componentMeta.value?.propsSchema?.some(schema => schema.vModel) || false)
 
 // 计算动态插槽项
 const dynamicSlotItems = computed(() => {

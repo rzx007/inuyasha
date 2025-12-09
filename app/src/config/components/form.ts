@@ -16,9 +16,6 @@ export const formComponents: ComponentMeta[] = [
     defaultStyle: {
       width: '300px',
     },
-    defaultModelValue: {
-      modelValue: 'hi', // 输入框的双向绑定值
-    },
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'input' }, // ElInput emits 'input' or 'update:modelValue'
       { label: '聚焦', value: 'onFocus', event: 'focus' },
@@ -37,6 +34,14 @@ export const formComponents: ComponentMeta[] = [
         label: '占位提示',
         type: 'text',
         defaultValue: 'Please input',
+      },
+      {
+        key: 'modelValue',
+        label: '值',
+        type: 'text',
+        defaultValue: 'hi',
+        vModel: true,
+        bindable: true,
       },
     ],
   },
@@ -58,9 +63,6 @@ export const formComponents: ComponentMeta[] = [
     defaultStyle: {
       width: '300px',
     },
-    defaultModelValue: {
-      modelValue: '', // 选择器的双向绑定值
-    },
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'change' },
     ],
@@ -79,6 +81,14 @@ export const formComponents: ComponentMeta[] = [
         defaultValue: [],
         bindable: true,
       },
+      {
+        key: 'modelValue',
+        label: '选中值',
+        type: 'text',
+        defaultValue: '',
+        vModel: true,
+        bindable: true,
+      },
     ],
   },
   {
@@ -94,9 +104,6 @@ export const formComponents: ComponentMeta[] = [
     defaultStyle: {
       width: '300px',
     },
-    defaultModelValue: {
-      modelValue: null, // 日期选择器的双向绑定值
-    },
     triggers: [
       { label: '值改变', value: 'onValueChange', event: 'change' },
     ],
@@ -106,6 +113,14 @@ export const formComponents: ComponentMeta[] = [
         label: '标签',
         type: 'text',
         defaultValue: 'Label',
+        bindable: true,
+      },
+      {
+        key: 'modelValue',
+        label: '选中日期',
+        type: 'text',
+        defaultValue: null,
+        vModel: true,
         bindable: true,
       },
     ],
