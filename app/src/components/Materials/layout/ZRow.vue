@@ -21,6 +21,10 @@ export interface Props {
   align?: 'top' | 'middle' | 'bottom'
 }
 
+defineOptions({
+  name: 'ZRow'
+})
+
 const props = withDefaults(defineProps<Props>(), {
   items: () => [],
   gutter: 0,
