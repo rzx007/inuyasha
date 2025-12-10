@@ -35,6 +35,7 @@
     "modern-monaco": "^0.3.2",
     "nanoid": "^5.1.6",
     "pinia": "^3.0.4",
+    "react-dnd-html5-backend": "^16.0.1",
     "reka-ui": "^2.6.1",
     "shiki": "^3.17.1",
     "tailwind-merge": "^3.4.0",
@@ -43,6 +44,7 @@
     "vue": "^3.5.22",
     "vue-codemirror6": "^1.4.1",
     "vue-router": "^4.6.3",
+    "vue3-dnd": "^2.1.0",
     "zod": "3.25.76"
   },
   "devDependencies": {

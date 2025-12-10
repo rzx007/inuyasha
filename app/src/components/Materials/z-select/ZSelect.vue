@@ -14,7 +14,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
+  <div class="inline-flex items-center gap-2">
     <span class="text-sm text-gray-500  whitespace-nowrap">{{ label }}</span>
     <ElSelect v-bind="$attrs" class="w-full">
       <ElOption

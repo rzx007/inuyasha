@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed, onMounted, onUnmounted, ref } from 'vue'
-import { VueDraggable } from 'vue-draggable-plus'
+import { defineAsyncComponent, computed, onMounted, onUnmounted, ref, defineComponent, h } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
 import type { ComponentSchema } from '@/types/component'
@@ -11,6 +10,8 @@ import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
 import { useFormStateStore } from '@/stores/formState'
 import { useComponentRegistry } from '@/stores/componentRegistry'
+import { useDrop, type DropTargetMonitor } from 'vue3-dnd'
+import { DndTypes, type DragItem } from '@/types/dnd'
 
 // 循环引用问题：DynamicRenderer 引用 EditorComponentWrapper，反之亦然
 // 使用 defineAsyncComponent 解决
@@ -149,35 +150,96 @@ const modelValueEvents = computed(() => {
 })
 
 // 获取指定插槽的子组件
-function getSlotChildren(slotName: string) {
+function getSlotChildren(slotName?: string) {
+  if (!slotName) {
+    // 如果没有指定 slot，返回所有没有 _slot 属性的子组件 (用于 PageRoot 或 默认 slot)
+    return props.schema.children?.filter(child => !child.props?._slot) || []
+  }
   return props.schema.children?.filter(child => child.props?._slot === slotName) || []
 }
 
-// 更新指定插槽的子组件
-function updateSlotChildren(slotName: string, newChildren: ComponentSchema[]) {
-  // 1. 保留不属于当前 slot 的组件
-  const otherChildren =
-    props.schema.children?.filter(child => child.props?._slot !== slotName) || []
+// 拖拽处理函数：处理新组件添加
+function handleDrop(item: DragItem, monitor: DropTargetMonitor, slotName?: string) {
+  // 防止嵌套组件重复处理
+  // 如果子组件已经处理了 drop 事件，父组件就不再处理
+  if (monitor.didDrop()) {
+    return
+  }
 
-  // 2. 标记新组件
-  const updatedNewChildren = newChildren.map(child => {
-    // 如果已经是当前 slot，直接返回
-    if (child.props?._slot === slotName) return child
-    // 否则（新拖入的，或从其他 slot 移过来的），更新 _slot
-    return {
-      ...child,
-      props: {
-        ...child.props,
-        _slot: slotName
+  // 1. 处理新组件 (COMPONENT)
+  if (item.type === DndTypes.COMPONENT) {
+    const { meta, cloneFn } = item
+    if (meta && cloneFn) {
+      const newComponent = cloneFn(meta)
+      if (newComponent) {
+        // 如果指定了 slot，设置 _slot 属性
+        if (slotName) {
+          newComponent.props = {
+            ...newComponent.props,
+            _slot: slotName
+          }
+        }
+        
+        // 使用 store 的 addComponent 方法，默认添加到末尾
+        editorStore.addComponent(newComponent, props.schema.id)
       }
     }
-  })
+    return { dropped: true }
+  }
 
-  // 3. 更新组件
-  editorStore.updateComponent(props.schema.id, {
-    children: [...otherChildren, ...updatedNewChildren]
-  })
+  // 2. 处理已存在组件排序/移动 (EXISTING_COMPONENT)
+  if (item.type === DndTypes.EXISTING_COMPONENT) {
+    const draggedId = item.id
+    if (!draggedId) return
+    
+    // 移动到容器末尾
+    editorStore.moveComponent(draggedId, props.schema.id, undefined, slotName)
+    
+    return { dropped: true }
+  }
 }
+
+// 封装一个 DropTarget 组件，简化模板中的重复代码
+const DropTargetArea = defineComponent({
+  name: 'DropTargetArea',
+  props: {
+    slotName: {
+      type: String,
+      default: undefined
+    },
+    customClass: {
+      type: [String, Object, Array],
+      default: ''
+    },
+    list: {
+      type: Array,
+      default: () => []
+    }
+  },
+  setup(props, { slots }) {
+    const [collected, drop] = useDrop(() => ({
+      accept: [DndTypes.COMPONENT, DndTypes.EXISTING_COMPONENT],
+      drop: (item: DragItem, monitor) => handleDrop(item, monitor, props.slotName),
+      collect: (monitor) => ({
+        isOver: monitor.isOver({ shallow: true }), // 仅当鼠标直接悬停在当前容器时高亮，避免父级同时高亮
+        canDrop: monitor.canDrop(),
+      }),
+    }))
+
+    return () => {
+      return h('div', {
+        ref: drop,
+        class: [
+          props.customClass,
+          collected.value.isOver ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
+        ]
+      }, [
+        slots.default ? slots.default() : null,
+        slots.footer ? slots.footer() : null
+      ])
+    }
+  }
+})
 
 const styleObject = computed(() => resolvedStyle.value)
 
@@ -222,17 +284,19 @@ const dynamicSlotItems = computed(() => {
 
 <template>
   <!-- PageRoot 组件 (特殊处理，始终作为顶级容器) -->
-  <VueDraggable
+  <DropTargetArea
     v-if="schema.type === ComponentType.PageRoot"
-    v-model="children"
-    group="components"
-    :animation="200"
-    handle=".drag-handle"
-    item-key="id"
+    :list="children"
+    class="page-root min-h-full p-1 border border-dashed"
     :style="styleObject"
-    class="page-root min-h-full"
   >
-    <EditorComponentWrapper v-for="child in children" :key="child.id" :schema="child" />
+    <EditorComponentWrapper 
+      v-for="(child, index) in children" 
+      :key="child.id" 
+      :schema="child" 
+      :index="index"
+      :parent-id="schema.id"
+    />
     <template #footer>
       <div
         v-if="children.length === 0"
@@ -241,7 +305,7 @@ const dynamicSlotItems = computed(() => {
         将组件拖到此处
       </div>
     </template>
-  </VueDraggable>
+  </DropTargetArea>
 
   <!-- 动态渲染部分 -->
   <template v-else-if="canUseDynamicRender">
@@ -256,22 +320,20 @@ const dynamicSlotItems = computed(() => {
     >
       <!-- 动态插槽渲染 (Static definition from meta.slots) -->
       <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
-        <!-- 如果允许拖拽，渲染 VueDraggable -->
-        <VueDraggable
+        <!-- 如果允许拖拽，渲染 DropTargetArea -->
+        <DropTargetArea
           v-if="slot.allowDrag"
-          :model-value="getSlotChildren(slot.name)"
-          @update:model-value="updateSlotChildren(slot.name, $event)"
-          group="components"
-          :animation="200"
-          handle=".drag-handle"
-          item-key="id"
+          :slot-name="slot.name"
+          :list="getSlotChildren(slot.name)"
           class="min-h-[50px] p-1 border border-dashed border-gray-300 bg-gray-50/50"
           :class="{ 'flex flex-wrap': schema.type === ComponentType.Row }"
         >
           <EditorComponentWrapper
-            v-for="child in getSlotChildren(slot.name)"
+            v-for="(child, index) in getSlotChildren(slot.name)"
             :key="child.id"
             :schema="child"
+            :index="index"
+            :parent-id="schema.id"
           />
           <template #footer>
             <div
@@ -281,14 +343,16 @@ const dynamicSlotItems = computed(() => {
               拖拽组件至此
             </div>
           </template>
-        </VueDraggable>
+        </DropTargetArea>
 
         <!-- 不允许拖拽 -->
         <div v-else>
           <EditorComponentWrapper
-            v-for="child in getSlotChildren(slot.name)"
+            v-for="(child, index) in getSlotChildren(slot.name)"
             :key="child.id"
             :schema="child"
+            :index="index"
+            :parent-id="schema.id"
           />
         </div>
       </template>
@@ -315,23 +379,20 @@ const dynamicSlotItems = computed(() => {
     >
       <!-- 动态插槽渲染 (Static definition from meta.slots) -->
       <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
-        <!-- ... (existing logic for static slots) ... -->
-        <!-- 如果允许拖拽，渲染 VueDraggable -->
-        <VueDraggable
+        <!-- 如果允许拖拽，渲染 DropTargetArea -->
+        <DropTargetArea
           v-if="slot.allowDrag"
-          :model-value="getSlotChildren(slot.name)"
-          @update:model-value="updateSlotChildren(slot.name, $event)"
-          group="components"
-          :animation="200"
-          handle=".drag-handle"
-          item-key="id"
+          :slot-name="slot.name"
+          :list="getSlotChildren(slot.name)"
           class="min-h-[50px] p-1 border border-dashed border-gray-300 bg-gray-50/50"
           :class="{ 'flex flex-wrap': schema.type === ComponentType.Row }"
         >
           <EditorComponentWrapper
-            v-for="child in getSlotChildren(slot.name)"
+            v-for="(child, index) in getSlotChildren(slot.name)"
             :key="child.id"
             :schema="child"
+            :index="index"
+            :parent-id="schema.id"
           />
           <template #footer>
             <div
@@ -341,34 +402,23 @@ const dynamicSlotItems = computed(() => {
               拖拽组件至此
             </div>
           </template>
-        </VueDraggable>
-
-        <!-- 不允许拖拽 -->
-        <div v-else>
-          <EditorComponentWrapper
-            v-for="child in getSlotChildren(slot.name)"
-            :key="child.id"
-            :schema="child"
-          />
-        </div>
+        </DropTargetArea>
       </template>
 
       <!-- 动态插槽渲染 (Dynamic generation from props.items) -->
       <template v-for="item in dynamicSlotItems" :key="item.name" #[item.name]>
         <!-- 动态插槽默认允许拖拽 (通常是内容区域) -->
-        <VueDraggable
-          :model-value="getSlotChildren(item.name)"
-          @update:model-value="updateSlotChildren(item.name, $event)"
-          group="components"
-          :animation="200"
-          handle=".drag-handle"
-          item-key="id"
+        <DropTargetArea
+          :slot-name="item.name"
+          :list="getSlotChildren(item.name)"
           class="min-h-[50px] p-1 border border-dashed border-gray-300 bg-gray-50/50"
         >
           <EditorComponentWrapper
-            v-for="child in getSlotChildren(item.name)"
+            v-for="(child, index) in getSlotChildren(item.name)"
             :key="child.id"
             :schema="child"
+            :index="index"
+            :parent-id="schema.id"
           />
           <template #footer>
             <div
@@ -378,7 +428,7 @@ const dynamicSlotItems = computed(() => {
               拖拽组件至此
             </div>
           </template>
-        </VueDraggable>
+        </DropTargetArea>
       </template>
 
       <!-- 文本内容特殊处理 -->

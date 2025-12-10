@@ -1,12 +1,13 @@
-## 拖拽渲染逻辑详解
+## 拖拽渲染逻辑详解 (Vue3-DnD 版)
 
 ### 整体架构
 
 流程分为三个阶段：
 
-1. 组件面板（ComponentPanel）— 拖拽源
-2. 画布（Canvas）— 拖拽目标
+1. 组件面板（ComponentPanel）— 拖拽源 (Drag Source)
+2. 画布（Canvas/DynamicRenderer）— 拖拽目标 (Drop Target)
 3. 组件注册系统（componentRegistry）— 组件创建与 ID 生成
+4. 编辑器状态管理（EditorStore）— 数据更新的核心
 
 ---
 
@@ -14,174 +15,113 @@
 
 #### 关键配置
 
-```vue
-<VueDraggable
-  v-model="baseComponents"
-  :sort="false"                    // 禁止排序（组件库不需要排序）
-  :group="{ name: 'components', pull: 'clone', put: false }"
-  :clone="cloneComponent"          // 克隆函数
-  item-key="type"
->
+使用 `vue3-dnd` 的 `useDrag` Hook：
+
+```typescript
+const [collected, dragSource] = useDrag(() => ({
+  type: DndTypes.COMPONENT, // 类型标识：新组件
+  item: { 
+    type: DndTypes.COMPONENT, 
+    meta: props.meta,
+    cloneFn: cloneComponent // 传递克隆函数，在 Drop 时调用
+  },
+  collect: (monitor) => ({
+    isDragging: monitor.isDragging(),
+  }),
+}))
 ```
 
-- `group: { name: 'components' }`：与画布使用同一组名，允许跨区域拖拽
-- `pull: 'clone'`：拖出时克隆，原列表不变
-- `put: false`：不允许放入，组件库只作为源
-- `sort: false`：禁止排序
+- **Drag Source**: 每个组件卡片都是一个拖拽源。
+- **Payload**: 携带 `ComponentMeta` 和 `cloneFn`。
 
 #### 克隆函数
 
 ```typescript
 function cloneComponent(meta: ComponentMeta) {
-  const existingComponents = editorStore.pageConfig.components
+  const rootComponent = editorStore.pageConfig.rootComponent
+  const existingComponents = rootComponent.children || []
   return createComponent(meta.type, undefined, existingComponents)
 }
 ```
 
-作用：将 `ComponentMeta` 转换为 `ComponentSchema`（实例），并生成唯一 ID 和语义化 ID。
-
 ---
 
-### 2. 画布（Canvas.vue）— 拖拽目标
+### 2. 画布（DynamicRenderer.vue）— 拖拽目标
 
 #### 关键配置
 
-```vue
-<VueDraggable
-  v-model="components"
-  group="components"              // 与组件面板同组
-  :animation="200"
-  handle=".drag-handle"           // 拖拽手柄
-  item-key="id"
->
-```
-
-- `group="components"`：接收来自组件面板的拖拽
-- `v-model="components"`：双向绑定，拖入后自动更新列表
-- `handle=".drag-handle"`：仅通过手柄拖拽（用于排序）
-
-#### 数据绑定
+使用 `vue3-dnd` 的 `useDrop` Hook：
 
 ```typescript
-const components = computed({
-  get: () => editorStore.pageConfig.components,
-  set: value => {
-    editorStore.setPageConfig({
-      ...editorStore.pageConfig,
-      components: value,
-      updatedAt: Date.now()
-    })
-  }
+const [collected, drop] = useDrop(() => ({
+  accept: [DndTypes.COMPONENT, DndTypes.EXISTING_COMPONENT], // 接收新组件和已有组件
+  drop: (item: DragItem, monitor) => handleDrop(item, monitor, props.slotName),
+  collect: (monitor) => ({
+    isOver: monitor.isOver(),
+    canDrop: monitor.canDrop(),
+  }),
+}))
+```
+
+#### Drop 处理逻辑
+
+`handleDrop` 函数负责处理放置事件：
+
+1. **新组件 (COMPONENT)**:
+   - 调用 `cloneFn(meta)` 创建新实例
+   - 调用 `editorStore.updateComponent` 将其添加到 `children`
+
+2. **已有组件 (EXISTING_COMPONENT)**:
+   - 调用 `editorStore.moveComponent(dragId, targetParentId, ...)`
+   - 实现跨容器移动或同容器排序
+
+---
+
+### 3. 组件排序与移动
+
+为了支持排序，每个画布中的组件（`EditorComponentWrapper`）同时也是 **拖拽源**：
+
+```typescript
+// EditorComponentWrapper.vue
+const [dragCollected, dragSource] = useDrag({
+  type: DndTypes.EXISTING_COMPONENT,
+  item: () => ({
+    type: DndTypes.EXISTING_COMPONENT,
+    id: props.schema.id,
+    index: props.index,
+    parentId: props.parentId
+  })
 })
 ```
 
-拖入后，`VueDraggable` 自动调用 `set`，更新 store。
+当组件被拖拽到新的容器（DropTargetArea）时，触发 `moveComponent`。
 
 ---
 
-### 3. 组件注册系统（componentRegistry.ts）— 核心逻辑
-
-#### 3.1 创建组件实例
-
-```typescript
-export function createComponent(
-  type: ComponentType,
-  overrides?: Partial<ComponentSchema>,
-  existingComponents: ComponentSchema[] = []
-): ComponentSchema | null
-```
-
-流程：
-
-1. 从 store 获取 `ComponentMeta`
-2. 生成语义化 ID（如 `button1`, `button2`）
-3. 生成唯一 ID（`nanoid()`）
-4. 合并默认 props/style
-5. 若支持嵌套，初始化 `children` 数组
-
-#### 3.2 语义化 ID 生成
-
-```typescript
-export function generateSemanticId(
-  type: ComponentType,
-  existingComponents: ComponentSchema[]
-): string
-```
-
-逻辑：
-
-- 递归收集所有组件（含嵌套）
-- 统计同类型组件数量
-- 生成 `{type}{number}`，如 `button1`, `input2`
-
-示例：
-
-- 第一个按钮 → `button1`
-- 第二个按钮 → `button2`
-- 第一个输入框 → `input1`
-
-#### 3.3 递归收集组件
-
-```typescript
-function collectAllComponents(components: ComponentSchema[]): ComponentSchema[]
-```
-
-用于统计嵌套组件，确保 ID 唯一。
-
----
-
-### 完整拖拽流程
+### 4. 数据更新流程
 
 ```bash
-用户操作：从组件面板拖拽一个按钮组件
+用户操作：从组件面板拖拽一个按钮组件到画布 PageRoot
     ↓
-1. ComponentPanel 触发 cloneComponent(meta)
+1. ComponentPanel (Drag Source) 开始拖拽
     ↓
-2. cloneComponent 调用 createComponent(meta.type, ...)
+2. 拖拽进入 DynamicRenderer (Drop Target)
+   - Visual Feedback: 显示高亮边框 (isOver)
     ↓
-3. createComponent 执行：
-   - 获取 ComponentMeta（包含默认配置）
-   - 调用 generateSemanticId() 生成 "button1"
-   - 生成唯一 ID（nanoid）
-   - 创建 ComponentSchema 实例
+3. 用户释放鼠标 (Drop)
     ↓
-4. VueDraggable 将克隆的 ComponentSchema 传递给 Canvas
+4. DynamicRenderer 执行 handleDrop
+   - 识别为 DndTypes.COMPONENT
+   - 执行 cloneFn -> createComponent -> 生成唯一 ID
     ↓
-5. Canvas 的 VueDraggable 接收组件
+5. 调用 editorStore.updateComponent
+   - 更新 PageRoot 的 children 数组
     ↓
-6. v-model 自动更新 components computed
-    ↓
-7. computed 的 setter 更新 editorStore.pageConfig.components
-    ↓
-8. 画布重新渲染，显示新组件
+6. Store 更新触发响应式重新渲染
 ```
 
----
+### 关键差异 (vs vue-draggable-plus)
 
-### 关键设计点
-
-1. 克隆模式：组件库使用 `pull: 'clone'`，原列表不变
-2. 统一组名：`group="components"` 实现跨区域拖拽
-3. 双重 ID：
-   - `id`：唯一标识（nanoid）
-   - `semanticId`：语义化标识（`button1`），便于调试
-4. 响应式更新：通过 computed 的 getter/setter 同步到 store
-5. 嵌套支持：递归收集组件，确保嵌套场景下 ID 唯一
-
----
-
-### 数据流转
-
-```bash
-ComponentMeta (元数据)
-    ↓ cloneComponent()
-ComponentSchema (实例)
-    ↓ VueDraggable 传递
-Canvas components[]
-    ↓ v-model 更新
-editorStore.pageConfig.components
-    ↓ 响应式更新
-UI 重新渲染
-```
-
-该设计实现了组件库到画布的拖拽创建，并保持数据一致性和唯一性。
+1. **手动控制**: 不再依赖 `v-model` 自动同步 DOM 和数据，而是显式调用 Store 方法。
+2. **数据源单一**: 所有状态变更必须通过 `EditorStore`，避免了组件内部直接修改 props 的副作用。
+3. **更细粒度的事件**: 可以精确控制 `canDrag`, `canDrop`, `hover` 等行为。

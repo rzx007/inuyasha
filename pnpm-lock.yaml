@@ -11,6 +11,9 @@ importers:
       element-plus:
         specifier: ^2.11.8
         version: 2.11.8(vue@3.5.24(typescript@5.9.3))
+      react-dnd-html5-backend:
+        specifier: ^16.0.1
+        version: 16.0.1
       tailwindcss:
         specifier: ^4.1.11
         version: 4.1.17
@@ -23,6 +26,9 @@ importers:
       vue-draggable-plus:
         specifier: ^0.6.0
         version: 0.6.0(@types/sortablejs@1.15.9)
+      vue3-dnd:
+        specifier: ^2.1.0
+        version: 2.1.0(vue@3.5.24(typescript@5.9.3))
     devDependencies:
       '@commitlint/cli':
         specifier: ^20.1.0
@@ -141,6 +147,9 @@ importers:
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@5.9.3)(vue@3.5.24(typescript@5.9.3))
+      react-dnd-html5-backend:
+        specifier: ^16.0.1
+        version: 16.0.1
       reka-ui:
         specifier: ^2.6.1
         version: 2.6.1(typescript@5.9.3)(vue@3.5.24(typescript@5.9.3))
@@ -165,6 +174,9 @@ importers:
       vue-router:
         specifier: ^4.6.3
         version: 4.6.3(vue@3.5.24(typescript@5.9.3))
+      vue3-dnd:
+        specifier: ^2.1.0
+        version: 2.1.0(vue@3.5.24(typescript@5.9.3))
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -1288,6 +1300,15 @@ packages:
   '@quansync/fs@0.1.5':
     resolution: {integrity: sha512-lNS9hL2aS2NZgNW7BBj+6EBl4rOf8l+tQ0eRY6JWCI8jI2kc53gSoqbjojU0OnAWhzoXiOjFyGsHcDGePB3lhA==}
 
+  '@react-dnd/asap@5.0.2':
+    resolution: {integrity: sha512-WLyfoHvxhs0V9U+GTsGilGgf2QsPl6ZZ44fnv0/b8T3nQyvzxidxsg/ZltbWssbsRDlYW8UKSQMTGotuTotZ6A==}
+
+  '@react-dnd/invariant@4.0.2':
+    resolution: {integrity: sha512-xKCTqAK/FFauOM9Ta2pswIyT3D8AQlfrYdOi/toTPEhqCuAs1v5tcJ3Y08Izh1cJ5Jchwy9SeAXmMg6zrKs2iw==}
+
+  '@react-dnd/shallowequal@4.0.2':
+    resolution: {integrity: sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==}
+
   '@rolldown/pluginutils@1.0.0-beta.50':
     resolution: {integrity: sha512-5e76wQiQVeL1ICOZVUg4LSOVYg9jyhGCin+icYozhsUzM+fHE7kddi1bdiE0jwVqTfkjba3jUFbEkoC9WkdvyA==}
 
@@ -2269,6 +2290,9 @@ packages:
 
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
+
+  dnd-core@16.0.1:
+    resolution: {integrity: sha512-HK294sl7tbw6F6IeuK16YSBUoorvHpY8RHO+9yFfaJyCDVb6n7PRcezrOEOa2SBCqiYpemh5Jx20ZcjKdFAVng==}
 
   dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
@@ -3438,9 +3462,15 @@ packages:
   randombytes@2.1.0:
     resolution: {integrity: sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ==}
 
+  react-dnd-html5-backend@16.0.1:
+    resolution: {integrity: sha512-Wu3dw5aDJmOGw8WjH1I1/yTH+vlXEL4vmjk5p+MHxP8HuHJS1lAGeIdG/hze1AvNeXWo/JgULV87LyQOr+r5jw==}
+
   readdirp@4.1.2:
     resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
     engines: {node: '>= 14.18.0'}
+
+  redux@4.2.1:
+    resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
 
   reflect.getprototypeof@1.0.10:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
@@ -4188,6 +4218,11 @@ packages:
     hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
+
+  vue3-dnd@2.1.0:
+    resolution: {integrity: sha512-szeB4ldsrnXTwBLmkmBuZaP9zE0eL4o8LCgTPeejOHCBsIOEUDf9W8TKCo+rj3cSVfbaa6Y5b27YVa99PI5HhA==}
+    peerDependencies:
+      vue: ^3.0.0-0 || ^2.6.0
 
   vue@3.5.24:
     resolution: {integrity: sha512-uTHDOpVQTMjcGgrqFPSb8iO2m1DUvo+WbGqoXQz8Y1CeBYQ0FXf2z1gLRaBtHjlRz7zZUBHxjVB5VTLzYkvftg==}
@@ -5553,6 +5588,12 @@ snapshots:
     dependencies:
       quansync: 0.2.11
 
+  '@react-dnd/asap@5.0.2': {}
+
+  '@react-dnd/invariant@4.0.2': {}
+
+  '@react-dnd/shallowequal@4.0.2': {}
+
   '@rolldown/pluginutils@1.0.0-beta.50': {}
 
   '@rolldown/pluginutils@1.0.0-beta.51': {}
@@ -6595,6 +6636,12 @@ snapshots:
   devlop@1.1.0:
     dependencies:
       dequal: 2.0.3
+
+  dnd-core@16.0.1:
+    dependencies:
+      '@react-dnd/asap': 5.0.2
+      '@react-dnd/invariant': 4.0.2
+      redux: 4.2.1
 
   dot-prop@5.3.0:
     dependencies:
@@ -7788,7 +7835,15 @@ snapshots:
     dependencies:
       safe-buffer: 5.2.1
 
+  react-dnd-html5-backend@16.0.1:
+    dependencies:
+      dnd-core: 16.0.1
+
   readdirp@4.1.2: {}
+
+  redux@4.2.1:
+    dependencies:
+      '@babel/runtime': 7.28.4
 
   reflect.getprototypeof@1.0.10:
     dependencies:
@@ -8696,6 +8751,17 @@ snapshots:
       '@volar/typescript': 2.4.23
       '@vue/language-core': 3.1.5(typescript@5.9.3)
       typescript: 5.9.3
+
+  vue3-dnd@2.1.0(vue@3.5.24(typescript@5.9.3)):
+    dependencies:
+      '@react-dnd/invariant': 4.0.2
+      '@react-dnd/shallowequal': 4.0.2
+      dnd-core: 16.0.1
+      fast-deep-equal: 3.1.3
+      vue: 3.5.24(typescript@5.9.3)
+      vue-demi: 0.14.10(vue@3.5.24(typescript@5.9.3))
+    transitivePeerDependencies:
+      - '@vue/composition-api'
 
   vue@3.5.24(typescript@5.9.3):
     dependencies:

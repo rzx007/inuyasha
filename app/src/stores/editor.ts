@@ -4,7 +4,7 @@ import type { ComponentId, ComponentSchema } from '@/types/component'
 import type { SelectedComponent, PageConfig } from '@/types/editor'
 import { EditorMode } from '@/types/editor'
 import { ComponentType } from '@/types/component'
-import { findComponentById, removeComponentById } from '@/utils/tree'
+import { findComponentById, removeComponentById, findComponentParent, isDescendant } from '@/utils/tree'
 import { pageRootMeta } from '@/config/components/pageRoot'
 import { nanoid } from 'nanoid'
 import { useDataSourceStore } from '@/stores/dataSource'
@@ -93,19 +93,28 @@ export const useEditorStore = defineStore('editor', () => {
   }
   
   // 添加组件
-  function addComponent(component: ComponentSchema, parentId?: ComponentId) {
+  function addComponent(component: ComponentSchema, parentId?: ComponentId, index?: number) {
     if (parentId) {
       // 添加到指定父组件
       const parent = findComponentInTree(parentId)
       if (parent && parent.children) {
-        parent.children.push(component)
+        if (typeof index === 'number' && index >= 0 && index <= parent.children.length) {
+          parent.children.splice(index, 0, component)
+        } else {
+          parent.children.push(component)
+        }
       }
     } else {
       // 添加到 PageRoot 的 children
       if (!pageConfig.value.rootComponent.children) {
         pageConfig.value.rootComponent.children = []
       }
-      pageConfig.value.rootComponent.children.push(component)
+      const children = pageConfig.value.rootComponent.children
+      if (typeof index === 'number' && index >= 0 && index <= children.length) {
+        children.splice(index, 0, component)
+      } else {
+        children.push(component)
+      }
     }
     pageConfig.value.updatedAt = Date.now()
   }
@@ -174,22 +183,87 @@ export const useEditorStore = defineStore('editor', () => {
     }
   }
   
-  // 移动组件（拖拽排序）
+  // 移动组件（支持跨容器和排序）
   function moveComponent(
-    fromIndex: number,
-    toIndex: number,
-    parentId?: ComponentId
+    dragId: ComponentId,
+    targetParentId: ComponentId,
+    targetIndex?: number,
+    slotName?: string
   ) {
     const root = pageConfig.value.rootComponent
-    const components = parentId
-      ? findComponentInTree(parentId)?.children
-      : root.children
-    
-    if (components) {
-      const [moved] = components.splice(fromIndex, 1)
-      components.splice(toIndex, 0, moved)
-      pageConfig.value.updatedAt = Date.now()
+
+    // 1. 查找被拖拽组件
+    const component = findComponentInTree(dragId)
+    if (!component) {
+      console.warn(`Drag component ${dragId} not found`)
+      return
     }
+
+    // 2. 查找目标父容器
+    const targetParent = findComponentInTree(targetParentId)
+    if (!targetParent) {
+      console.warn(`Target parent ${targetParentId} not found`)
+      return
+    }
+
+    // 3. 检查合法性：不能移动到自己内部
+    if (dragId === targetParentId) return 
+    // 防止把父级移动到自己的子孙节点下面
+    if (root.children && isDescendant(targetParentId, dragId, root.children)) {
+      console.warn('Cannot move component into its own descendant')
+      return
+    }
+    
+    // 4. 获取原父容器信息（用于索引修正）
+    let oldIndex = -1
+    let oldParentId: string | undefined
+    if (root.children) {
+      const result = findComponentParent(dragId, root.children)
+      if (result) {
+        oldIndex = result.index
+        oldParentId = result.parent?.id || root.id // 如果 parent 为 null，说明在 root.children 中，父就是 root
+      }
+    }
+
+    // 5. 从原位置移除
+    if (root.children) {
+      removeComponentById(dragId, root.children)
+    }
+
+    // 6. 更新组件属性 (slot)
+    if (slotName) {
+        if (!component.props) component.props = {}
+        component.props._slot = slotName
+    } else {
+        if (component.props && component.props._slot) {
+            delete component.props._slot
+        }
+    }
+    
+    // 7. 插入到新位置
+    if (!targetParent.children) {
+        targetParent.children = []
+    }
+    
+    // 计算最终插入索引
+    let finalIndex = targetIndex !== undefined ? targetIndex : targetParent.children.length
+    
+    // 如果是同容器内移动，且原位置在目标位置之前，移除后会导致目标位置索引前移
+    // 注意：这里我们假设 targetIndex 是基于“移除前”的视图计算的（通常 hover 是这样）
+    // 或者我们统一约定：targetIndex 是“期望插入的位置”，如果同容器且 old < target，说明我们想插在更后面
+    // 例如 [A, B, C], 把 A (0) 移到 C (2) 后面 (3)。
+    // 移除 A -> [B, C]。 插入到 3? 越界。应该是 2。
+    // 所以 oldIndex < finalIndex 时，finalIndex--
+    if (oldParentId === targetParentId && oldIndex !== -1 && oldIndex < finalIndex) {
+        finalIndex--
+    }
+
+    // 边界检查
+    if (finalIndex < 0) finalIndex = 0
+    if (finalIndex > targetParent.children.length) finalIndex = targetParent.children.length
+    
+    targetParent.children.splice(finalIndex, 0, component)
+    pageConfig.value.updatedAt = Date.now()
   }
   
   return {
@@ -216,4 +290,3 @@ export const useEditorStore = defineStore('editor', () => {
     moveComponent,
   }
 })
-

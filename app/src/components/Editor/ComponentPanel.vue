@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, defineComponent, h } from 'vue'
+import type { PropType } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
-import { VueDraggable } from 'vue-draggable-plus'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
 import { createComponent } from '@/utils/componentRegistry'
 import type { ComponentMeta } from '@/types/component'
 import { ComponentType } from '@/types/component'
 import { getIconComponent } from '@/utils/iconMapping'
+import { useDrag } from 'vue3-dnd'
+import { DndTypes } from '@/types/dnd'
 
 const componentStore = useComponentStore()
 const editorStore = useEditorStore()
@@ -52,6 +54,60 @@ function cloneComponent(meta: ComponentMeta) {
   const existingComponents = rootComponent.children || []
   return createComponent(meta.type, undefined, existingComponents)
 }
+
+// 可拖拽项组件（使用 defineComponent 规范声明）
+const DraggableItem = defineComponent({
+  name: 'DraggableItem',
+  props: {
+    meta: {
+      type: Object as PropType<ComponentMeta>,
+      required: true
+    }
+  },
+  setup(props, { slots }) {
+    const [collected, dragSource] = useDrag(() => ({
+      type: DndTypes.COMPONENT,
+      item: { 
+        type: DndTypes.COMPONENT, 
+        meta: props.meta,
+        cloneFn: cloneComponent,
+        display: props.meta.display // 传递组件显示类型
+      },
+      collect: (monitor) => ({
+        isDragging: monitor.isDragging(),
+      }),
+    }))
+
+    const isDragging = computed(() => collected.value.isDragging)
+
+    return () =>
+      h(
+        'div',
+        {
+          ref: dragSource,
+          class: [
+            'user-select-none flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group',
+            isDragging.value ? 'opacity-50' : ''
+          ]
+        },
+        [
+          h(
+            'div',
+            {
+              class:
+                'p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2'
+            },
+            slots.icon ? slots.icon() : []
+          ),
+          h(
+            'div',
+            { class: 'text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center' },
+            props.meta.name
+          )
+        ]
+      )
+  }
+})
 </script>
 
 <template>
@@ -84,33 +140,18 @@ function cloneComponent(meta: ComponentMeta) {
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
           {{ category.label }}
         </h4>
-        <VueDraggable
-          :model-value="category.components"
-          @update:model-value="() => {}"
-          :sort="false"
-          :group="{ name: 'components', pull: 'clone', put: false }"
-          :clone="cloneComponent"
-          item-key="type"
-          class="grid grid-cols-2 gap-2"
-        >
-          <div
+        <div class="grid grid-cols-2 gap-2">
+          <DraggableItem
             v-for="meta in category.components"
             :key="meta.type"
-            class="user-select-none flex flex-col items-center justify-center p-3 bg-white border border-slate-200 rounded-lg hover:border-primary/70 hover:shadow-md cursor-grab active:cursor-grabbing transition-all group"
+            :meta="meta"
           >
-            <div
-              class="p-2 bg-slate-50 text-slate-600 rounded-md group-hover:bg-primary/10 group-hover:text-primary transition-colors mb-2"
-            >
+            <template #icon>
               <component :is="getIconComponent(meta.icon)" :size="16" />
-            </div>
-            <div class="text-xs font-medium text-slate-600 group-hover:text-slate-900 text-center">
-              {{ meta.name }}
-            </div>
-          </div>
-        </VueDraggable>
+            </template>
+          </DraggableItem>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
-
