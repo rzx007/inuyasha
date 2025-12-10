@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Sparkles, Link } from 'lucide-vue-next'
+import { Sparkles, Link, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import DataBindingDialog from '../DataBindingDialog.vue'
 import type { DataBinding } from '@/types/dataSource'
 
@@ -14,8 +14,58 @@ const currentBindingProp = ref<string | null>(null)
 const pageConfig = computed(() => editorStore.pageConfig)
 const rootComponent = computed(() => editorStore.getPageRoot())
 
+// 统一的padding值
+const paddingValue = computed({
+  get: () => {
+    const style = rootComponent.value.style || {}
+    const top = style.paddingTop || '0px'
+    const right = style.paddingRight || '0px'
+    const bottom = style.paddingBottom || '0px'
+    const left = style.paddingLeft || '0px'
+
+    // 如果四个方向都一样，返回统一值
+    if (top === right && right === bottom && bottom === left) {
+      return top
+    }
+    return ''
+  },
+  set: (value: string) => {
+    updateRootStyle('paddingTop', value)
+    updateRootStyle('paddingRight', value)
+    updateRootStyle('paddingBottom', value)
+    updateRootStyle('paddingLeft', value)
+  }
+})
+
+// 统一的margin值
+const marginValue = computed({
+  get: () => {
+    const style = rootComponent.value.style || {}
+    const top = style.marginTop || '0px'
+    const right = style.marginRight || '0px'
+    const bottom = style.marginBottom || '0px'
+    const left = style.marginLeft || '0px'
+
+    // 如果四个方向都一样，返回统一值
+    if (top === right && right === bottom && bottom === left) {
+      return top
+    }
+    return ''
+  },
+  set: (value: string) => {
+    updateRootStyle('marginTop', value)
+    updateRootStyle('marginRight', value)
+    updateRootStyle('marginBottom', value)
+    updateRootStyle('marginLeft', value)
+  }
+})
+
 // 颜色选择器相关状态
 const colorPickerRefs = ref<Record<string, HTMLInputElement | null>>({})
+
+// 展开状态
+const isPaddingExpanded = ref(false)
+const isMarginExpanded = ref(false)
 
 // 打开颜色选择器
 function openColorPicker(key: string) {
@@ -206,6 +256,124 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
           @update:model-value="val => updateRootStyle('backgroundRepeat', val)"
           class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
         />
+      </div>
+
+      <!-- 内边框 -->
+      <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+        <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5">
+          <span>内边框</span>
+          <button
+            @click="isPaddingExpanded = !isPaddingExpanded"
+            class="text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <component :is="isPaddingExpanded ? ChevronDown : ChevronRight" :size="12" />
+          </button>
+        </div>
+        <div v-if="!isPaddingExpanded" class="mb-2">
+          <Input
+            :model-value="paddingValue"
+            placeholder="0px"
+            @update:model-value="paddingValue = $event"
+            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+          />
+        </div>
+        <div v-else class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">上</label>
+            <Input
+              :model-value="rootComponent.style?.paddingTop || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('paddingTop', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">右</label>
+            <Input
+              :model-value="rootComponent.style?.paddingRight || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('paddingRight', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">下</label>
+            <Input
+              :model-value="rootComponent.style?.paddingBottom || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('paddingBottom', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">左</label>
+            <Input
+              :model-value="rootComponent.style?.paddingLeft || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('paddingLeft', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- 外边框 -->
+      <div class="border-b border-slate-100 last:border-0 px-4 py-4">
+        <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5">
+          <span>外边框</span>
+          <button
+            @click="isMarginExpanded = !isMarginExpanded"
+            class="text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            <component :is="isMarginExpanded ? ChevronDown : ChevronRight" :size="12" />
+          </button>
+        </div>
+        <div v-if="!isMarginExpanded" class="mb-2">
+          <Input
+            :model-value="marginValue"
+            placeholder="0px"
+            @update:model-value="marginValue = $event"
+            class="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+          />
+        </div>
+        <div v-else class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">上</label>
+            <Input
+              :model-value="rootComponent.style?.marginTop || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('marginTop', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">右</label>
+            <Input
+              :model-value="rootComponent.style?.marginRight || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('marginRight', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">下</label>
+            <Input
+              :model-value="rootComponent.style?.marginBottom || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('marginBottom', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-slate-400 mb-1 block">左</label>
+            <Input
+              :model-value="rootComponent.style?.marginLeft || ''"
+              placeholder="0px"
+              @update:model-value="val => updateRootStyle('marginLeft', val)"
+              class="w-full px-2 py-1 bg-white border border-slate-200 rounded text-xs text-slate-700 focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+        </div>
       </div>
     </div>
 

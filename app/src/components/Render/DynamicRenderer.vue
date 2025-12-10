@@ -287,7 +287,7 @@ const dynamicSlotItems = computed(() => {
   <DropTargetArea
     v-if="schema.type === ComponentType.PageRoot"
     :list="children"
-    class="page-root min-h-full p-1 border border-dashed"
+    class="page-root min-h-full border border-dashed"
     :style="styleObject"
   >
     <EditorComponentWrapper 

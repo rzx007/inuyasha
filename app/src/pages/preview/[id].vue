@@ -52,7 +52,7 @@ onMounted(async () => { // Make it async
 </script>
 
 <template>
-  <div v-if="pageConfig" class="preview-page">
+  <div v-if="pageConfig" class="preview-page bg-gray-50 min-h-screen">
     <PreviewRenderer :schema="pageConfig.rootComponent" />
   </div>
   <div v-else class="flex items-center justify-center h-screen text-gray-500">

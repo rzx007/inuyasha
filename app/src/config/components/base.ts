@@ -9,12 +9,10 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: true,
     display: 'block',
-    componentName: 'div', // Use div for generic container
+    componentName: 'ZContainer', // Use div for generic container
     defaultProps: {},
     defaultStyle: {
-      padding: '16px',
       backgroundColor: '#fff',
-      minHeight: '100px',
     },
     slots: [
       { name: 'default', label: 'Default', allowDrag: true }
@@ -94,6 +92,13 @@ export const baseComponents: ComponentMeta[] = [
         label: '按钮文字',
         type: 'text',
         defaultValue: '按钮',
+        bindable: true,
+      },
+      {
+        key: 'disabled',
+        label: '禁用',
+        type: 'switch',
+        defaultValue: false,
         bindable: true,
       },
       {

@@ -91,7 +91,7 @@ export const formComponents: ComponentMeta[] = [
       },
       {
         key: 'modelValue',
-        label: '选中值',
+        label: '默认值',
         type: 'text',
         defaultValue: '',
         vModel: true,

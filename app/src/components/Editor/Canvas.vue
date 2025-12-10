@@ -18,7 +18,7 @@ function handleCanvasClick() {
 
 <template>
   <div
-    class="canvas-container h-full  bg-gray-100"
+    class="canvas-container relative h-full bg-gray-100"
     @click="handleCanvasClick"
   >
     <div class="canvas-content overflow-auto h-full p-4">
@@ -41,10 +41,6 @@ function handleCanvasClick() {
 </template>
 
 <style scoped>
-.canvas-content {
-  position: relative;
-}
-
 /* 当画布为空时，给拖拽区域一个最小高度和视觉提示 */
 .is-empty {
   min-height: 400px;
