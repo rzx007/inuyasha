@@ -74,7 +74,7 @@ const {
     </div>
     <div v-else class="text-center text-gray-400 text-sm">暂无事件配置</div>
 
-    <!-- Event Configuration Dialog -->
+    <!-- 事件配置对话框 -->
     <Dialog :open="isEventDialogVisible" @update:open="val => (isEventDialogVisible = val)">
       <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -82,7 +82,7 @@ const {
         </DialogHeader>
         
         <div class="space-y-4">
-          <!-- Trigger Selection -->
+          <!-- 触发器选择 -->
            <div class="space-y-2">
             <label class="text-sm font-medium">触发器</label>
             <Select v-model="currentEvent.trigger">
@@ -122,7 +122,7 @@ const {
                 </div>
                 
                 <div class="grid gap-3">
-                  <!-- Action Type -->
+                  <!-- 动作类型 -->
                   <div>
                     <label class="text-xs text-gray-500 block mb-1">动作类型</label>
                     <Select
@@ -144,7 +144,7 @@ const {
                     </Select>
                   </div>
 
-                  <!-- Dynamic Config Fields -->
+                  <!-- 动态配置字段 -->
                   <div class="space-y-2 pl-1 border-l-2 border-blue-200">
                     <ActionConfigFields
                       :action="action"

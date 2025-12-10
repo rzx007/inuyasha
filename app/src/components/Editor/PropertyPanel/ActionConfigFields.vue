@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -18,6 +19,7 @@ import type {
   SetLocalStorageActionConfig,
   DownloadActionConfig,
 } from '@/types/event'
+import { useDataSourceStore } from '@/stores/dataSource'
 
 interface Props {
   action: ActionConfig
@@ -27,10 +29,18 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+const dataSourceStore = useDataSourceStore()
+const dataSourceOptions = computed(() =>
+  Object.values(dataSourceStore.dataSources).map(ds => ({
+    label: `${ds.name || ds.id}`,
+    value: ds.id,
+  }))
+)
 </script>
 
 <template>
-  <!-- Show Message -->
+  <!-- 显示消息 -->
   <template v-if="action.type === 'showMessage'">
     <div>
       <label class="text-xs block">消息内容</label>
@@ -51,7 +61,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Run Script -->
+  <!-- 运行脚本 -->
   <template v-else-if="action.type === 'runScript'">
     <div>
       <label class="text-xs block">脚本代码 (JS)</label>
@@ -63,7 +73,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Control Component -->
+  <!-- 控制组件 -->
   <template v-else-if="action.type === 'controlComponent'">
     <div>
       <label class="text-xs block">目标组件ID</label>
@@ -117,7 +127,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Go To URL -->
+  <!-- 跳转到URL -->
   <template v-else-if="action.type === 'goToUrl'">
     <div>
       <label class="text-xs block">URL</label>
@@ -133,7 +143,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Navigate To -->
+  <!-- 导航到 -->
   <template v-else-if="action.type === 'navigateTo'">
     <div>
       <label class="text-xs block">路径 (Path)</label>
@@ -141,7 +151,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Copy To Clipboard -->
+  <!-- 复制到剪贴板 -->
   <template v-else-if="action.type === 'copyToClipboard'">
     <div>
       <label class="text-xs block">文本内容</label>
@@ -149,7 +159,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Set LocalStorage -->
+  <!-- 设置本地存储 -->
   <template v-else-if="action.type === 'setLocalStorage'">
     <div class="grid grid-cols-2 gap-2">
       <div>
@@ -163,7 +173,7 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Download -->
+  <!-- 下载 -->
   <template v-else-if="action.type === 'download'">
     <div>
       <label class="text-xs block">文件地址 (URL)</label>
@@ -175,14 +185,30 @@ const props = defineProps<Props>()
     </div>
   </template>
 
-  <!-- Call DataSource -->
+  <!-- 调用数据源 -->
   <template v-else-if="action.type === 'callDataSource'">
     <div class="text-xs text-gray-500">
-      请在数据源面板配置数据源ID (需要实现数据源选择器)
+      请在数据源面板配置数据源，然后在此选择。
     </div>
-    <div>
-      <label class="text-xs block">数据源ID</label>
-      <Input v-model="(action.config as any).dataSourceId" />
+    <div class="space-y-1">
+      <label class="text-xs block">数据源</label>
+      <Select
+        :model-value="(action.config as any).dataSourceId"
+        @update:model-value="(val: any) => ((action.config as any).dataSourceId = val)"
+      >
+        <SelectTrigger class="w-full h-9 text-sm">
+          <SelectValue placeholder="选择数据源" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem
+            v-for="ds in dataSourceOptions"
+            :key="ds.value"
+            :value="ds.value"
+          >
+            {{ ds.label }}
+          </SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   </template>
 </template>

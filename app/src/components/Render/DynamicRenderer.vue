@@ -40,8 +40,14 @@ onMounted(() => {
       .filter(schema => schema.vModel && !schema.storeInProps)
       .forEach(schema => {
         const existingValue = formStateStore.getComponentState(props.schema.id, schema.key)
-        if (existingValue === undefined && schema.defaultValue !== undefined) {
-          formStateStore.setComponentState(props.schema.id, schema.key, schema.defaultValue)
+        // 优先使用 props.schema.props 中的当前值，如果没有再用 defaultValue 作为后备
+        const propsValue = (props.schema.props as any)?.[schema.key]
+        if (existingValue === undefined) {
+          if (propsValue !== undefined) {
+            formStateStore.setComponentState(props.schema.id, schema.key, propsValue)
+          } else if (schema.defaultValue !== undefined) {
+            formStateStore.setComponentState(props.schema.id, schema.key, schema.defaultValue)
+          }
         }
       })
   }

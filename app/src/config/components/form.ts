@@ -9,10 +9,7 @@ export const formComponents: ComponentMeta[] = [
     category: 'form',
     display: 'inline-block',
     componentName: 'ElInput',
-    defaultProps: {
-      label: 'Label',
-      placeholder: 'Please input',
-    },
+    defaultProps: {},
     defaultStyle: {
       width: '300px',
     },

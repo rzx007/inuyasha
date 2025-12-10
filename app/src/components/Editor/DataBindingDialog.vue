@@ -145,7 +145,7 @@ const componentPropertyOptions = computed(() => {
 
 const allDataSources = computed(() => dataSourceStore.dataSources)
 
-// Initialize state when dialog opens or propKey changes
+// 初始化状态(对话框打开或propKey变化时)
 watch(
   [() => props.modelValue, () => props.propKey],
   ([isOpen, propKey]) => {
@@ -155,7 +155,7 @@ watch(
 
       let binding: DataBinding | undefined
       
-      // Check if it's a style binding
+      // 检查是否是样式绑定
       if (propKey.startsWith('style.')) {
         binding = selectedComp.schema.props[`${propKey}_binding`]
       } else {
@@ -172,16 +172,11 @@ watch(
           selectedComponent.value = binding.componentId
           
           let simplifiedPath = binding.path || ''
-          // 兼容旧格式：去除前缀
-          simplifiedPath = simplifiedPath
-            .replace(/^modelValue\./, '')
-            .replace(/^props\./, '')
-            .replace(/^style\./, '')
             
           selectedPropertyPath.value = simplifiedPath
         }
       } else {
-        // Reset if no binding
+        // 如果没有绑定，则重置
         activeTab.value = 'dataSource'
         selectedDataSource.value = null
         dataPath.value = ''
@@ -229,7 +224,7 @@ function handleSave() {
         </TabsList>
         
         <TabsContent value="dataSource" class="flex-1 flex flex-col gap-4 mt-4 min-h-0">
-          <div class="space-y-2 flex-shrink-0">
+          <div class="space-y-2 shrink-0">
             <label class="text-sm font-medium">数据源</label>
             <Select v-model="selectedDataSource">
               <SelectTrigger class="w-full">
@@ -247,7 +242,7 @@ function handleSave() {
             </Select>
           </div>
           
-          <div class="space-y-2 flex-shrink-0">
+          <div class="space-y-2 shrink-0">
             <label class="text-sm font-medium">数据路径</label>
             <div class="flex gap-2">
               <Input v-model="dataPath" placeholder="例如：data.user.name" />

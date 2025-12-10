@@ -93,54 +93,21 @@ const handleSaveApi = (data: { name: string; config: ApiDataSourceConfig }) => {
 }
 
 const handleRunTest = async (api: DataSource) => {
-  const config = api.config as ApiDataSourceConfig
   try {
-    let success = false
-    // Construct headers object
-    const headers: Record<string, string> = {}
-    if (Array.isArray(config.headers)) {
-        config.headers.forEach((h: any) => {
-            if (h.key) headers[h.key] = h.value
-        })
-    } else {
-        // Fallback for old format if any
-        Object.assign(headers, config.headers || {})
-    }
-
-    let url = config.url
-    // Construct query params (simple append)
-    if (Array.isArray(config.params) && config.params.length > 0) {
-       const qs = config.params
-        .filter((p: any) => p.key)
-        .map((p: any) => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`)
-        .join('&')
-       if (qs) url += (url.includes('?') ? '&' : '?') + qs
-    }
-
-    const res = await fetch(url, {
-      method: config.method,
-      headers,
-      body: ['GET', 'HEAD'].includes(config.method) ? undefined : config.body
-    })
-    const data = await res.json().catch(() => ({ error: 'Parse Error' }))
-    success = res.ok
-    
+    await dataSourceStore.fetchDataSource(api.id)
+    const ds = dataSources.value[api.id]
     testResult.value = {
-      status: res.status,
-      statusText: res.statusText,
-      data
+      status: ds?.data?.error ? 500 : 200,
+      statusText: ds?.data?.error ? 'Error' : 'OK',
+      data: ds?.data,
     }
-    // 测试成功后同步到 store，方便画布立即使用数据
-    if (success) {
-      await dataSourceStore.fetchDataSource(api.id)
-    }
-    showTestResult.value = true
   } catch (e: any) {
     testResult.value = {
       status: 0,
       statusText: 'Error',
-      data: { message: e.message }
+      data: { message: e?.message || '未知错误' },
     }
+  } finally {
     showTestResult.value = true
   }
 }
