@@ -1,8 +1,9 @@
 {
   "name": "inuyasha",
   "version": "1.0.0",
-  "description": "",
+  "description": "Inuyasha is a visual editor for building web applications.",
   "main": "index.js",
+  "homepage": "https://rzx007.github.io/inuyasha",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "eslint": "eslint .",
