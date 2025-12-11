@@ -1,22 +1,27 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed, onMounted, onUnmounted, ref, defineComponent, h } from 'vue'
+import { defineAsyncComponent, computed, onMounted, onUnmounted, ref } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
 import type { ComponentSchema } from '@/types/component'
 import { ComponentType } from '@/types/component'
-import { ElCard, ElStatistic,  ElOption } from 'element-plus'
-import ChartRenderer from './widgets/ChartRenderer.vue'
+import { ElOption } from 'element-plus'
 import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
 import { useFormStateStore } from '@/stores/formState'
 import { useComponentRegistry } from '@/stores/componentRegistry'
-import { useDrop, type DropTargetMonitor } from 'vue3-dnd'
-import { DndTypes, type DragItem } from '@/types/dnd'
 
 // 循环引用问题：DynamicRenderer 引用 EditorComponentWrapper，反之亦然
 // 使用 defineAsyncComponent 解决
 const EditorComponentWrapper = defineAsyncComponent(
   () => import('@/components/Editor/EditorComponentWrapper.vue')
+)
+
+const SlotDropWrapper = defineAsyncComponent(
+  () => import('@/components/Editor/SlotDropWrapper.vue')
+)
+
+const PageRootDropZone = defineAsyncComponent(
+  () => import('@/components/Editor/PageRootDropZone.vue')
 )
 
 interface Props {
@@ -158,89 +163,6 @@ function getSlotChildren(slotName?: string) {
   return props.schema.children?.filter(child => child.props?._slot === slotName) || []
 }
 
-// 拖拽处理函数：处理新组件添加
-function handleDrop(item: DragItem, monitor: DropTargetMonitor, slotName?: string) {
-  // 防止嵌套组件重复处理
-  // 如果子组件已经处理了 drop 事件，父组件就不再处理
-  if (monitor.didDrop()) {
-    return
-  }
-
-  // 1. 处理新组件 (COMPONENT)
-  if (item.type === DndTypes.COMPONENT) {
-    const { meta, cloneFn } = item
-    if (meta && cloneFn) {
-      const newComponent = cloneFn(meta)
-      if (newComponent) {
-        // 如果指定了 slot，设置 _slot 属性
-        if (slotName) {
-          newComponent.props = {
-            ...newComponent.props,
-            _slot: slotName
-          }
-        }
-        
-        // 使用 store 的 addComponent 方法，默认添加到末尾
-        editorStore.addComponent(newComponent, props.schema.id)
-      }
-    }
-    return { dropped: true }
-  }
-
-  // 2. 处理已存在组件排序/移动 (EXISTING_COMPONENT)
-  if (item.type === DndTypes.EXISTING_COMPONENT) {
-    const draggedId = item.id
-    if (!draggedId) return
-    
-    // 移动到容器末尾
-    editorStore.moveComponent(draggedId, props.schema.id, undefined, slotName)
-    
-    return { dropped: true }
-  }
-}
-
-// 封装一个 DropTarget 组件，简化模板中的重复代码
-const DropTargetArea = defineComponent({
-  name: 'DropTargetArea',
-  props: {
-    slotName: {
-      type: String,
-      default: undefined
-    },
-    customClass: {
-      type: [String, Object, Array],
-      default: ''
-    },
-    list: {
-      type: Array,
-      default: () => []
-    }
-  },
-  setup(props, { slots }) {
-    const [collected, drop] = useDrop(() => ({
-      accept: [DndTypes.COMPONENT, DndTypes.EXISTING_COMPONENT],
-      drop: (item: DragItem, monitor) => handleDrop(item, monitor, props.slotName),
-      collect: (monitor) => ({
-        isOver: monitor.isOver({ shallow: true }), // 仅当鼠标直接悬停在当前容器时高亮，避免父级同时高亮
-        canDrop: monitor.canDrop(),
-      }),
-    }))
-
-    return () => {
-      return h('div', {
-        ref: drop,
-        class: [
-          props.customClass,
-          collected.value.isOver ? 'ring-2 ring-primary ring-inset bg-primary/5' : ''
-        ]
-      }, [
-        slots.default ? slots.default() : null,
-        slots.footer ? slots.footer() : null
-      ])
-    }
-  }
-})
-
 const styleObject = computed(() => resolvedStyle.value)
 
 // 获取组件元数据
@@ -284,11 +206,10 @@ const dynamicSlotItems = computed(() => {
 
 <template>
   <!-- PageRoot 组件 (特殊处理，始终作为顶级容器) -->
-  <DropTargetArea
+  <PageRootDropZone
     v-if="schema.type === ComponentType.PageRoot"
-    :list="children"
-    class="page-root min-h-full border border-dashed"
-    :style="styleObject"
+    :parent-id="schema.id"
+    :style-object="styleObject"
   >
     <EditorComponentWrapper 
       v-for="(child, index) in children" 
@@ -297,15 +218,12 @@ const dynamicSlotItems = computed(() => {
       :index="index"
       :parent-id="schema.id"
     />
-    <template #footer>
-      <div
-        v-if="children.length === 0"
-        class="empty-placeholder text-center text-gray-400 text-sm py-4"
-      >
-        将组件拖到此处
-      </div>
-    </template>
-  </DropTargetArea>
+    
+    <!-- 空状态提示（不是拖拽目标，只是视觉提示） -->
+    <div v-if="children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-4">
+      将组件拖到此处
+    </div>
+  </PageRootDropZone>
 
   <!-- 动态渲染部分 -->
   <template v-else-if="canUseDynamicRender">
@@ -320,41 +238,19 @@ const dynamicSlotItems = computed(() => {
     >
       <!-- 动态插槽渲染 (Static definition from meta.slots) -->
       <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
-        <!-- 如果允许拖拽，渲染 DropTargetArea -->
-        <DropTargetArea
-          v-if="slot.allowDrag"
+        <EditorComponentWrapper
+          v-for="(child, index) in getSlotChildren(slot.name)"
+          :key="child.id"
+          :schema="child"
+          :index="index"
+          :parent-id="schema.id"
+        />
+        
+        <SlotDropWrapper
+          v-if="slot.allowDrag && getSlotChildren(slot.name).length === 0"
           :slot-name="slot.name"
-          :list="getSlotChildren(slot.name)"
-          class="min-h-[50px] p-1 border border-dashed border-gray-300 bg-gray-50/50"
-          :class="{ 'flex flex-wrap': schema.type === ComponentType.Row }"
-        >
-          <EditorComponentWrapper
-            v-for="(child, index) in getSlotChildren(slot.name)"
-            :key="child.id"
-            :schema="child"
-            :index="index"
-            :parent-id="schema.id"
-          />
-          <template #footer>
-            <div
-              v-if="getSlotChildren(slot.name).length === 0"
-              class="empty-placeholder text-center text-gray-400 text-sm py-2"
-            >
-              拖拽组件至此
-            </div>
-          </template>
-        </DropTargetArea>
-
-        <!-- 不允许拖拽 -->
-        <div v-else>
-          <EditorComponentWrapper
-            v-for="(child, index) in getSlotChildren(slot.name)"
-            :key="child.id"
-            :schema="child"
-            :index="index"
-            :parent-id="schema.id"
-          />
-        </div>
+          :parent-id="schema.id"
+        />
       </template>
 
       <!-- 下拉框选项特殊处理 (如果组件是 ElSelect) -->
@@ -379,56 +275,36 @@ const dynamicSlotItems = computed(() => {
     >
       <!-- 动态插槽渲染 (Static definition from meta.slots) -->
       <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
-        <!-- 如果允许拖拽，渲染 DropTargetArea -->
-        <DropTargetArea
-          v-if="slot.allowDrag"
+        <EditorComponentWrapper
+          v-for="(child, index) in getSlotChildren(slot.name)"
+          :key="child.id"
+          :schema="child"
+          :index="index"
+          :parent-id="schema.id"
+        />
+        
+        <SlotDropWrapper
+          v-if="slot.allowDrag && getSlotChildren(slot.name).length === 0"
           :slot-name="slot.name"
-          :list="getSlotChildren(slot.name)"
-          class="min-h-[50px] p-1 border border-dashed border-gray-300 bg-gray-50/50"
-          :class="{ 'flex flex-wrap': schema.type === ComponentType.Row }"
-        >
-          <EditorComponentWrapper
-            v-for="(child, index) in getSlotChildren(slot.name)"
-            :key="child.id"
-            :schema="child"
-            :index="index"
-            :parent-id="schema.id"
-          />
-          <template #footer>
-            <div
-              v-if="getSlotChildren(slot.name).length === 0"
-              class="empty-placeholder text-center text-gray-400 text-sm py-2"
-            >
-              拖拽组件至此
-            </div>
-          </template>
-        </DropTargetArea>
+          :parent-id="schema.id"
+        />
       </template>
 
       <!-- 动态插槽渲染 (Dynamic generation from props.items) -->
       <template v-for="item in dynamicSlotItems" :key="item.name" #[item.name]>
-        <!-- 动态插槽默认允许拖拽 (通常是内容区域) -->
-        <DropTargetArea
+        <EditorComponentWrapper
+          v-for="(child, index) in getSlotChildren(item.name)"
+          :key="child.id"
+          :schema="child"
+          :index="index"
+          :parent-id="schema.id"
+        />
+        
+        <SlotDropWrapper
+          v-if="getSlotChildren(item.name).length === 0"
           :slot-name="item.name"
-          :list="getSlotChildren(item.name)"
-          class="min-h-[50px] p-1 border border-dashed border-gray-300 bg-gray-50/50"
-        >
-          <EditorComponentWrapper
-            v-for="(child, index) in getSlotChildren(item.name)"
-            :key="child.id"
-            :schema="child"
-            :index="index"
-            :parent-id="schema.id"
-          />
-          <template #footer>
-            <div
-              v-if="getSlotChildren(item.name).length === 0"
-              class="empty-placeholder text-center text-gray-400 text-sm py-2"
-            >
-              拖拽组件至此
-            </div>
-          </template>
-        </DropTargetArea>
+          :parent-id="schema.id"
+        />
       </template>
 
       <!-- 文本内容特殊处理 -->
@@ -438,53 +314,8 @@ const dynamicSlotItems = computed(() => {
     </component>
   </template>
 
-  <!-- 回退到手动渲染 (用于未配置 componentName 的组件或复杂组件) -->
-  <template v-else>
-    <!-- 统计数值组件 -->
-    <ElStatistic
-      v-if="schema.type === ComponentType.Statistic"
-      ref="componentRef"
-      :title="resolvedProps.title || 'Title'"
-      :value="resolvedProps.value || 0"
-      :style="styleObject"
-    />
-
-    <!-- 列表组件 -->
-    <ElCard
-      v-else-if="schema.type === ComponentType.List"
-      ref="componentRef"
-      class="component-list"
-      :style="styleObject"
-    >
-      <template #header>
-        <span>{{ resolvedProps.header }}</span>
-      </template>
-      <div
-        v-for="(item, index) in resolvedProps.items"
-        :key="index"
-        class="list-item py-2 px-4"
-        :class="{ 'border-b': index < resolvedProps.items.length - 1 }"
-      >
-        <div class="font-semibold">{{ item.title }}</div>
-        <div class="text-sm text-gray-500">{{ item.description }}</div>
-      </div>
-      <template v-if="resolvedProps.footer" #footer>
-        <span>{{ resolvedProps.footer }}</span>
-      </template>
-    </ElCard>
-
-
-    <!-- 图表组件 -->
-    <ChartRenderer
-      v-else-if="schema.type === ComponentType.Chart"
-      ref="componentRef"
-      :option="resolvedProps.option || {}"
-      :style="styleObject"
-    />
-
-    <!-- 未知组件 -->
-    <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
-      <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
-    </div>
-  </template>
+  <!-- 未知组件类型 -->
+  <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
+    <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
+  </div>
 </template>

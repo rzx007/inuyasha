@@ -4,8 +4,7 @@ import type { ComponentSchema } from '@/types/component'
 import { ComponentType } from '@/types/component'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
-import { ElCard, ElStatistic, ElOption } from 'element-plus'
-import ChartRenderer from './widgets/ChartRenderer.vue'
+import { ElOption } from 'element-plus'
 import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
 import { useFormStateStore } from '@/stores/formState'
@@ -167,7 +166,9 @@ const modelValueEvents = computed(() => {
 const canUseDynamicRender = computed(() => !!componentMeta.value?.componentName)
 
 // 是否需要双向绑定（根据 propsSchema 中是否存在 vModel 属性判断）
-const needsModelValue = computed(() => componentMeta.value?.propsSchema?.some(schema => schema.vModel) || false)
+const needsModelValue = computed(
+  () => componentMeta.value?.propsSchema?.some(schema => schema.vModel) || false
+)
 
 // 计算动态插槽项
 const dynamicSlotItems = computed(() => {
@@ -179,8 +180,17 @@ const dynamicSlotItems = computed(() => {
 </script>
 
 <template>
+  <!-- PageRoot 组件 (特殊处理) -->
+  <component
+    v-if="schema.type === ComponentType.PageRoot"
+    :is="componentMeta?.componentName || 'div'"
+    :style="styleObject"
+    class="page-root min-h-full"
+  >
+    <PreviewRenderer v-for="child in schema.children" :key="child.id" :schema="child" />
+  </component>
   <!-- 动态渲染部分 -->
-  <template v-if="canUseDynamicRender">
+  <template v-else-if="canUseDynamicRender">
     <!-- 需要双向绑定的组件（表单组件） -->
     <component
       v-if="needsModelValue"
@@ -244,62 +254,8 @@ const dynamicSlotItems = computed(() => {
     </component>
   </template>
 
-  <!-- 回退到手动渲染 (用于未配置 componentName 的组件或复杂组件) -->
-  <template v-else>
-    <!-- PageRoot 组件 -->
-    <div
-      v-if="schema.type === ComponentType.PageRoot"
-      :style="styleObject"
-      class="page-root min-h-full"
-    >
-      <PreviewRenderer v-for="child in schema.children" :key="child.id" :schema="child" />
-    </div>
-
-    <!-- 统计数值组件 -->
-    <ElStatistic
-      v-else-if="schema.type === ComponentType.Statistic"
-      ref="componentRef"
-      :title="resolvedProps.title || 'Title'"
-      :value="resolvedProps.value || 0"
-      :style="styleObject"
-    />
-
-    <!-- 列表组件 -->
-    <ElCard
-      v-else-if="schema.type === ComponentType.List"
-      ref="componentRef"
-      class="component-list"
-      :style="styleObject"
-    >
-      <template #header>
-        <span>{{ resolvedProps.header }}</span>
-      </template>
-      <div
-        v-for="(item, index) in resolvedProps.items"
-        :key="index"
-        class="list-item py-2 px-4"
-        :class="{ 'border-b': index < resolvedProps.items.length - 1 }"
-      >
-        <div class="font-semibold">{{ item.title }}</div>
-        <div class="text-sm text-gray-500">{{ item.description }}</div>
-      </div>
-      <template v-if="resolvedProps.footer" #footer>
-        <span>{{ resolvedProps.footer }}</span>
-      </template>
-    </ElCard>
-
-
-    <!-- 图表组件 -->
-    <ChartRenderer
-      v-else-if="schema.type === ComponentType.Chart"
-      ref="componentRef"
-      :option="resolvedProps.option || {}"
-      :style="styleObject"
-    />
-
-    <!-- 未知组件 -->
-    <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
-      <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
-    </div>
-  </template>
+  <!-- 未知组件类型 -->
+  <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
+    <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
+  </div>
 </template>

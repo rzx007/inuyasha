@@ -8,6 +8,7 @@ export const dataComponents: ComponentMeta[] = [
     icon: 'BarChart3',
     category: 'data',
     display: 'inline-block',
+    componentName: 'ElStatistic',
     defaultProps: {},
     defaultStyle: {
       padding: '16px',

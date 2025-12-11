@@ -238,8 +238,7 @@ const setRef = (el: any) => {
     class="component-wrapper relative"
     :class="{
       'selected': selectedId === schema.id,
-      'mb-2': !schema.style.margin,
-      'inline-block align-top mr-2': displayType === 'inline-block',
+      'inline-block': displayType === 'inline-block',
       'opacity-50': dragCollected.isDragging,
       // 移除原有的 ring class，改为使用 indicator
     }"

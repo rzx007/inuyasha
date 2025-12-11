@@ -9,6 +9,7 @@ export const pageRootMeta: ComponentMeta = {
   type: ComponentType.PageRoot,
   name: '页面根元素',
   icon: 'Layout',
+  componentName: 'ZPageRoot',
   category: 'layout',
   canNest: true,
   display: 'block',
