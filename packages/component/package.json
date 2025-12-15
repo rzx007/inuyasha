@@ -1,0 +1,17 @@
+{
+  "name": "@inuyasha/component",
+  "version": "1.0.0",
+  "description": "Component system for Inuyasha",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@inuyasha/core": "workspace:*",
+    "nanoid": "^5.1.6"
+  }
+}

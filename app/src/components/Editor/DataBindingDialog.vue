@@ -9,8 +9,8 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGr
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ChevronRight, ChevronDown, Check } from 'lucide-vue-next'
-import type { ComponentSchema } from '@/types/component'
-import type { DataBinding } from '@/types/dataSource'
+import type { ComponentSchema } from '@inuyasha/core'
+import type { DataBinding } from '@inuyasha/core'
 
 interface Props {
   modelValue: boolean

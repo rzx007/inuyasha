@@ -18,7 +18,7 @@ import type {
   CopyToClipboardActionConfig,
   SetLocalStorageActionConfig,
   DownloadActionConfig,
-} from '@/types/event'
+} from '@inuyasha/core'
 import { useDataSourceStore } from '@/stores/dataSource'
 
 interface Props {

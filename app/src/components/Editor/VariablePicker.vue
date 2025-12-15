@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { TextCursor, X } from 'lucide-vue-next'
 import { useEditorStore } from '@/stores/editor'
-import type { ComponentSchema } from '@/types/component'
+import type { ComponentSchema } from '@inuyasha/core'
 
 const emit = defineEmits<{
   (e: 'select', value: string): void

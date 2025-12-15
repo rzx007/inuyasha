@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { ChevronDown, ChevronRight, Layers as LayersIcon } from 'lucide-vue-next'
 import { Badge } from '@/components/ui/badge'
-import type { ComponentSchema } from '@/types/component'
+import type { ComponentSchema } from '@inuyasha/core'
 import { getIconComponent } from '@/utils/iconMapping'
 import { useComponentStore } from '@/stores/component'
 

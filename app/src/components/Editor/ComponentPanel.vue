@@ -1,19 +1,30 @@
 <script setup lang="ts">
-import { computed, ref, defineComponent, h } from 'vue'
+import { computed, ref, defineComponent, h, onMounted } from 'vue'
 import type { PropType } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
 import { createComponent } from '@/utils/componentRegistry'
-import type { ComponentMeta } from '@/types/component'
-import { ComponentType } from '@/types/component'
+import type { ComponentMeta } from '@inuyasha/core'
+import { ComponentType } from '@inuyasha/core'
 import { getIconComponent } from '@/utils/iconMapping'
 import { useDrag } from 'vue3-dnd'
-import { DndTypes } from '@/types/dnd'
+import { DndTypes } from '@inuyasha/core'
+import { allComponents } from '@/config/components'
+import { pageRootMeta } from '@/config/components/pageRoot'
 
 const componentStore = useComponentStore()
 const editorStore = useEditorStore()
+
+// 注册组件（确保只注册一次）
+onMounted(() => {
+  // 如果还没有注册过组件，则注册
+  if (componentStore.getAllComponents().length === 0) {
+    componentStore.registerComponents(allComponents)
+    componentStore.registerComponent(pageRootMeta)
+  }
+})
 
 // 搜索关键词
 const searchKeyword = ref('')
@@ -35,13 +46,13 @@ function filterComponents(components: ComponentMeta[], keyword: string): Compone
 
 // 按分类获取组件（搜索过滤）
 const categorizedComponents = computed(() => {
-  const categories = componentStore.getCategorizedComponents()
+  const categories = componentStore.getCategorizedComponents
   return categories
-    .map(category => ({
+    .map((category) => ({
       ...category,
       components: filterComponents(category.components, searchKeyword.value),
     }))
-    .filter(category => category.components.length > 0) // 过滤掉空的分组
+    .filter((category) => category.components.length > 0) // 过滤掉空的分组
 })
 
 // 判断是否有搜索结果

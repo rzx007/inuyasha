@@ -7,10 +7,10 @@ import {
 } from 'lucide-vue-next'
 import { useDataSourceStore } from '@/stores/dataSource'
 import { useEditorStore } from '@/stores/editor'
-import { DataSourceType, type ApiDataSourceConfig, type DataSource } from '@/types/dataSource'
+import { DataSourceType, type ApiDataSourceConfig, type DataSource } from '@inuyasha/core'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import ApiForm from './ApiForm.vue'
-import type { ComponentSchema } from '@/types/component'
+import type { ComponentSchema } from '@inuyasha/core'
 
 const dataSourceStore = useDataSourceStore()
 const editorStore = useEditorStore()

@@ -128,3 +128,5 @@ export function objectToString(obj: { [x: string]: any }) {
 export function stringToObject(str: string) {
   return eval(`(${str})`)
 }
+
+export * from './iconMapping'

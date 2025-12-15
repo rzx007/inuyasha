@@ -7,7 +7,7 @@ import type {
   ActionType,
   EventBinding,
   ControlComponentActionConfig,
-} from '@/types/event'
+} from '@inuyasha/core'
 
 export function useEventPanel() {
   const editorStore = useEditorStore()

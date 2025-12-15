@@ -1,12 +1,16 @@
 {
   "name": "@inuyasha/utils",
   "version": "1.0.0",
-  "description": "",
+  "description": "Utility functions for Inuyasha",
   "main": "index.ts",
+  "types": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "lucide-vue-next": "^0.555.0"
+  }
 }

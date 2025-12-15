@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import type { ComponentSchema } from '@/types/component'
-import { ComponentType } from '@/types/component'
+import type { ComponentSchema } from '@inuyasha/core'
+import { ComponentType } from '@inuyasha/core'
 import { useComponentStore } from '@/stores/component'
 import { useEditorStore } from '@/stores/editor'
 import { ElOption } from 'element-plus'

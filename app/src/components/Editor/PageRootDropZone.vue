@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useDrop } from 'vue3-dnd'
-import { DndTypes, type DragItem } from '@/types/dnd'
+import { DndTypes, type DragItem } from '@inuyasha/core'
 import { useEditorStore } from '@/stores/editor'
 
 interface Props {

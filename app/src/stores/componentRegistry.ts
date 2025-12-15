@@ -1,31 +1,29 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { ComponentInstanceRegistry } from '@inuyasha/component'
+
+const registry = new ComponentInstanceRegistry()
 
 export const useComponentRegistry = defineStore('componentRegistry', () => {
   // Store component instances keyed by component ID
-  const registry = ref<Map<string, any>>(new Map())
+  const registryRef = ref(registry)
 
   function register(id: string, instance: any) {
-    if (id && instance) {
-      registry.value.set(id, instance)
-    }
+    registry.register(id, instance)
   }
 
   function unregister(id: string) {
-    if (id) {
-      registry.value.delete(id)
-    }
+    registry.unregister(id)
   }
 
   function getComponent(id: string) {
-    return registry.value.get(id)
+    return registry.getComponent(id)
   }
 
   return {
-    registry,
+    registry: registryRef,
     register,
     unregister,
     getComponent
   }
 })
-

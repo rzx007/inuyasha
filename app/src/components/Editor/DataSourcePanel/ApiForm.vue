@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import VariablePicker from '../VariablePicker.vue'
 import { resolveVariablesInConfig } from '@/utils/expressionEngine'
-import type { ApiDataSourceConfig, DataSource } from '@/types/dataSource'
+import type { ApiDataSourceConfig, DataSource } from '@inuyasha/core'
 import { useDataSourceStore } from '@/stores/dataSource'
 
 const props = defineProps<{

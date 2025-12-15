@@ -1,9 +1,9 @@
 import { computed } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useDataSourceStore } from '@/stores/dataSource'
-import type { DataBinding } from '@/types/dataSource'
+import type { DataBinding } from '@inuyasha/core'
 import { resolveBinding } from '@/utils/expressionEngine'
-import { findComponentById } from '@/utils/tree'
+import { findComponentById } from '@inuyasha/component'
 
 export function useComponentProps() {
   const editorStore = useEditorStore()

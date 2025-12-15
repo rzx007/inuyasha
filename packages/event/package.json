@@ -1,0 +1,17 @@
+{
+  "name": "@inuyasha/event",
+  "version": "1.0.0",
+  "description": "Event system for Inuyasha",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@inuyasha/core": "workspace:*",
+    "@inuyasha/expression": "workspace:*"
+  }
+}
