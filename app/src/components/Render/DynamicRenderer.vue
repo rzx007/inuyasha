@@ -5,10 +5,9 @@ import { useComponentStore } from '@/stores/component'
 import type { ComponentSchema } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
 import { ElOption } from 'element-plus'
-import { resolveBinding } from '@/utils/expressionEngine'
+import { resolveBinding, createExpressionContext } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
 import { useFormStateStore } from '@/stores/formState'
-import { useDataSourceStore } from '@/stores/dataSource'
 import { useComponentRegistry } from '@/stores/componentRegistry'
 
 // 循环引用问题：DynamicRenderer 引用 EditorComponentWrapper，反之亦然
@@ -33,7 +32,6 @@ const props = defineProps<Props>()
 const editorStore = useEditorStore()
 const componentStore = useComponentStore()
 const formStateStore = useFormStateStore()
-const dataSourceStore = useDataSourceStore()
 const componentRegistry = useComponentRegistry()
 
 // 组件实例引用
@@ -70,17 +68,15 @@ onUnmounted(() => {
   componentRegistry.unregister(props.schema.id)
 })
 
+// 创建响应式 expression context，确保依赖追踪
+const expressionContext = computed(() => createExpressionContext())
+
 const resolvedProps = computed(() => {
-  // 先访问响应式属性以建立依赖追踪
-  editorStore.pageConfig
-  dataSourceStore.dataSources
-  formStateStore.states
-  
   const newProps = { ...props.schema.props }
   for (const key in newProps) {
     const bindingKey = `${key}_binding`
     if (newProps[bindingKey]) {
-      const resolvedValue = resolveBinding(newProps[bindingKey])
+      const resolvedValue = resolveBinding(newProps[bindingKey], expressionContext.value)
       if (resolvedValue !== undefined) {
         newProps[key] = resolvedValue
       }
@@ -91,11 +87,6 @@ const resolvedProps = computed(() => {
 
 // Create a computed version of the style that resolves any style bindings
 const resolvedStyle = computed(() => {
-  // 先访问响应式属性以建立依赖追踪
-  editorStore.pageConfig
-  dataSourceStore.dataSources
-  formStateStore.states
-  
   const newStyle = { ...props.schema.style }
   const propsObj = props.schema.props
   // 查找 style.xxx_binding 格式的绑定
@@ -104,7 +95,7 @@ const resolvedStyle = computed(() => {
       // 提取样式属性名，例如 'style.width_binding' -> 'width'
       const styleKey = key.substring(6, key.length - 8)
       const binding = propsObj[key]
-      const resolvedValue = resolveBinding(binding)
+      const resolvedValue = resolveBinding(binding, expressionContext.value)
       if (resolvedValue !== undefined) {
         newStyle[styleKey] = resolvedValue
       }

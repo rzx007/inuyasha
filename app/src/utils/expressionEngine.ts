@@ -6,17 +6,17 @@ import { useFormStateStore } from '@/stores/formState'
 import type { ExpressionContext } from '@inuyasha/expression'
 
 /**
- * Resolves the value of a data binding configuration.
- * @param binding - The data binding configuration object.
- * @returns The resolved value, or undefined if not found.
+ * 创建用于计算属性的响应式表达式上下文。
+ * 确保所有响应式依赖被正确追踪。
+ * @returns 响应式的表达式上下文
  */
-export function resolveBinding(binding: DataBinding): any {
+export function createExpressionContext(): ExpressionContext {
   const editorStore = useEditorStore()
   const dataSourceStore = useDataSourceStore()
   const formStateStore = useFormStateStore()
 
-  // 直接访问响应式属性以建立依赖追踪
-  const context: ExpressionContext = {
+  // 在 computed 中访问响应式属性以建立依赖追踪
+  return {
     editorStore: {
       pageConfig: editorStore.pageConfig
     },
@@ -30,7 +30,17 @@ export function resolveBinding(binding: DataBinding): any {
       }
     }
   }
-  return resolveBindingCore(binding, context)
+}
+
+/**
+ * 解析数据绑定配置对象的值。
+ * @param binding - 数据绑定配置对象。
+ * @param context - 可选的表达式上下文。如果未提供, 将自动创建新上下文。
+ * @returns 解析后的值，如果未找到则返回 undefined。
+ */
+export function resolveBinding(binding: DataBinding, context?: ExpressionContext): any {
+  const ctx = context || createExpressionContext()
+  return resolveBindingCore(binding, ctx)
 }
 
 // 解析变量路径 (例如 "input1.value" 或 "user.name")
