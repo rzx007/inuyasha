@@ -4,6 +4,7 @@ import { useComponentStore } from '@/stores/component'
 import DataBindingDialog from '../DataBindingDialog.vue'
 import PropField from './PropField.vue'
 import { useComponentProps } from './useComponentProps'
+import LabelInput from '@/components/BaseUI/LabelInput.vue'
 
 interface Props {
   componentId: string

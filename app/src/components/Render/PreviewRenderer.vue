@@ -121,7 +121,7 @@ const componentMeta = computed(() => componentStore.getComponentMeta(props.schem
 
 // 动态事件绑定
 const dynamicEvents = computed(() => {
-  const events: Record<string, Function> = {}
+  const events: Record<string, () => void> = {}
   if (componentMeta.value?.triggers) {
     componentMeta.value.triggers.forEach(trigger => {
       if (trigger.event) {
@@ -195,26 +195,34 @@ const dynamicSlotItems = computed(() => {
 <template>
   <!-- PageRoot 组件 (特殊处理) -->
   <component
-    v-if="schema.type === ComponentType.PageRoot"
     :is="componentMeta?.componentName || 'div'"
+    v-if="schema.type === ComponentType.PageRoot"
     :style="styleObject"
     class="page-root min-h-full"
   >
-    <PreviewRenderer v-for="child in schema.children" :key="child.id" :schema="child" />
+    <PreviewRenderer
+      v-for="child in schema.children"
+      :key="child.id"
+      :schema="child"
+    />
   </component>
   <!-- 动态渲染部分 -->
   <template v-else-if="canUseDynamicRender">
     <!-- 需要双向绑定的组件（表单组件） -->
     <component
+      :is="componentMeta?.componentName"
       v-if="needsModelValue"
       ref="componentRef"
-      :is="componentMeta?.componentName"
       v-bind="{ ...resolvedProps, ...modelValueBindings }"
       :style="styleObject"
       v-on="{ ...dynamicEvents, ...modelValueEvents }"
     >
       <!-- 动态插槽渲染 -->
-      <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
+      <template
+        v-for="slot in componentMeta?.slots"
+        :key="slot.name"
+        #[slot.name]
+      >
         <PreviewRenderer
           v-for="child in getSlotChildren(slot.name)"
           :key="child.id"
@@ -225,15 +233,19 @@ const dynamicSlotItems = computed(() => {
 
     <!-- 不需要双向绑定的组件 -->
     <component
+      :is="componentMeta?.componentName"
       v-else
       ref="componentRef"
-      :is="componentMeta?.componentName"
       v-bind="resolvedProps"
       :style="styleObject"
       v-on="dynamicEvents"
     >
       <!-- 动态插槽渲染 (Static definition) -->
-      <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
+      <template
+        v-for="slot in componentMeta?.slots"
+        :key="slot.name"
+        #[slot.name]
+      >
         <PreviewRenderer
           v-for="child in getSlotChildren(slot.name)"
           :key="child.id"
@@ -242,7 +254,11 @@ const dynamicSlotItems = computed(() => {
       </template>
 
       <!-- 动态插槽渲染 (Dynamic generation from props.items) -->
-      <template v-for="item in dynamicSlotItems" :key="item.name" #[item.name]>
+      <template
+        v-for="item in dynamicSlotItems"
+        :key="item.name"
+        #[item.name]
+      >
         <PreviewRenderer
           v-for="child in getSlotChildren(item.name)"
           :key="child.id"
@@ -258,7 +274,13 @@ const dynamicSlotItems = computed(() => {
   </template>
 
   <!-- 未知组件类型 -->
-  <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
-    <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
+  <div
+    v-else
+    :style="styleObject"
+    class="p-4 border border-dashed border-red-400 bg-red-50"
+  >
+    <div class="text-red-500 text-sm">
+      未知组件类型: {{ schema.type }}
+    </div>
   </div>
 </template>

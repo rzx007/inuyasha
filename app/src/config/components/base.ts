@@ -127,7 +127,7 @@ export const baseComponents: ComponentMeta[] = [
         type: 'number',
         defaultValue: 100,
       },
-     
+
     ],
   },
   {
@@ -253,7 +253,7 @@ export const baseComponents: ComponentMeta[] = [
     category: 'base',
     canNest: false,
     display: 'block',
-    componentName: 'ElDivider',
+    componentName: 'ZDivider',
     defaultProps: {
       direction: 'horizontal',
     },
@@ -269,6 +269,34 @@ export const baseComponents: ComponentMeta[] = [
         options: [
           { label: '水平', value: 'horizontal' },
           { label: '垂直', value: 'vertical' },
+        ],
+      },
+      {
+        key: 'label',
+        label: '标签',
+        type: 'text',
+        defaultValue: '',
+      },
+      {
+        key: 'borderStyle',
+        label: '边框样式',
+        type: 'select',
+        defaultValue: 'solid',
+        options: [
+          { label: '实线', value: 'solid' },
+          { label: '虚线', value: 'dashed' },
+          { label: '点线', value: 'dotted' },
+        ],
+      },
+      {
+        key: 'contentPosition',
+        label: '内容位置',
+        type: 'select',
+        defaultValue: 'center',
+        options: [
+          { label: '左', value: 'left' },
+          { label: '中', value: 'center' },
+          { label: '右', value: 'right' },
         ],
       },
     ],

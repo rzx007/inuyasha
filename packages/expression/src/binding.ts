@@ -19,9 +19,14 @@ export function resolveBinding(binding: DataBinding, context: ExpressionContext)
   switch (binding.type) {
     case 'dataSource':
       if (binding.dataSourceId) {
+        // 如果数据源 ID 存在，则查找数据源
         const ds = dataSourceStore.dataSources[binding.dataSourceId]
         if (ds && ds.data) {
+          // 如果数据源存在，则返回数据源数据和路径
           return binding.path ? get(ds.data, binding.path) : ds.data
+        } else {
+          // 如果数据源不存在，则返回 undefined
+          return undefined
         }
       }
       return undefined
@@ -32,11 +37,14 @@ export function resolveBinding(binding: DataBinding, context: ExpressionContext)
         const rootComponent = editorStore.pageConfig.rootComponent
         let componentSchema = null
         if (rootComponent.id === binding.componentId) {
+          // 如果组件 ID 与根组件 ID 相同，则返回根组件 schema
           componentSchema = rootComponent
         } else if (rootComponent.children) {
+          // 如果组件 ID 不在根组件中，则查找子组件
           componentSchema = findComponentById(binding.componentId, rootComponent.children)
         }
         
+        // 如果找不到组件，则返回 undefined
         if (!componentSchema) {
           return undefined
         }

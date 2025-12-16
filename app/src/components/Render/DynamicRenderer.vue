@@ -182,7 +182,7 @@ const componentMeta = computed(() => componentStore.getComponentMeta(props.schem
 
 // 动态事件绑定
 const dynamicEvents = computed(() => {
-  const events: Record<string, Function> = {}
+  const events: Record<string, () => void> = {}
   if (componentMeta.value?.triggers) {
     componentMeta.value.triggers.forEach(trigger => {
       if (trigger.event) {
