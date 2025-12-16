@@ -5,7 +5,7 @@ import { useComponentStore } from '@/stores/component'
 import type { ComponentSchema } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
 import { ElOption } from 'element-plus'
-import { resolveBinding, createExpressionContext } from '@/utils/expressionEngine'
+import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
 import { useFormStateStore } from '@/stores/formState'
 import { useComponentRegistry } from '@/stores/componentRegistry'
@@ -68,15 +68,18 @@ onUnmounted(() => {
   componentRegistry.unregister(props.schema.id)
 })
 
-// 创建响应式 expression context，确保依赖追踪
-const expressionContext = computed(() => createExpressionContext())
+
 
 const resolvedProps = computed(() => {
+  
+  editorStore.pageConfig
+  formStateStore.states
+
   const newProps = { ...props.schema.props }
   for (const key in newProps) {
     const bindingKey = `${key}_binding`
     if (newProps[bindingKey]) {
-      const resolvedValue = resolveBinding(newProps[bindingKey], expressionContext.value)
+      const resolvedValue = resolveBinding(newProps[bindingKey])
       if (resolvedValue !== undefined) {
         newProps[key] = resolvedValue
       }
@@ -87,6 +90,9 @@ const resolvedProps = computed(() => {
 
 // Create a computed version of the style that resolves any style bindings
 const resolvedStyle = computed(() => {
+  editorStore.pageConfig
+  formStateStore.states
+
   const newStyle = { ...props.schema.style }
   const propsObj = props.schema.props
   // 查找 style.xxx_binding 格式的绑定
@@ -95,7 +101,7 @@ const resolvedStyle = computed(() => {
       // 提取样式属性名，例如 'style.width_binding' -> 'width'
       const styleKey = key.substring(6, key.length - 8)
       const binding = propsObj[key]
-      const resolvedValue = resolveBinding(binding, expressionContext.value)
+      const resolvedValue = resolveBinding(binding)
       if (resolvedValue !== undefined) {
         newStyle[styleKey] = resolvedValue
       }
