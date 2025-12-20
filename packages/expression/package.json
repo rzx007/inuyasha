@@ -11,8 +11,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@inuyasha/core": "workspace:*",
     "@inuyasha/component": "workspace:*",
+    "@inuyasha/core": "workspace:*",
     "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12"
   }
 }
