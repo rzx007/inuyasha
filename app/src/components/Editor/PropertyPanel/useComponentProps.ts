@@ -97,13 +97,16 @@ export function useComponentProps() {
   function formatBindingLabel(binding: DataBinding): string {
     if (binding.type === 'dataSource' && binding.dataSourceId) {
       const ds = dataSourceStore.dataSources[binding.dataSourceId]
+      // 如果数据源存在，则返回数据源名称和路径
       if (ds) {
         return `{{ ${ds.name}${binding.path ? '.' + binding.path : ''} }}`
       }
+      // 如果数据源不存在，则返回数据源 ID 和路径
       return `{{ ${binding.dataSourceId}${binding.path ? '.' + binding.path : ''} }}`
     } else if (binding.type === 'component' && binding.componentId) {
       const root = editorStore.pageConfig.rootComponent
       let comp = null
+      // 如果组件 ID 与根组件 ID 相同，则返回根组件语义化 ID 和路径
       if (root.id === binding.componentId) {
         comp = root
       } else if (root.children) {
@@ -113,10 +116,13 @@ export function useComponentProps() {
       if (comp) {
         return `{{ ${comp.semanticId}${binding.path ? '.' + binding.path : ''} }}`
       }
+      // 如果找不到组件，则返回组件 ID 和路径
       return `{{ ${binding.componentId}${binding.path ? '.' + binding.path : ''} }}`
     } else if (binding.type === 'static') {
-       return `{{ ${binding.value} }}`
+      // 如果绑定类型为静态，则返回静态值
+      return `{{ ${binding.value} }}`
     }
+    // 如果绑定类型未知，则返回 Unknown
     return '{{ Unknown }}'
   }
 

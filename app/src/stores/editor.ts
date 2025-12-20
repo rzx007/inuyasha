@@ -10,7 +10,6 @@ import { useDataSourceStore } from '@/stores/dataSource'
 import { useFormStateStore } from '@/stores/formState'
 import { useComponentRegistry } from '@/stores/componentRegistry'
 
-// Create editor store instance
 let editorStoreCore: EditorStoreCore | null = null
 
 function getEditorStoreCore(): EditorStoreCore {

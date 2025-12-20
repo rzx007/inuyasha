@@ -5,6 +5,7 @@ import { ZButton } from './z-button'
 import { ZTabs, ZCollapse, ZRow, ZContainer, ZPageRoot } from './layout'
 import { ZTable } from './data'
 import { ZSelect } from './z-select'
+import { ZDivider } from './z-divider'
 
 export const materialsComponents = {
   ZButton,
@@ -15,4 +16,5 @@ export const materialsComponents = {
   ZSelect,
   ZContainer,
   ZPageRoot,
+  ZDivider,
 }

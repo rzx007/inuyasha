@@ -2,12 +2,12 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { ComponentSchema } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
-import { useComponentStore } from '@/stores/component'
-import { useEditorStore } from '@/stores/editor'
-import { ElOption } from 'element-plus'
-import { resolveBinding, createExpressionContext } from '@/utils/expressionEngine'
+import { resolveBinding } from '@/utils/expressionEngine'
 import { executeEvent } from '@/utils/eventEngine'
+import { useEditorStore } from '@/stores/editor'
+import { useComponentStore } from '@/stores/component'
 import { useFormStateStore } from '@/stores/formState'
+import { useDataSourceStore } from '@/stores/dataSource'
 import { useComponentRegistry } from '@/stores/componentRegistry'
 
 interface Props {
@@ -17,6 +17,7 @@ const props = defineProps<Props>()
 const componentStore = useComponentStore()
 const editorStore = useEditorStore()
 const formStateStore = useFormStateStore()
+const dataSourceStore = useDataSourceStore()
 const componentRegistry = useComponentRegistry()
 
 // 组件实例引用
@@ -52,15 +53,19 @@ onUnmounted(() => {
   componentRegistry.unregister(props.schema.id)
 })
 
-// 创建响应式 expression context，确保依赖追踪
-const expressionContext = computed(() => createExpressionContext())
 
+// 解析属性绑定
 const resolvedProps = computed(() => {
+  
+  editorStore.pageConfig
+  formStateStore.states
+  dataSourceStore.dataSources
+
   const newProps = { ...props.schema.props }
   for (const key in newProps) {
     const bindingKey = `${key}_binding`
     if (newProps[bindingKey]) {
-      const resolvedValue = resolveBinding(newProps[bindingKey], expressionContext.value)
+      const resolvedValue = resolveBinding(newProps[bindingKey])
       if (resolvedValue !== undefined) {
         newProps[key] = resolvedValue
       }
@@ -69,8 +74,13 @@ const resolvedProps = computed(() => {
   return newProps
 })
 
-// Create a computed version of the style that resolves any style bindings
+// 解析样式绑定
 const resolvedStyle = computed(() => {
+
+  editorStore.pageConfig
+  formStateStore.states
+  dataSourceStore.dataSources
+
   const newStyle = { ...props.schema.style }
   const propsObj = props.schema.props
 
@@ -80,7 +90,7 @@ const resolvedStyle = computed(() => {
       // 提取样式属性名，例如 'style.width_binding' -> 'width'
       const styleKey = key.substring(6, key.length - 8)
       const binding = propsObj[key]
-      const resolvedValue = resolveBinding(binding, expressionContext.value)
+      const resolvedValue = resolveBinding(binding)
       if (resolvedValue !== undefined) {
         newStyle[styleKey] = resolvedValue
       }
@@ -111,7 +121,7 @@ const componentMeta = computed(() => componentStore.getComponentMeta(props.schem
 
 // 动态事件绑定
 const dynamicEvents = computed(() => {
-  const events: Record<string, Function> = {}
+  const events: Record<string, () => void> = {}
   if (componentMeta.value?.triggers) {
     componentMeta.value.triggers.forEach(trigger => {
       if (trigger.event) {
@@ -185,55 +195,57 @@ const dynamicSlotItems = computed(() => {
 <template>
   <!-- PageRoot 组件 (特殊处理) -->
   <component
-    v-if="schema.type === ComponentType.PageRoot"
     :is="componentMeta?.componentName || 'div'"
+    v-if="schema.type === ComponentType.PageRoot"
     :style="styleObject"
     class="page-root min-h-full"
   >
-    <PreviewRenderer v-for="child in schema.children" :key="child.id" :schema="child" />
+    <PreviewRenderer
+      v-for="child in schema.children"
+      :key="child.id"
+      :schema="child"
+    />
   </component>
   <!-- 动态渲染部分 -->
   <template v-else-if="canUseDynamicRender">
     <!-- 需要双向绑定的组件（表单组件） -->
     <component
+      :is="componentMeta?.componentName"
       v-if="needsModelValue"
       ref="componentRef"
-      :is="componentMeta?.componentName"
       v-bind="{ ...resolvedProps, ...modelValueBindings }"
       :style="styleObject"
       v-on="{ ...dynamicEvents, ...modelValueEvents }"
     >
       <!-- 动态插槽渲染 -->
-      <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
+      <template
+        v-for="slot in componentMeta?.slots"
+        :key="slot.name"
+        #[slot.name]
+      >
         <PreviewRenderer
           v-for="child in getSlotChildren(slot.name)"
           :key="child.id"
           :schema="child"
         />
       </template>
-
-      <!-- 下拉框选项特殊处理 (如果组件是 ElSelect) -->
-      <template v-if="schema.type === ComponentType.Select">
-        <ElOption
-          v-for="item in resolvedProps.options"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value"
-        />
-      </template>
     </component>
 
     <!-- 不需要双向绑定的组件 -->
     <component
+      :is="componentMeta?.componentName"
       v-else
       ref="componentRef"
-      :is="componentMeta?.componentName"
       v-bind="resolvedProps"
       :style="styleObject"
       v-on="dynamicEvents"
     >
       <!-- 动态插槽渲染 (Static definition) -->
-      <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
+      <template
+        v-for="slot in componentMeta?.slots"
+        :key="slot.name"
+        #[slot.name]
+      >
         <PreviewRenderer
           v-for="child in getSlotChildren(slot.name)"
           :key="child.id"
@@ -242,7 +254,11 @@ const dynamicSlotItems = computed(() => {
       </template>
 
       <!-- 动态插槽渲染 (Dynamic generation from props.items) -->
-      <template v-for="item in dynamicSlotItems" :key="item.name" #[item.name]>
+      <template
+        v-for="item in dynamicSlotItems"
+        :key="item.name"
+        #[item.name]
+      >
         <PreviewRenderer
           v-for="child in getSlotChildren(item.name)"
           :key="child.id"
@@ -258,7 +274,13 @@ const dynamicSlotItems = computed(() => {
   </template>
 
   <!-- 未知组件类型 -->
-  <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
-    <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
+  <div
+    v-else
+    :style="styleObject"
+    class="p-4 border border-dashed border-red-400 bg-red-50"
+  >
+    <div class="text-red-500 text-sm">
+      未知组件类型: {{ schema.type }}
+    </div>
   </div>
 </template>

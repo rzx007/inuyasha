@@ -80,7 +80,7 @@ onMounted(() => {
         </div>
 
         <!-- 属性面板 -->
-        <div class="w-80 shrink-0">
+        <div class="w-72 shrink-0">
           <PropertyPanel />
         </div>
       </div>
