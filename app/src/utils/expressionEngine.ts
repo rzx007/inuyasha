@@ -8,6 +8,7 @@ import type { ExpressionContext } from '@inuyasha/expression'
 /**
  * 创建用于计算属性的响应式表达式上下文。
  * 确保所有响应式依赖被正确追踪。
+ * 返回的 getter 对象确保每次访问时都能触发 Vue 响应式追踪。
  * @returns 响应式的表达式上下文
  */
 export function createExpressionContext(): ExpressionContext {
@@ -15,17 +16,20 @@ export function createExpressionContext(): ExpressionContext {
   const dataSourceStore = useDataSourceStore()
   const formStateStore = useFormStateStore()
 
-  // 在 computed 中访问响应式属性以建立依赖追踪
+  // 使用 getter 确保每次访问时都触发响应式追踪
   return {
     editorStore: {
-      pageConfig: editorStore.pageConfig
+      get pageConfig() {
+        return editorStore.pageConfig
+      }
     },
     dataSourceStore: {
-      dataSources: dataSourceStore.dataSources
+      get dataSources() {
+        return dataSourceStore.dataSources
+      }
     },
     formStateStore: {
       getComponentState: (componentId: string, key: string) => {
-        // 使用 store 的方法，该方法内部会访问响应式 states
         return formStateStore.getComponentState(componentId, key)
       }
     }
@@ -46,23 +50,6 @@ export function resolveBinding(binding: DataBinding, context?: ExpressionContext
 
 // 解析 API 配置中的所有变量
 export function resolveVariablesInConfig(config: ApiDataSourceConfig): ApiDataSourceConfig {
-    const editorStore = useEditorStore()
-    const dataSourceStore = useDataSourceStore()
-    const formStateStore = useFormStateStore()
-
-    const context: ExpressionContext = {
-      editorStore: {
-        pageConfig: editorStore.pageConfig
-      },
-      dataSourceStore: {
-        dataSources: dataSourceStore.dataSources
-      },
-      formStateStore: {
-        getComponentState: (componentId: string, key: string) => {
-          return formStateStore.getComponentState(componentId, key)
-        }
-      }
-    }
-
+    const context = createExpressionContext()
     return resolveVariablesInConfigCore(config, context)
 }
