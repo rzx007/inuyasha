@@ -111,24 +111,9 @@ importers:
       '@element-plus/icons-vue':
         specifier: ^2.3.2
         version: 2.3.2(vue@3.5.24(typescript@5.9.3))
-      '@inuyasha/component':
-        specifier: workspace:*
-        version: link:../packages/component
       '@inuyasha/core':
         specifier: workspace:*
         version: link:../packages/core
-      '@inuyasha/editor':
-        specifier: workspace:*
-        version: link:../packages/editor
-      '@inuyasha/event':
-        specifier: workspace:*
-        version: link:../packages/event
-      '@inuyasha/expression':
-        specifier: workspace:*
-        version: link:../packages/expression
-      '@inuyasha/state':
-        specifier: workspace:*
-        version: link:../packages/state
       '@inuyasha/utils':
         specifier: workspace:*
         version: link:../packages/utils
@@ -276,69 +261,21 @@ importers:
         specifier: ^9.38.0
         version: 9.39.1(jiti@2.6.1)
 
-  packages/component:
-    dependencies:
-      '@inuyasha/core':
-        specifier: workspace:*
-        version: link:../core
-      nanoid:
-        specifier: ^5.1.6
-        version: 5.1.6
-
   packages/core:
     dependencies:
-      zod:
-        specifier: 3.25.76
-        version: 3.25.76
-
-  packages/editor:
-    dependencies:
-      '@inuyasha/component':
-        specifier: workspace:*
-        version: link:../component
-      '@inuyasha/core':
-        specifier: workspace:*
-        version: link:../core
-      nanoid:
-        specifier: ^5.1.6
-        version: 5.1.6
-
-  packages/event:
-    dependencies:
-      '@inuyasha/core':
-        specifier: workspace:*
-        version: link:../core
-      '@inuyasha/expression':
-        specifier: workspace:*
-        version: link:../expression
-
-  packages/expression:
-    dependencies:
-      '@inuyasha/component':
-        specifier: workspace:*
-        version: link:../component
-      '@inuyasha/core':
-        specifier: workspace:*
-        version: link:../core
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21
+      nanoid:
+        specifier: ^5.1.6
+        version: 5.1.6
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
     devDependencies:
       '@types/lodash-es':
         specifier: ^4.17.12
         version: 4.17.12
-
-  packages/state:
-    dependencies:
-      '@inuyasha/core':
-        specifier: workspace:*
-        version: link:../core
-      '@inuyasha/expression':
-        specifier: workspace:*
-        version: link:../expression
-      nanoid:
-        specifier: ^5.1.6
-        version: 5.1.6
 
   packages/utils:
     dependencies:
@@ -348,24 +285,9 @@ importers:
 
   packages/vue:
     dependencies:
-      '@inuyasha/component':
-        specifier: workspace:*
-        version: link:../component
       '@inuyasha/core':
         specifier: workspace:*
         version: link:../core
-      '@inuyasha/editor':
-        specifier: workspace:*
-        version: link:../editor
-      '@inuyasha/event':
-        specifier: workspace:*
-        version: link:../event
-      '@inuyasha/expression':
-        specifier: workspace:*
-        version: link:../expression
-      '@inuyasha/state':
-        specifier: workspace:*
-        version: link:../state
       lodash-es:
         specifier: ^4.17.21
         version: 4.17.21

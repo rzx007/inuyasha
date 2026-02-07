@@ -4,7 +4,7 @@ import { cloneDeep } from 'lodash-es'
 import type { ComponentId, ComponentSchema } from '@inuyasha/core'
 import type { SelectedComponent, PageConfig } from '@inuyasha/core'
 import { EditorMode } from '@inuyasha/core'
-import { EditorStore as EditorStoreCore } from '@inuyasha/editor'
+import { EditorStore as EditorStoreCore } from '@inuyasha/core/editor'
 import { nanoid } from 'nanoid'
 import { useDataSourceStore } from './dataSource'
 import { useFormStateStore } from './formState'
@@ -27,11 +27,11 @@ function getEditorStoreCore(): EditorStoreCore {
         label: pageRootMeta.name,
         props: { ...pageRootMeta.defaultProps },
         style: { ...pageRootMeta.defaultStyle },
-        children: [],
+        children: []
       },
       dataSources: {},
       createdAt: Date.now(),
-      updatedAt: Date.now(),
+      updatedAt: Date.now()
     })
   }
   return editorStoreCore
@@ -190,6 +190,6 @@ export const useEditorStore = defineStore('editor', () => {
     selectComponent,
     moveComponent,
     findComponentInTree,
-    createDefaultPageRoot,
+    createDefaultPageRoot
   }
 })

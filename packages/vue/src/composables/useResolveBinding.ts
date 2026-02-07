@@ -1,4 +1,4 @@
-import { resolveBinding as resolveBindingCore } from '@inuyasha/expression'
+import { resolveBinding as resolveBindingCore } from '@inuyasha/core/expression'
 import type { DataBinding } from '@inuyasha/core'
 import { useExpressionContext } from './useExpressionContext'
 

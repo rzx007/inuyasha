@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { ComponentInstanceRegistry } from '@inuyasha/component'
+import { ComponentInstanceRegistry } from '@inuyasha/core/component'
 
 const registry = new ComponentInstanceRegistry()
 

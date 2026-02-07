@@ -3,7 +3,9 @@ import { computed, ref, defineComponent, h, onMounted } from 'vue'
 import type { PropType } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
-import { useComponentStore, useEditorStore, createComponent } from '@inuyasha/vue'
+import { useComponentStore } from '@/stores/component'
+import { useEditorStore } from '@/stores/editor'
+import { createComponent } from '@inuyasha/core/component'
 import type { ComponentMeta } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
 import { getIconComponent } from '@/utils/iconMapping'
@@ -31,14 +33,15 @@ const searchKeyword = ref('')
 function filterComponents(components: ComponentMeta[], keyword: string): ComponentMeta[] {
   // 过滤掉 PageRoot 组件
   let filtered = components.filter(meta => meta.type !== ComponentType.PageRoot)
-  
+
   if (!keyword.trim()) {
     return filtered
   }
   const lowerKeyword = keyword.toLowerCase().trim()
-  return filtered.filter(meta => 
-    meta.name.toLowerCase().includes(lowerKeyword) ||
-    meta.type.toLowerCase().includes(lowerKeyword)
+  return filtered.filter(
+    meta =>
+      meta.name.toLowerCase().includes(lowerKeyword) ||
+      meta.type.toLowerCase().includes(lowerKeyword)
   )
 }
 
@@ -46,11 +49,11 @@ function filterComponents(components: ComponentMeta[], keyword: string): Compone
 const categorizedComponents = computed(() => {
   const categories = componentStore.getCategorizedComponents
   return categories
-    .map((category) => ({
+    .map(category => ({
       ...category,
-      components: filterComponents(category.components, searchKeyword.value),
+      components: filterComponents(category.components, searchKeyword.value)
     }))
-    .filter((category) => category.components.length > 0) // 过滤掉空的分组
+    .filter(category => category.components.length > 0) // 过滤掉空的分组
 })
 
 // 判断是否有搜索结果
@@ -76,15 +79,15 @@ const DraggableItem = defineComponent({
   setup(props, { slots }) {
     const [collected, dragSource] = useDrag(() => ({
       type: DndTypes.COMPONENT,
-      item: { 
-        type: DndTypes.COMPONENT, 
+      item: {
+        type: DndTypes.COMPONENT,
         meta: props.meta,
         cloneFn: cloneComponent,
         display: props.meta.display // 传递组件显示类型
       },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging(),
-      }),
+      collect: monitor => ({
+        isDragging: monitor.isDragging()
+      })
     }))
 
     const isDragging = computed(() => collected.value.isDragging)
@@ -135,26 +138,21 @@ const DraggableItem = defineComponent({
 
     <div class="flex-1 overflow-y-auto p-4">
       <!-- 无搜索结果提示 -->
-      <div v-if="searchKeyword.trim() && !hasSearchResults" class="flex flex-col items-center justify-center py-12 text-slate-400">
+      <div
+        v-if="searchKeyword.trim() && !hasSearchResults"
+        class="flex flex-col items-center justify-center py-12 text-slate-400"
+      >
         <Search class="mb-3 opacity-50" :size="32" />
         <p class="text-sm">未找到匹配的组件</p>
       </div>
 
       <!-- 动态渲染分类组件 -->
-      <div
-        v-for="category in categorizedComponents"
-        :key="category.key"
-        class="mb-6"
-      >
+      <div v-for="category in categorizedComponents" :key="category.key" class="mb-6">
         <h4 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3 px-1">
           {{ category.label }}
         </h4>
         <div class="grid grid-cols-2 gap-2">
-          <DraggableItem
-            v-for="meta in category.components"
-            :key="meta.type"
-            :meta="meta"
-          >
+          <DraggableItem v-for="meta in category.components" :key="meta.type" :meta="meta">
             <template #icon>
               <component :is="getIconComponent(meta.icon)" :size="16" />
             </template>

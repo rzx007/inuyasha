@@ -3,20 +3,20 @@ import { useEditorStore } from '@/stores/editor'
 import { useDataSourceStore } from '@/stores/dataSource'
 import type { DataBinding } from '@inuyasha/core'
 import { useResolveBinding } from '@inuyasha/vue'
-import { findComponentById } from '@inuyasha/component'
+import { findComponentById } from '@inuyasha/core/component'
 
 export function useComponentProps() {
   const editorStore = useEditorStore()
   const dataSourceStore = useDataSourceStore()
   const resolveBinding = useResolveBinding()
-  
+
   const selectedComponent = computed(() => editorStore.selectedComponent)
 
   // 通用获取属性值（支持 props 和 style）
   function getValue(key: string, isStyle = false) {
     if (!selectedComponent.value) return undefined
-    const target = isStyle 
-      ? selectedComponent.value.schema.style 
+    const target = isStyle
+      ? selectedComponent.value.schema.style
       : selectedComponent.value.schema.props
     return target[key]
   }
@@ -113,7 +113,7 @@ export function useComponentProps() {
       } else if (root.children) {
         comp = findComponentById(binding.componentId, root.children)
       }
-      
+
       if (comp) {
         return `{{ ${comp.semanticId}${binding.path ? '.' + binding.path : ''} }}`
       }
@@ -138,4 +138,3 @@ export function useComponentProps() {
     updateBinding
   }
 }
-

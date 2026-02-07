@@ -20,9 +20,12 @@ function handleCanvasClick() {
 </script>
 
 <template>
-  <div class="canvas-container relative h-full bg-gray-100" @click="handleCanvasClick">
+  <div
+    class="canvas-container relative h-full bg-gray-100"
+    @click="handleCanvasClick"
+  >
     <div class="canvas-content overflow-auto h-full p-4">
-      {{ rootComponent }}
+      <!-- {{ rootComponent }} -->
       <DynamicRenderer :schema="rootComponent" />
 
       <!-- 空状态提示 -->
@@ -31,7 +34,9 @@ function handleCanvasClick() {
         class="empty-canvas absolute inset-0 flex items-center justify-center text-gray-400 pointer-events-none"
       >
         <div class="text-center">
-          <div class="text-4xl mb-2">📋</div>
+          <div class="text-4xl mb-2">
+            📋
+          </div>
           <div>从左侧组件库拖拽添加组件</div>
         </div>
       </div>

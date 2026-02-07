@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Layers as LayersIcon } from 'lucide-vue-next
 import { Badge } from '@/components/ui/badge'
 import type { ComponentSchema } from '@inuyasha/core'
 import { getIconComponent } from '@/utils/iconMapping'
-import { useComponentStore } from '@/stores/component'
+import { useComponentStore } from '@inuyasha/vue'
 
 export type LayerNode = {
   id: string

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { ComponentId } from '@inuyasha/core'
-import { FormStateStore } from '@inuyasha/state'
+import { FormStateStore } from '@inuyasha/core/state'
 
 const formStateStore = new FormStateStore()
 

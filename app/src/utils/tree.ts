@@ -1,7 +1,7 @@
-// Re-export from @inuyasha/component
+// Re-export from @inuyasha/core/component
 export {
   findComponentById,
   findComponentParent,
   isDescendant,
   removeComponentById
-} from '@inuyasha/component'
+} from '@inuyasha/core/component'

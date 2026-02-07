@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { DataSource, DataSourceId } from '@inuyasha/core'
-import { DataSourceStore } from '@inuyasha/state'
-import type { ExpressionContext } from '@inuyasha/expression'
+import { DataSourceStore } from '@inuyasha/core/state'
+import type { ExpressionContext } from '@inuyasha/core/expression'
 import { useEditorStore } from './editor'
 import { useFormStateStore } from './formState'
 
@@ -44,7 +44,7 @@ export const useDataSourceStore = defineStore('dataSource', () => {
   async function fetchDataSource(id: DataSourceId) {
     const editorStore = useEditorStore()
     const formStateStore = useFormStateStore()
-    
+
     const context: ExpressionContext = {
       editorStore: {
         pageConfig: editorStore.pageConfig
@@ -60,7 +60,7 @@ export const useDataSourceStore = defineStore('dataSource', () => {
         }
       }
     }
-    
+
     await dataSourceStore.fetchDataSource(id, context)
     dataSources.value = { ...dataSourceStore.dataSources }
   }
@@ -73,6 +73,6 @@ export const useDataSourceStore = defineStore('dataSource', () => {
     clearDataSources,
     exportDataSources,
     importDataSources,
-    fetchDataSource,
+    fetchDataSource
   }
 })

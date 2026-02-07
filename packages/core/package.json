@@ -1,7 +1,7 @@
 {
   "name": "@inuyasha/core",
   "version": "1.0.0",
-  "description": "Core types and interfaces for Inuyasha",
+  "description": "Core packages merged - component, editor, event, expression, state",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "scripts": {
@@ -11,6 +11,19 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "nanoid": "^5.1.6",
+    "lodash-es": "^4.17.21",
     "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/lodash-es": "^4.17.12"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./component": "./src/component/index.ts",
+    "./editor": "./src/editor/index.ts",
+    "./event": "./src/event/index.ts",
+    "./expression": "./src/expression/index.ts",
+    "./state": "./src/state/index.ts"
   }
 }
