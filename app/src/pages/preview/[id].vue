@@ -7,7 +7,7 @@ import { useComponentStore } from '@/stores/component'
 import { allComponents } from '@/config/components'
 import { pageRootMeta } from '@/config/components/pageRoot'
 import PreviewRenderer from '@/components/Render/PreviewRenderer.vue'
-import type { PageConfig } from '@/types/editor'
+import type { PageConfig } from '@inuyasha/core'
 
 import { useDataSourceStore } from '@/stores/dataSource'
 

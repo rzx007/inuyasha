@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { useComponentProps } from './useComponentProps'
 
+
 interface PropConfig {
   key: string
   label: string

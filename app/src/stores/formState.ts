@@ -1,51 +1,32 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { ComponentId } from '@/types/component'
+import type { ComponentId } from '@inuyasha/core'
+import { FormStateStore } from '@inuyasha/state'
+
+const formStateStore = new FormStateStore()
 
 export const useFormStateStore = defineStore('formState', () => {
-  // 嵌套结构存储组件的双向绑定值
-  // 结构：{ [componentId]: { [modelValueKey]: value } }
-  // 例如：{ 'comp-123': { value: 'hello', checked: true } }
-  const states = ref<Record<ComponentId, Record<string, any>>>({})
+  const states = ref(formStateStore.states)
 
-  /**
-   * 设置组件的某个双向绑定属性值
-   * @param componentId 组件ID
-   * @param key 属性名（如 'value', 'checked' 等）
-   * @param value 属性值
-   */
   function setComponentState(componentId: ComponentId, key: string, value: any) {
-    if (!states.value[componentId]) {
-      states.value[componentId] = {}
-    }
-    states.value[componentId][key] = value
+    formStateStore.setComponentState(componentId, key, value)
+    states.value = { ...formStateStore.states }
   }
 
-  /**
-   * 获取组件的某个双向绑定属性值
-   * @param componentId 组件ID
-   * @param key 属性名（如 'value', 'checked' 等）
-   * @returns 属性值，如果不存在则返回 undefined
-   */
   function getComponentState(componentId: ComponentId, key: string): any {
+    // 访问响应式 states 以建立依赖追踪
     return states.value[componentId]?.[key]
   }
 
-  /**
-   * 获取组件的所有双向绑定属性
-   * @param componentId 组件ID
-   * @returns 组件的所有双向绑定属性对象
-   */
   function getComponentStates(componentId: ComponentId): Record<string, any> | undefined {
-    return states.value[componentId]
+    return formStateStore.getComponentStates(componentId)
   }
-  /**
-   * 移除组件时应该同步清除对应的双向绑定值
-   * @param componentId 组件ID
-   */
+
   function removeComponentState(componentId: ComponentId) {
-    delete states.value[componentId]
+    formStateStore.removeComponentState(componentId)
+    states.value = { ...formStateStore.states }
   }
+
   return {
     states,
     setComponentState,

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Link, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import DataBindingDialog from '../DataBindingDialog.vue'
-import type { DataBinding } from '@/types/dataSource'
+import type { DataBinding } from '@inuyasha/core'
 
 const editorStore = useEditorStore()
 const isDataBindingDialogVisible = ref(false)

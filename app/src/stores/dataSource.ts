@@ -1,83 +1,68 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { DataSource, DataSourceId, ApiDataSourceConfig } from '@/types/dataSource'
-import { nanoid } from 'nanoid'
-import { resolveVariablesInConfig } from '@/utils/expressionEngine'
+import type { DataSource, DataSourceId } from '@inuyasha/core'
+import { DataSourceStore } from '@inuyasha/state'
+import type { ExpressionContext } from '@inuyasha/expression'
+import { useEditorStore } from './editor'
+import { useFormStateStore } from './formState'
+
+const dataSourceStore = new DataSourceStore()
 
 export const useDataSourceStore = defineStore('dataSource', () => {
-  const dataSources = ref<Record<DataSourceId, DataSource>>({})
+  const dataSources = ref(dataSourceStore.dataSources)
 
   function addDataSource(dataSource: Omit<DataSource, 'id'>) {
-    const id = nanoid()
-    dataSources.value[id] = { ...dataSource, id }
+    const id = dataSourceStore.addDataSource(dataSource)
+    dataSources.value = { ...dataSourceStore.dataSources }
     return id
   }
 
   function updateDataSource(id: DataSourceId, updates: Partial<DataSource>) {
-    if (dataSources.value[id]) {
-      Object.assign(dataSources.value[id], updates)
-    }
+    dataSourceStore.updateDataSource(id, updates)
+    dataSources.value = { ...dataSourceStore.dataSources }
   }
 
   function removeDataSource(id: DataSourceId) {
-    delete dataSources.value[id]
+    dataSourceStore.removeDataSource(id)
+    dataSources.value = { ...dataSourceStore.dataSources }
   }
 
   function clearDataSources() {
-    dataSources.value = {}
+    dataSourceStore.clearDataSources()
+    dataSources.value = { ...dataSourceStore.dataSources }
   }
 
   function exportDataSources(): Record<DataSourceId, DataSource> {
-    return { ...dataSources.value }
+    return dataSourceStore.exportDataSources()
   }
 
   function importDataSources(sources: Record<DataSourceId, DataSource> = {}) {
-    clearDataSources()
-    dataSources.value = { ...sources }
+    dataSourceStore.importDataSources(sources)
+    dataSources.value = { ...dataSourceStore.dataSources }
   }
 
   async function fetchDataSource(id: DataSourceId) {
-    const ds = dataSources.value[id]
-    if (!ds || ds.type !== 'api') return
-
-    const originalConfig = ds.config as ApiDataSourceConfig
-    // 解析变量
-    const config = resolveVariablesInConfig(originalConfig)
-
-    try {
-      // Basic fetch implementation.
-      // Convert array headers to object
-      const headersObject = (config.headers || []).reduce((acc: Record<string, string>, curr) => {
-        if (curr.key) acc[curr.key] = curr.value
-        return acc
-      }, {} as Record<string, string>)
-
-      let url = config.url
-      if (config.params && config.params.length > 0) {
-        const queryString = config.params
-          .filter(p => p.key)
-          .map(p => `${encodeURIComponent(p.key)}=${encodeURIComponent(p.value)}`)
-          .join('&')
-        if (queryString) {
-          url += (url.includes('?') ? '&' : '?') + queryString
+    const editorStore = useEditorStore()
+    const formStateStore = useFormStateStore()
+    
+    const context: ExpressionContext = {
+      editorStore: {
+        pageConfig: editorStore.pageConfig
+      },
+      dataSourceStore: {
+        // 使用响应式的 dataSources.value 以建立依赖追踪
+        dataSources: dataSources.value
+      },
+      formStateStore: {
+        getComponentState: (componentId: string, key: string) => {
+          // 使用 store 的方法，该方法内部会访问响应式 states
+          return formStateStore.getComponentState(componentId, key)
         }
       }
-
-      const response = await fetch(url, {
-        method: config.method,
-        headers: headersObject,
-        body: ['GET', 'HEAD'].includes(config.method) ? undefined : config.body,
-      })
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      const data = await response.json()
-      
-      updateDataSource(id, { data, lastFetched: Date.now() })
-    } catch (error) {
-      console.error(`Failed to fetch data source ${id}:`, error)
-      updateDataSource(id, { data: { error: 'Failed to fetch' }, lastFetched: Date.now() })
     }
+    
+    await dataSourceStore.fetchDataSource(id, context)
+    dataSources.value = { ...dataSourceStore.dataSources }
   }
 
   return {

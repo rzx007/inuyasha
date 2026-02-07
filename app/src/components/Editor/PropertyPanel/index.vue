@@ -4,7 +4,7 @@ import { useEditorStore } from '@/stores/editor'
 import { MousePointer2, Copy, Trash2 } from 'lucide-vue-next'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { ComponentType } from '@/types/component'
+import { ComponentType } from '@inuyasha/core'
 import PageSettingsPanel from './PageSettingsPanel.vue'
 import ComponentPropsPanel from './ComponentPropsPanel.vue'
 import ComponentEventsPanel from './ComponentEventsPanel.vue'
@@ -41,7 +41,7 @@ function handleDeleteComponent() {
 
 <template>
   <div
-    class="property-panel w-80 h-full flex flex-col bg-white border-l border-slate-200 shrink-0"
+    class="property-panel w-full h-full flex flex-col bg-white border-l border-slate-200 shrink-0"
     style="box-shadow: -4px 0 24px rgba(0, 0, 0, 0.02)"
   >
     <!-- 页面设置视图 -->

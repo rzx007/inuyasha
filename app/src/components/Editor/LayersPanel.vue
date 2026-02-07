@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import { Layers as LayersIcon } from 'lucide-vue-next'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
-import type { ComponentSchema } from '@/types/component'
+import type { ComponentSchema } from '@inuyasha/core'
 import LayerTreeItem, { type LayerNode } from './LayerTreeItem.vue'
 
 const editorStore = useEditorStore()

@@ -12,7 +12,8 @@
     "build": "turbo build",
     "upgrade": "taze major -r -I",
     "inspector": "node-modules-inspector",
-    "changelog": "changelogen --bump"
+    "changelog": "changelogen --bump",
+    "upload": "pinme upload ./app/dist"
   },
   "packageManager": "pnpm@10.0.0",
   "keywords": [],

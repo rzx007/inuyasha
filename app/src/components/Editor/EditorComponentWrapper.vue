@@ -2,10 +2,10 @@
 import { computed, ref } from 'vue'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
-import type { ComponentSchema } from '@/types/component'
+import type { ComponentSchema } from '@inuyasha/core'
 import DynamicRenderer from '@/components/Render/DynamicRenderer.vue'
 import { useDrag, useDrop } from 'vue3-dnd'
-import { DndTypes, type DragItem } from '@/types/dnd'
+import { DndTypes, type DragItem } from '@inuyasha/core'
 
 interface Props {
   schema: ComponentSchema

@@ -1,5 +1,5 @@
-import type { ComponentMeta } from '@/types/component'
-import { ComponentType } from '@/types/component'
+import type { ComponentMeta } from '@inuyasha/core'
+import { ComponentType } from '@inuyasha/core'
 
 /**
  * PageRoot 组件配置

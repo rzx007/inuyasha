@@ -1,57 +1,52 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import type { ComponentMeta, ComponentType } from '@/types/component'
+import { ref, computed } from 'vue'
+import type { ComponentMeta, ComponentType } from '@inuyasha/core'
+import { ComponentRegistry, CATEGORY_CONFIG } from '@inuyasha/component'
 
-// 分类配置：定义分类的显示顺序和标签
-const CATEGORY_CONFIG: Array<{ key: ComponentMeta['category'], label: string }> = [
-  { key: 'base', label: '基础组件' },
-  { key: 'layout', label: '布局组件' },
-  { key: 'data', label: '数据展示' },
-  { key: 'form', label: '表单组件' },
-]
+const registry = new ComponentRegistry()
 
 export const useComponentStore = defineStore('component', () => {
-  // 组件库（已注册的组件）
-  const componentLibrary = ref<Map<ComponentType, ComponentMeta>>(new Map())
+  // 使用一个计数器来触发响应式更新
+  const updateTrigger = ref(0)
   
   // 注册组件
   function registerComponent(meta: ComponentMeta) {
-    componentLibrary.value.set(meta.type, meta)
+    registry.registerComponent(meta)
+    updateTrigger.value++
   }
   
   // 批量注册组件
   function registerComponents(metas: ComponentMeta[]) {
-    metas.forEach(meta => registerComponent(meta))
+    registry.registerComponents(metas)
+    updateTrigger.value++
   }
   
   // 获取组件元信息
   function getComponentMeta(type: ComponentType): ComponentMeta | undefined {
-    return componentLibrary.value.get(type)
+    return registry.getComponentMeta(type)
   }
   
   // 获取所有组件（按分类）
   function getComponentsByCategory(category: ComponentMeta['category']) {
-    return Array.from(componentLibrary.value.values()).filter(
-      meta => meta.category === category
-    )
+    // 访问 updateTrigger 以建立响应式依赖
+    updateTrigger.value
+    return registry.getComponentsByCategory(category)
   }
   
   // 获取所有组件
   function getAllComponents(): ComponentMeta[] {
-    return Array.from(componentLibrary.value.values())
+    updateTrigger.value
+    return registry.getAllComponents()
   }
   
-  // 获取按分类分组的组件
-  function getCategorizedComponents(): Array<{ key: string, label: string, components: ComponentMeta[] }> {
-    return CATEGORY_CONFIG.map(category => ({
-      key: category.key,
-      label: category.label,
-      components: getComponentsByCategory(category.key),
-    }))
-  }
+  // 获取按分类分组的组件（使用 computed 确保响应式）
+  const getCategorizedComponents = computed(() => {
+    updateTrigger.value // 建立响应式依赖
+    return registry.getCategorizedComponents()
+  })
   
   return {
-    componentLibrary,
+    componentLibrary: computed(() => registry),
     registerComponent,
     registerComponents,
     getComponentMeta,
@@ -60,4 +55,3 @@ export const useComponentStore = defineStore('component', () => {
     getCategorizedComponents,
   }
 })
-
