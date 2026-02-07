@@ -132,6 +132,9 @@ importers:
       '@inuyasha/utils':
         specifier: workspace:*
         version: link:../packages/utils
+      '@inuyasha/vue':
+        specifier: workspace:*
+        version: link:../packages/vue
       '@shikijs/monaco':
         specifier: ^3.17.1
         version: 3.17.1
@@ -342,6 +345,43 @@ importers:
       lucide-vue-next:
         specifier: ^0.555.0
         version: 0.555.0(vue@3.5.24(typescript@5.9.3))
+
+  packages/vue:
+    dependencies:
+      '@inuyasha/component':
+        specifier: workspace:*
+        version: link:../component
+      '@inuyasha/core':
+        specifier: workspace:*
+        version: link:../core
+      '@inuyasha/editor':
+        specifier: workspace:*
+        version: link:../editor
+      '@inuyasha/event':
+        specifier: workspace:*
+        version: link:../event
+      '@inuyasha/expression':
+        specifier: workspace:*
+        version: link:../expression
+      '@inuyasha/state':
+        specifier: workspace:*
+        version: link:../state
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
+      nanoid:
+        specifier: ^5.1.6
+        version: 5.1.6
+      pinia:
+        specifier: ^2.0.0 || ^3.0.0
+        version: 3.0.4(typescript@5.9.3)(vue@3.5.24(typescript@5.9.3))
+      vue:
+        specifier: ^3.0.0
+        version: 3.5.24(typescript@5.9.3)
+    devDependencies:
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
 
 packages:
 

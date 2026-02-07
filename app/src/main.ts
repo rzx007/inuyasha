@@ -6,12 +6,16 @@ import App from './App.vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import { materialsComponents } from './components/Materials'
+import { createInuyashaPlugin } from '@inuyasha/vue'
+import { pageRootMeta } from './config/components/pageRoot'
+import Toast from './components/toast'
 
 const app = createApp(App)
 const pinia = createPinia()
 
 app.use(router)
 app.use(pinia)
+app.use(createInuyashaPlugin({ pageRootMeta, toast: Toast }))
 app.use(ElementPlus) // 全局注册，供低代码渲染器使用全量组件
 
 // 批量注册 Materials 组件

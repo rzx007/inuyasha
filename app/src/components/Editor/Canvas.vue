@@ -5,7 +5,10 @@ import DynamicRenderer from '@/components/Render/DynamicRenderer.vue'
 
 const editorStore = useEditorStore()
 
-const rootComponent = computed(() => editorStore.pageConfig.rootComponent)
+const rootComponent = computed(() => {
+  return editorStore.pageConfig.rootComponent
+})
+
 const hasChildren = computed(() => {
   return rootComponent.value.children && rootComponent.value.children.length > 0
 })
@@ -17,15 +20,11 @@ function handleCanvasClick() {
 </script>
 
 <template>
-  <div
-    class="canvas-container relative h-full bg-gray-100"
-    @click="handleCanvasClick"
-  >
+  <div class="canvas-container relative h-full bg-gray-100" @click="handleCanvasClick">
     <div class="canvas-content overflow-auto h-full p-4">
-      <DynamicRenderer
-        :schema="rootComponent"
-      />
-      
+      {{ rootComponent }}
+      <DynamicRenderer :schema="rootComponent" />
+
       <!-- 空状态提示 -->
       <div
         v-if="!hasChildren"

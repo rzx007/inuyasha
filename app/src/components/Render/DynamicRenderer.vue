@@ -2,11 +2,9 @@
 import { defineAsyncComponent, computed, onMounted, onUnmounted, ref } from 'vue'
 import type { ComponentSchema } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
-import { resolveBinding } from '@/utils/expressionEngine'
-import { executeEvent } from '@/utils/eventEngine'
+import { useResolveBinding, useExecuteEvent } from '@inuyasha/vue'
 import { useEditorStore } from '@/stores/editor'
 import { useComponentStore } from '@/stores/component'
-import { useDataSourceStore } from '@/stores/dataSource'
 import { useFormStateStore } from '@/stores/formState'
 import { useComponentRegistry } from '@/stores/componentRegistry'
 
@@ -32,8 +30,9 @@ const props = defineProps<Props>()
 const editorStore = useEditorStore()
 const componentStore = useComponentStore()
 const formStateStore = useFormStateStore()
-const dataSourceStore = useDataSourceStore()
 const componentRegistry = useComponentRegistry()
+const resolveBinding = useResolveBinding()
+const executeEvent = useExecuteEvent()
 
 // 组件实例引用
 const componentRef = ref(null)
@@ -69,15 +68,8 @@ onUnmounted(() => {
   componentRegistry.unregister(props.schema.id)
 })
 
-
-
 // 解析属性绑定
 const resolvedProps = computed(() => {
-  
-  editorStore.pageConfig
-  formStateStore.states
-  dataSourceStore.dataSources
-
   const newProps = { ...props.schema.props }
   for (const key in newProps) {
     const bindingKey = `${key}_binding`
@@ -93,10 +85,6 @@ const resolvedProps = computed(() => {
 
 // 解析样式绑定
 const resolvedStyle = computed(() => {
-  editorStore.pageConfig
-  formStateStore.states
-  dataSourceStore.dataSources
-
   const newStyle = { ...props.schema.style }
   const propsObj = props.schema.props
   // 查找 style.xxx_binding 格式的绑定
@@ -197,7 +185,9 @@ const dynamicEvents = computed(() => {
 const canUseDynamicRender = computed(() => !!componentMeta.value?.componentName)
 
 // 是否需要双向绑定（根据 propsSchema 中是否存在 vModel 属性判断）
-const needsModelValue = computed(() => componentMeta.value?.propsSchema?.some(schema => schema.vModel) || false)
+const needsModelValue = computed(
+  () => componentMeta.value?.propsSchema?.some(schema => schema.vModel) || false
+)
 
 // 拖拽列表的计算属性
 const children = computed({
@@ -223,16 +213,19 @@ const dynamicSlotItems = computed(() => {
     :parent-id="schema.id"
     :style-object="styleObject"
   >
-    <EditorComponentWrapper 
-      v-for="(child, index) in children" 
-      :key="child.id" 
-      :schema="child" 
+    <EditorComponentWrapper
+      v-for="(child, index) in children"
+      :key="child.id"
+      :schema="child"
       :index="index"
       :parent-id="schema.id"
     />
-    
+
     <!-- 空状态提示（不是拖拽目标，只是视觉提示） -->
-    <div v-if="children.length === 0" class="empty-placeholder text-center text-gray-400 text-sm py-4">
+    <div
+      v-if="children.length === 0"
+      class="empty-placeholder text-center text-gray-400 text-sm py-4"
+    >
       将组件拖到此处
     </div>
   </PageRootDropZone>
@@ -257,7 +250,7 @@ const dynamicSlotItems = computed(() => {
           :index="index"
           :parent-id="schema.id"
         />
-        
+
         <SlotDropWrapper
           v-if="slot.allowDrag && getSlotChildren(slot.name).length === 0"
           :slot-name="slot.name"
@@ -284,7 +277,7 @@ const dynamicSlotItems = computed(() => {
           :index="index"
           :parent-id="schema.id"
         />
-        
+
         <SlotDropWrapper
           v-if="slot.allowDrag && getSlotChildren(slot.name).length === 0"
           :slot-name="slot.name"
@@ -301,7 +294,7 @@ const dynamicSlotItems = computed(() => {
           :index="index"
           :parent-id="schema.id"
         />
-        
+
         <SlotDropWrapper
           v-if="getSlotChildren(item.name).length === 0"
           :slot-name="item.name"

@@ -31,17 +31,17 @@ function handleComponentClick(event: MouseEvent) {
 function handleDeleteComponent(event: KeyboardEvent) {
   // 检查事件目标是否是可编辑元素
   const target = event.target as HTMLElement
-  const isEditableElement = 
+  const isEditableElement =
     target.tagName === 'INPUT' ||
     target.tagName === 'TEXTAREA' ||
     target.isContentEditable ||
     target.closest('input, textarea, [contenteditable="true"]')
-  
+
   // 如果是在可编辑元素中，不执行删除操作
   if (isEditableElement) {
     return
   }
-  
+
   if (event.key === 'Delete' || event.key === 'Backspace') {
     event.preventDefault()
     event.stopPropagation()
@@ -64,9 +64,9 @@ const [dragCollected, dragSource, dragPreview] = useDrag({
     parentId: props.parentId,
     display: displayType.value // 传递组件显示类型
   }),
-  collect: (monitor) => ({
-    isDragging: monitor.isDragging(),
-  }),
+  collect: monitor => ({
+    isDragging: monitor.isDragging()
+  })
 })
 
 // 指示器位置状态
@@ -81,7 +81,7 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
   // 同父容器内即时排序，避免必须松手才调整
   hover(item, monitor) {
     if (!componentRef.value) return
-    
+
     // 计算悬停位置并设置指示器
     const hoverRect = componentRef.value.getBoundingClientRect()
     const clientOffset = monitor.getClientOffset()
@@ -89,7 +89,7 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
 
     // 如果是 inline-block 组件之间的排序，使用左右指示器
     const isInlineSort = item.display === 'inline-block' && displayType.value === 'inline-block'
-    
+
     if (isInlineSort) {
       const hoverMiddleX = (hoverRect.right - hoverRect.left) / 2
       const hoverClientX = clientOffset.x - hoverRect.left
@@ -120,18 +120,18 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
     // 对于即时排序，只有当指示器位置表明确实跨越了中点时才触发移动
     // 注意：这里的移动是真正的 DOM 移动，会立即反映在界面上
     // 所以 indicatorPosition 其实是“预判”位置，如果真的移动了，item.index 会变
-    
+
     // 暂时保留原有的逻辑，仅在真正 drop 时才跨容器移动，同容器内 hover 保持现状
     // 但为了更好的视觉效果，我们可以依赖 indicatorPosition 来做判断
-    
+
     // TODO: 如果要完全依赖 indicator 排序，这里需要调整
     // 目前 hover 逻辑主要用于排序，drop 逻辑用于最终确认
-    
+
     // 简化：仅当确实跨越中点时才执行移动
-    const isAfter = isInlineSort 
-      ? indicatorPosition.value === 'right' 
+    const isAfter = isInlineSort
+      ? indicatorPosition.value === 'right'
       : indicatorPosition.value === 'bottom'
-      
+
     if (dragIndex < hoverIndex && !isAfter) return
     if (dragIndex > hoverIndex && isAfter) return
 
@@ -141,25 +141,25 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
   },
   drop(item, monitor) {
     indicatorPosition.value = null // 重置指示器
-    
+
     if (monitor.didDrop()) {
       return
     }
 
     // drop 时的逻辑主要用于处理跨容器拖拽和新组件添加
     // 同容器内的排序已经在 hover 中处理了（虽然这里会再次计算 targetIndex，但如果是同容器且 hover 已更新，影响不大）
-    
+
     if (!componentRef.value) {
       return
     }
-    
+
     // 重新计算一次 targetIndex，确保准确
     let targetIndex = props.index !== undefined ? props.index : 0
     // 根据 indicatorPosition 决定是否 +1
     // 如果 hover 没有触发（例如快速拖动），需要重新计算 indicatorPosition 类似的逻辑
     const hoverRect = componentRef.value.getBoundingClientRect()
     const clientOffset = monitor.getClientOffset()
-    
+
     let isAfter = false
     if (clientOffset) {
       const isInlineSort = item.display === 'inline-block' && displayType.value === 'inline-block'
@@ -173,7 +173,7 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
         isAfter = hoverClientY > hoverMiddleY
       }
     }
-    
+
     if (isAfter) {
       targetIndex += 1
     }
@@ -185,13 +185,13 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
         const newComponent = cloneFn(meta)
         if (newComponent) {
           if (props.schema.props?._slot) {
-             newComponent.props = {
-               ...newComponent.props,
-               _slot: props.schema.props._slot
-             }
+            newComponent.props = {
+              ...newComponent.props,
+              _slot: props.schema.props._slot
+            }
           }
           if (props.parentId) {
-             editorStore.addComponent(newComponent, props.parentId, targetIndex)
+            editorStore.addComponent(newComponent, props.parentId, targetIndex)
           }
         }
       }
@@ -212,12 +212,12 @@ const [dropCollected, dropTarget] = useDrop<DragItem, unknown, { isOver: boolean
         item.parentId = props.parentId
         item.index = targetIndex
       }
-      
+
       return { dropped: true }
     }
   },
-  collect: (monitor) => ({
-    isOver: monitor.isOver({ shallow: true }),
+  collect: monitor => ({
+    isOver: monitor.isOver({ shallow: true })
   })
 })
 
@@ -237,9 +237,9 @@ const setRef = (el: any) => {
     :ref="setRef"
     class="component-wrapper relative"
     :class="{
-      'selected': selectedId === schema.id,
+      selected: selectedId === schema.id,
       'inline-block': displayType === 'inline-block',
-      'opacity-50': dragCollected.isDragging,
+      'opacity-50': dragCollected.isDragging
       // 移除原有的 ring class，改为使用 indicator
     }"
     tabindex="0"
@@ -247,10 +247,22 @@ const setRef = (el: any) => {
     @keydown="handleDeleteComponent"
   >
     <!-- 拖拽位置指示器 -->
-    <div v-if="dropCollected.isOver && indicatorPosition === 'top'" class="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-50 pointer-events-none"></div>
-    <div v-if="dropCollected.isOver && indicatorPosition === 'bottom'" class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-50 pointer-events-none"></div>
-    <div v-if="dropCollected.isOver && indicatorPosition === 'left'" class="absolute top-0 bottom-0 left-0 w-0.5 bg-blue-500 z-50 pointer-events-none"></div>
-    <div v-if="dropCollected.isOver && indicatorPosition === 'right'" class="absolute top-0 bottom-0 right-0 w-0.5 bg-blue-500 z-50 pointer-events-none"></div>
+    <div
+      v-if="dropCollected.isOver && indicatorPosition === 'top'"
+      class="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 z-50 pointer-events-none"
+    ></div>
+    <div
+      v-if="dropCollected.isOver && indicatorPosition === 'bottom'"
+      class="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 z-50 pointer-events-none"
+    ></div>
+    <div
+      v-if="dropCollected.isOver && indicatorPosition === 'left'"
+      class="absolute top-0 bottom-0 left-0 w-0.5 bg-blue-500 z-50 pointer-events-none"
+    ></div>
+    <div
+      v-if="dropCollected.isOver && indicatorPosition === 'right'"
+      class="absolute top-0 bottom-0 right-0 w-0.5 bg-blue-500 z-50 pointer-events-none"
+    ></div>
 
     <!-- 选中高亮边框 -->
     <div
@@ -273,7 +285,12 @@ const setRef = (el: any) => {
         title="Delete"
         @click.stop="handleDeleteButtonClick"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"><path fill="currentColor" d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <path
+            fill="currentColor"
+            d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
+          />
+        </svg>
       </button>
     </div>
 

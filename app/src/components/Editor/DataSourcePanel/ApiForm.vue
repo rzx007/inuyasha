@@ -7,9 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import VariablePicker from '../VariablePicker.vue'
-import { resolveVariablesInConfig } from '@/utils/expressionEngine'
+import { useResolveVariablesInConfig, useDataSourceStore } from '@inuyasha/vue'
 import type { ApiDataSourceConfig, DataSource } from '@inuyasha/core'
-import { useDataSourceStore } from '@/stores/dataSource'
 
 const props = defineProps<{
   open: boolean
@@ -32,9 +31,14 @@ const activeTab = ref('params')
 
 // Store
 const dataSourceStore = useDataSourceStore()
+const resolveVariablesInConfig = useResolveVariablesInConfig()
 
 // Variable Picker State
-const activePicker = ref<{ type: 'url' | 'body' | 'param' | 'header', index?: number, target?: HTMLElement } | null>(null)
+const activePicker = ref<{
+  type: 'url' | 'body' | 'param' | 'header'
+  index?: number
+  target?: HTMLElement
+} | null>(null)
 const showPicker = ref(false)
 
 // Response State
@@ -107,7 +111,7 @@ const handleSend = async () => {
       headers: headers.value,
       body: body.value
     }
-    
+
     // 使用工具函数解析变量
     const config = resolveVariablesInConfig(tempConfig)
 
@@ -140,7 +144,7 @@ const handleSend = async () => {
 
     const data = await res.json().catch(() => ({ error: 'Could not parse JSON' }))
     success = res.ok
-    
+
     response.value = {
       status: res.status,
       statusText: res.statusText,
@@ -163,7 +167,11 @@ const handleSend = async () => {
 }
 
 // Variable Picker Logic
-const openPicker = (type: 'url' | 'body' | 'param' | 'header', event: MouseEvent, index?: number) => {
+const openPicker = (
+  type: 'url' | 'body' | 'param' | 'header',
+  event: MouseEvent,
+  index?: number
+) => {
   const target = event.currentTarget as HTMLElement
   activePicker.value = { type, index, target }
   showPicker.value = true
@@ -173,7 +181,7 @@ const handleInsertVariable = (variable: string) => {
   if (!activePicker.value) return
 
   const { type, index } = activePicker.value
-  
+
   if (type === 'url') {
     url.value += variable
   } else if (type === 'body') {
@@ -183,7 +191,7 @@ const handleInsertVariable = (variable: string) => {
   } else if (type === 'header' && typeof index === 'number') {
     headers.value[index].value += variable
   }
-  
+
   showPicker.value = false
   activePicker.value = null
 }
@@ -211,7 +219,9 @@ const responseSize = computed(() => {
 
 <template>
   <Dialog :open="open" @update:open="$emit('update:open', $event)">
-    <DialogContent class="w-[70vw]! max-w-[70vw]! h-[90vh] flex flex-col p-0 gap-0 overflow-hidden sm:rounded-xl">
+    <DialogContent
+      class="w-[70vw]! max-w-[70vw]! h-[90vh] flex flex-col p-0 gap-0 overflow-hidden sm:rounded-xl"
+    >
       <!-- Header -->
       <div
         class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white"
@@ -262,7 +272,7 @@ const responseSize = computed(() => {
                 >请求名称</label
               >
               <div class="relative group">
-                <Input v-model="name" placeholder="例如：获取用户信息" class="font-semibold " />
+                <Input v-model="name" placeholder="例如：获取用户信息" class="font-semibold" />
                 <Type :size="14" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300" />
               </div>
             </div>
@@ -293,22 +303,22 @@ const responseSize = computed(() => {
                     />
                   </div>
                   <div class="flex-1 flex relative group">
-                     <input
+                    <input
                       v-model="url"
                       placeholder="https://api.example.com/v1/resource"
                       class="flex-1 px-3 text-sm font-mono text-slate-700 placeholder:text-slate-300 outline-none w-full bg-transparent"
                     />
-                    <button 
-                      @click="(e) => openPicker('url', e)"
+                    <button
+                      @click="e => openPicker('url', e)"
                       class="text-slate-400 hover:text-indigo-500 p-1.5 mr-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Braces :size="14" />
                     </button>
                     <!-- Variable Picker Positioned Relative to this container if needed, or use global absolute -->
-                    <VariablePicker 
-                      v-if="showPicker && activePicker?.type === 'url'" 
-                      @select="handleInsertVariable" 
-                      @close="showPicker = false" 
+                    <VariablePicker
+                      v-if="showPicker && activePicker?.type === 'url'"
+                      @select="handleInsertVariable"
+                      @close="showPicker = false"
                     />
                   </div>
                 </div>
@@ -369,9 +379,13 @@ const responseSize = computed(() => {
                 <TabsContent value="params" class="h-full m-0 p-4 flex flex-col">
                   <div class="flex items-center justify-between mb-3">
                     <span class="text-[11px] font-medium text-slate-500">Query Parameters</span>
-                    <span class="text-[10px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full">Automated encoding</span>
+                    <span class="text-[10px] bg-slate-100 text-slate-400 px-2 py-0.5 rounded-full"
+                      >Automated encoding</span
+                    >
                   </div>
-                  <div class="flex-1 overflow-y-auto border border-slate-200 rounded-lg bg-white relative">
+                  <div
+                    class="flex-1 overflow-y-auto border border-slate-200 rounded-lg bg-white relative"
+                  >
                     <div
                       class="grid grid-cols-[1fr_1fr_40px] border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase py-2.5 px-3 sticky top-0 z-10 backdrop-blur-sm"
                     >
@@ -385,7 +399,7 @@ const responseSize = computed(() => {
                       class="grid grid-cols-[1fr_1fr_40px] border-b border-slate-50 last:border-0 group hover:bg-slate-50"
                     >
                       <div class="border-r border-slate-100 relative">
-                         <input
+                        <input
                           v-model="item.key"
                           placeholder="Key"
                           class="w-full px-3 py-2.5 text-xs bg-transparent outline-none font-mono font-medium text-slate-700 placeholder:text-slate-300"
@@ -397,16 +411,20 @@ const responseSize = computed(() => {
                           placeholder="Value"
                           class="flex-1 px-3 py-2.5 text-xs bg-transparent outline-none font-mono text-indigo-600 font-medium"
                         />
-                        <button 
-                          @click="(e) => openPicker('param', e, index)"
+                        <button
+                          @click="e => openPicker('param', e, index)"
                           class="text-slate-400 hover:text-indigo-500 p-1.5 opacity-0 group-hover/input:opacity-100 transition-opacity"
                         >
                           <Braces :size="14" />
                         </button>
-                        <VariablePicker 
-                          v-if="showPicker && activePicker?.type === 'param' && activePicker.index === index" 
-                          @select="handleInsertVariable" 
-                          @close="showPicker = false" 
+                        <VariablePicker
+                          v-if="
+                            showPicker &&
+                            activePicker?.type === 'param' &&
+                            activePicker.index === index
+                          "
+                          @select="handleInsertVariable"
+                          @close="showPicker = false"
                         />
                       </div>
                       <div class="flex items-center justify-center">
@@ -427,7 +445,7 @@ const responseSize = computed(() => {
                     </div>
                   </div>
                   <div class="pt-4">
-                     <Button
+                    <Button
                       variant="outline"
                       size="sm"
                       @click="addParam"
@@ -443,8 +461,10 @@ const responseSize = computed(() => {
                   <div class="flex items-center justify-between mb-3">
                     <span class="text-[11px] font-medium text-slate-500">Request Headers</span>
                   </div>
-                  <div class="flex-1 overflow-y-auto border border-slate-200 rounded-lg bg-white relative">
-                     <div
+                  <div
+                    class="flex-1 overflow-y-auto border border-slate-200 rounded-lg bg-white relative"
+                  >
+                    <div
                       class="grid grid-cols-[1fr_1fr_40px] border-b border-slate-200 bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase py-2.5 px-3 sticky top-0 z-10 backdrop-blur-sm"
                     >
                       <div class="border-r border-slate-200">Key</div>
@@ -457,7 +477,7 @@ const responseSize = computed(() => {
                       class="grid grid-cols-[1fr_1fr_40px] border-b border-slate-50 last:border-0 group hover:bg-slate-50"
                     >
                       <div class="border-r border-slate-100 relative">
-                         <input
+                        <input
                           v-model="item.key"
                           placeholder="Key"
                           class="w-full px-3 py-2.5 text-xs bg-transparent outline-none font-mono font-medium text-slate-700 placeholder:text-slate-300"
@@ -469,16 +489,20 @@ const responseSize = computed(() => {
                           placeholder="Value"
                           class="flex-1 px-3 py-2.5 text-xs bg-transparent outline-none font-mono text-indigo-600 font-medium"
                         />
-                        <button 
-                          @click="(e) => openPicker('header', e, index)"
+                        <button
+                          @click="e => openPicker('header', e, index)"
                           class="text-slate-400 hover:text-indigo-500 p-1.5 opacity-0 group-hover/input:opacity-100 transition-opacity"
                         >
                           <Braces :size="14" />
                         </button>
-                        <VariablePicker 
-                          v-if="showPicker && activePicker?.type === 'header' && activePicker.index === index" 
-                          @select="handleInsertVariable" 
-                          @close="showPicker = false" 
+                        <VariablePicker
+                          v-if="
+                            showPicker &&
+                            activePicker?.type === 'header' &&
+                            activePicker.index === index
+                          "
+                          @select="handleInsertVariable"
+                          @close="showPicker = false"
                         />
                       </div>
                       <div class="flex items-center justify-center">
@@ -528,16 +552,16 @@ const responseSize = computed(() => {
                         >Raw JSON Payload</span
                       >
                       <div class="relative">
-                        <button 
-                          @click="(e) => openPicker('body', e)"
+                        <button
+                          @click="e => openPicker('body', e)"
                           class="text-[10px] text-indigo-600 flex items-center gap-1.5 hover:bg-indigo-50 px-2 py-1 rounded transition-colors font-medium border border-transparent hover:border-indigo-100"
                         >
                           <Braces :size="12" /> Insert Variable
                         </button>
-                        <VariablePicker 
-                          v-if="showPicker && activePicker?.type === 'body'" 
-                          @select="handleInsertVariable" 
-                          @close="showPicker = false" 
+                        <VariablePicker
+                          v-if="showPicker && activePicker?.type === 'body'"
+                          @select="handleInsertVariable"
+                          @close="showPicker = false"
                         />
                       </div>
                     </div>
@@ -561,8 +585,10 @@ const responseSize = computed(() => {
             class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center"
           >
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Response</span>
-             <div class="flex gap-2">
-                 <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Body</span>
+            <div class="flex gap-2">
+              <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wide"
+                >Body</span
+              >
             </div>
           </div>
 
