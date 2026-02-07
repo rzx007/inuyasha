@@ -1,91 +1,79 @@
+/**
+ * 组件类型定义 (Zod)
+ */
+
+import { z } from 'zod'
 import type { EventBinding } from './event'
+import { EventBindingSchema } from './event'
 
-/**
- * 组件类型定义
- */
-
-/**
- * 组件唯一标识
- */
 export type ComponentId = string
 
-/**
- * 组件类型枚举
- */
-export enum ComponentType {
-  // 基础组件
-  Container = 'container',
-  Text = 'text',
-  Image = 'image',
-  Button = 'button',
-  Divider = 'divider',
-  
-  // 布局组件
-  Row = 'row',
-  Col = 'col',
-  Card = 'card',
-  Collapse = 'collapse',
-  Tabs = 'tabs',
-  PageRoot = 'pageRoot',
-  
-  // 数据展示组件
-  Table = 'table',
-  Statistic = 'statistic',
-  Chart = 'chart',
-  List = 'list',
-  
-  // 表单组件
-  Input = 'input',
-  Select = 'select',
-  DatePicker = 'datePicker',
-  Upload = 'upload',
-}
+const componentTypeValues = [
+  'container', 'text', 'image', 'button', 'divider',
+  'row', 'col', 'card', 'collapse', 'tabs', 'pageRoot',
+  'table', 'statistic', 'chart', 'list',
+  'input', 'select', 'datePicker', 'upload',
+] as const
 
-/**
- * 组件属性配置（基础）
- */
-export interface ComponentProps {
-  [key: string]: any
-}
+export const ComponentTypeSchema = z.enum(componentTypeValues)
+export type ComponentType = z.infer<typeof ComponentTypeSchema>
 
-/**
- * 组件样式配置
- */
-export interface ComponentStyle {
-  width?: string | number
-  height?: string | number
-  padding?: string | number
-  margin?: string | number
-  backgroundColor?: string
-  color?: string
-  fontSize?: string | number
-  fontWeight?: string | number
-  textAlign?: 'left' | 'center' | 'right'
-  border?: string
-  borderRadius?: string | number
-  [key: string]: any
-}
+/** @deprecated Use 'container' | 'text' | ... literal. Kept for backward compatibility. */
+export const ComponentType = {
+  Container: 'container' as const,
+  Text: 'text' as const,
+  Image: 'image' as const,
+  Button: 'button' as const,
+  Divider: 'divider' as const,
+  Row: 'row' as const,
+  Col: 'col' as const,
+  Card: 'card' as const,
+  Collapse: 'collapse' as const,
+  Tabs: 'tabs' as const,
+  PageRoot: 'pageRoot' as const,
+  Table: 'table' as const,
+  Statistic: 'statistic' as const,
+  Chart: 'chart' as const,
+  List: 'list' as const,
+  Input: 'input' as const,
+  Select: 'select' as const,
+  DatePicker: 'datePicker' as const,
+  Upload: 'upload' as const,
+} satisfies Record<string, ComponentType>
 
-/**
- * 组件数据绑定配置
- */
-export interface ComponentDataSource {
-  type: 'static' | 'api' | 'expression'
-  value?: any
-  api?: {
-    url: string
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
-    params?: Record<string, any>
-  }
-  expression?: string
-}
+export const ComponentPropsSchema = z.record(z.any())
+export type ComponentProps = z.infer<typeof ComponentPropsSchema>
 
-/**
- * 组件配置Schema
- */
+export const ComponentStyleSchema = z.object({
+  width: z.union([z.string(), z.number()]).optional(),
+  height: z.union([z.string(), z.number()]).optional(),
+  padding: z.union([z.string(), z.number()]).optional(),
+  margin: z.union([z.string(), z.number()]).optional(),
+  backgroundColor: z.string().optional(),
+  color: z.string().optional(),
+  fontSize: z.union([z.string(), z.number()]).optional(),
+  fontWeight: z.union([z.string(), z.number()]).optional(),
+  textAlign: z.enum(['left', 'center', 'right']).optional(),
+  border: z.string().optional(),
+  borderRadius: z.union([z.string(), z.number()]).optional(),
+}).catchall(z.any())
+export type ComponentStyle = z.infer<typeof ComponentStyleSchema>
+
+export const ComponentDataSourceSchema = z.object({
+  type: z.enum(['static', 'api', 'expression']),
+  value: z.any().optional(),
+  api: z.object({
+    url: z.string(),
+    method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).optional(),
+    params: z.record(z.any()).optional(),
+  }).optional(),
+  expression: z.string().optional(),
+})
+export type ComponentDataSource = z.infer<typeof ComponentDataSourceSchema>
+
 export interface ComponentSchema {
-  id: ComponentId
-  semanticId: string // 语义化唯一标识，与 id 等效（如 button1, button2）
+  id: string
+  semanticId: string
   type: ComponentType
   label: string
   props: ComponentProps
@@ -95,66 +83,76 @@ export interface ComponentSchema {
   events?: EventBinding[]
 }
 
-/**
- * 组件注册信息
- */
-export interface ComponentMeta {
-  type: ComponentType
-  name: string
-  icon?: string
-  category: 'base' | 'layout' | 'data' | 'form'
-  defaultProps: ComponentProps
-  defaultStyle: ComponentStyle
-  propsSchema: ComponentPropSchema[]
-  canNest?: boolean // 是否支持嵌套子组件
-  display?: 'block' | 'inline-block' // 组件的显示类型
-  componentName?: string //  对应的 Vue 组件名称 (e.g：'ElButton', 'ElInput')
-  triggers?: ComponentTrigger[] // 组件支持的事件触发器列表
-  slots?: ComponentSlot[] // 插槽定义
-  methods?: ComponentMethod[] // 组件方法
-  exposedMethods?: Array<{ name: string; label: string }> // 可供控制动作调用的方法
-  useDynamicSlots?: boolean // 是否根据 items 属性动态生成插槽 (e.g: ElTabs, ElCollapse)
-}
+const ComponentSchemaSchema: z.ZodType<ComponentSchema> = z.lazy(() =>
+  z.object({
+    id: z.string(),
+    semanticId: z.string(),
+    type: ComponentTypeSchema,
+    label: z.string(),
+    props: ComponentPropsSchema,
+    style: ComponentStyleSchema,
+    children: z.array(ComponentSchemaSchema).optional(),
+    dataSource: ComponentDataSourceSchema.optional(),
+    events: z.array(EventBindingSchema).optional(),
+  })
+)
+export { ComponentSchemaSchema }
 
-/**
- * 组件属性Schema（用于生成属性配置表单）
- */
-export interface ComponentPropSchema {
-  key: string
-  label: string
-  type: 'text' | 'number' | 'select' | 'color' | 'switch' | 'textarea' | 'json'
-  defaultValue?: any
-  options?: Array<{ label: string; value: any }>
-  placeholder?: string
-  description?: string
-  bindable?: boolean //标记是否可以进行数据绑定
-  vModel?: boolean //标记是否支持双向绑定
-  storeInProps?: boolean //当 vModel 为 true 时，标记是否存储在 props 中（而非 formStateStore）。有些组件的配置项在画布阶段可能需要双向绑定， 但是它发布时只是一个静态的配置
-}
+const PropSchemaOptionSchema = z.object({
+  label: z.string(),
+  value: z.any(),
+})
 
-/**
- * 组件支持的触发器定义
- */
-export interface ComponentTrigger {
-  label: string
-  value: string // 事件名称，如：'onClick', 'onValueChange', 'onClose'
-  event: string // 原生事件名称，如：'click', 'update:modelValue'
-}
+export const ComponentPropSchemaSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  type: z.enum(['text', 'number', 'select', 'color', 'switch', 'textarea', 'json']),
+  defaultValue: z.any().optional(),
+  options: z.array(PropSchemaOptionSchema).optional(),
+  placeholder: z.string().optional(),
+  description: z.string().optional(),
+  bindable: z.boolean().optional(),
+  vModel: z.boolean().optional(),
+  storeInProps: z.boolean().optional(),
+})
+export type ComponentPropSchema = z.infer<typeof ComponentPropSchemaSchema>
 
-/**
- * 组件插槽定义
- */
-export interface ComponentSlot {
-  name: string // 插槽名称，如：'default', 'header'
-  label: string 
-  allowDrag?: boolean // 是否允许拖拽组件到此插槽 (用于编辑器)
-}
+export const ComponentTriggerSchema = z.object({
+  label: z.string(),
+  value: z.string(),
+  event: z.string(),
+})
+export type ComponentTrigger = z.infer<typeof ComponentTriggerSchema>
 
-/**
- * 组件方法定义
- */
-export interface ComponentMethod {
-  name: string // 方法名称，如：'validate', 'resetFields'
-  label: string 
-  params?: string[] // 参数名称
-}
+export const ComponentSlotSchema = z.object({
+  name: z.string(),
+  label: z.string(),
+  allowDrag: z.boolean().optional(),
+})
+export type ComponentSlot = z.infer<typeof ComponentSlotSchema>
+
+export const ComponentMethodSchema = z.object({
+  name: z.string(),
+  label: z.string(),
+  params: z.array(z.string()).optional(),
+})
+export type ComponentMethod = z.infer<typeof ComponentMethodSchema>
+
+export const ComponentMetaSchema = z.object({
+  type: ComponentTypeSchema,
+  name: z.string(),
+  icon: z.string().optional(),
+  category: z.enum(['base', 'layout', 'data', 'form']),
+  defaultProps: ComponentPropsSchema,
+  defaultStyle: ComponentStyleSchema,
+  propsSchema: z.array(ComponentPropSchemaSchema),
+  canNest: z.boolean().optional(),
+  display: z.enum(['block', 'inline-block']).optional(),
+  componentName: z.string().optional(),
+  triggers: z.array(ComponentTriggerSchema).optional(),
+  slots: z.array(ComponentSlotSchema).optional(),
+  methods: z.array(ComponentMethodSchema).optional(),
+  exposedMethods: z.array(z.object({ name: z.string(), label: z.string() })).optional(),
+  useDynamicSlots: z.boolean().optional(),
+})
+export type ComponentMeta = z.infer<typeof ComponentMetaSchema>

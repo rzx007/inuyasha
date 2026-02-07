@@ -282,7 +282,11 @@ importers:
         specifier: ^5.1.6
         version: 5.1.6
 
-  packages/core: {}
+  packages/core:
+    dependencies:
+      zod:
+        specifier: 3.25.76
+        version: 3.25.76
 
   packages/editor:
     dependencies:

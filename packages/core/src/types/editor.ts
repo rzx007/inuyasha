@@ -1,45 +1,41 @@
 /**
- * 编辑器类型定义
+ * 编辑器类型定义 (Zod)
  */
 
-import type { ComponentId, ComponentSchema } from './component'
-import type { DataSource, DataSourceId } from './dataSource'
+import { z } from 'zod'
+import { ComponentSchemaSchema } from './component'
+import { DataSourceSchema } from './dataSource'
 
-/**
- * 编辑器模式
- */
-export enum EditorMode {
-  Edit = 'edit',
-  Preview = 'preview',
-}
+export const EditorModeSchema = z.enum(['edit', 'preview'])
+export type EditorMode = z.infer<typeof EditorModeSchema>
 
-/**
- * 选中的组件信息
- */
-export interface SelectedComponent {
-  id: ComponentId
-  schema: ComponentSchema
-}
+/** @deprecated Use 'edit' | 'preview' literal. Kept for backward compatibility. */
+export const EditorMode = {
+  Edit: 'edit' as const,
+  Preview: 'preview' as const,
+} satisfies Record<string, EditorMode>
 
-/**
- * 操作历史项
- */
-export interface HistoryItem {
-  type: 'add' | 'delete' | 'update' | 'move'
-  componentId: ComponentId
-  data: any
-  timestamp: number
-}
+export const SelectedComponentSchema = z.object({
+  id: z.string(),
+  schema: ComponentSchemaSchema,
+})
+export type SelectedComponent = z.infer<typeof SelectedComponentSchema>
 
-/**
- * 页面配置
- */
-export interface PageConfig {
-  id: string
-  name: string
-  title: string
-  rootComponent: ComponentSchema
-  dataSources?: Record<DataSourceId, DataSource>
-  createdAt: number
-  updatedAt: number
-}
+export const HistoryItemSchema = z.object({
+  type: z.enum(['add', 'delete', 'update', 'move']),
+  componentId: z.string(),
+  data: z.any(),
+  timestamp: z.number(),
+})
+export type HistoryItem = z.infer<typeof HistoryItemSchema>
+
+export const PageConfigSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  title: z.string(),
+  rootComponent: ComponentSchemaSchema,
+  dataSources: z.record(DataSourceSchema).optional(),
+  createdAt: z.number(),
+  updatedAt: z.number(),
+})
+export type PageConfig = z.infer<typeof PageConfigSchema>
