@@ -1,13 +1,12 @@
 import { computed } from 'vue'
-import { useEditorStore } from '@/stores/editor'
-import { useDataSourceStore } from '@/stores/dataSource'
+import { useEditor, useDataSource } from '@inuyasha/vue'
 import type { DataBinding } from '@inuyasha/core'
 import { useResolveBinding } from '@inuyasha/vue'
 import { findComponentById } from '@inuyasha/core/component'
 
 export function useComponentProps() {
-  const editorStore = useEditorStore()
-  const dataSourceStore = useDataSourceStore()
+  const editorStore = useEditor()
+  const dataSourceStore = useDataSource()
   const resolveBinding = useResolveBinding()
 
   const selectedComponent = computed(() => editorStore.selectedComponent)

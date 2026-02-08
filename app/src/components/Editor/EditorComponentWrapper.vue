@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEditorStore } from '@/stores/editor'
-import { useComponentStore } from '@/stores/component'
+import { useEditor, useComponentMeta } from '@inuyasha/vue'
 import type { ComponentSchema } from '@inuyasha/core'
 import DynamicRenderer from '@/components/Render/DynamicRenderer.vue'
 import { useDrag, useDrop } from 'vue3-dnd'
@@ -14,8 +13,8 @@ interface Props {
 }
 const props = defineProps<Props>()
 
-const editorStore = useEditorStore()
-const componentStore = useComponentStore()
+const editorStore = useEditor()
+const componentStore = useComponentMeta()
 const selectedId = computed(() => editorStore.selectedComponent?.id)
 
 const displayType = computed(() => {

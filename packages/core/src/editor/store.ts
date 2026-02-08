@@ -7,6 +7,12 @@ import {
   findComponentParent,
   isDescendant
 } from '../component'
+import {
+  updateComponentImmutable as updateTreeImmutable,
+  addComponentImmutable as addTreeImmutable,
+  deleteComponentImmutable as deleteTreeImmutable,
+  moveComponentImmutable as moveTreeImmutable
+} from './immutable'
 
 /**
  * Editor store logic
@@ -192,6 +198,67 @@ export class EditorStore {
         schema: component
       }
     }
+  }
+
+  // 不可变更新：添加组件（返回新 root，用于 structural sharing）
+  addComponentImmutable(component: ComponentSchema, parentId?: ComponentId, index?: number) {
+    const newRoot = addTreeImmutable(
+      this.pageConfig.rootComponent,
+      component,
+      parentId,
+      index
+    )
+    this.pageConfig.rootComponent = newRoot
+    this.pageConfig.updatedAt = Date.now()
+    return this.pageConfig
+  }
+
+  // 不可变更新：删除组件
+  deleteComponentImmutable(id: ComponentId) {
+    if (id === this.pageConfig.rootComponent.id) {
+      console.warn('Cannot delete PageRoot component')
+      return null
+    }
+    const newRoot = deleteTreeImmutable(this.pageConfig.rootComponent, id)
+    if (!newRoot) return null
+    this.pageConfig.rootComponent = newRoot
+    if (this.selectedComponent?.id === id) {
+      this.selectedComponent = null
+    }
+    this.pageConfig.updatedAt = Date.now()
+    return this.pageConfig
+  }
+
+  // 不可变更新：更新组件
+  updateComponentImmutable(id: ComponentId, updates: Partial<ComponentSchema>) {
+    const newRoot = updateTreeImmutable(
+      this.pageConfig.rootComponent,
+      id,
+      updates
+    )
+    this.pageConfig.rootComponent = newRoot
+    this.pageConfig.updatedAt = Date.now()
+    return this.pageConfig
+  }
+
+  // 不可变更新：移动组件
+  moveComponentImmutable(
+    dragId: ComponentId,
+    targetParentId: ComponentId,
+    targetIndex?: number,
+    slotName?: string
+  ) {
+    const newRoot = moveTreeImmutable(
+      this.pageConfig.rootComponent,
+      dragId,
+      targetParentId,
+      targetIndex,
+      slotName
+    )
+    if (!newRoot) return null
+    this.pageConfig.rootComponent = newRoot
+    this.pageConfig.updatedAt = Date.now()
+    return this.pageConfig
   }
 
   // 移动组件（支持跨容器和排序）

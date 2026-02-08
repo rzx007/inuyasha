@@ -1,14 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { cloneDeep } from 'lodash-es'
 import type { ComponentId, ComponentSchema } from '@inuyasha/core'
 import type { SelectedComponent, PageConfig } from '@inuyasha/core'
 import { EditorMode } from '@inuyasha/core'
 import { EditorStore as EditorStoreCore } from '@inuyasha/core/editor'
 import { nanoid } from 'nanoid'
-import { useDataSourceStore } from './dataSource'
-import { useFormStateStore } from './formState'
-import { useComponentRegistry } from './componentRegistry'
+import { useDataSource } from './dataSource'
+import { useFormState } from './formState'
+import { useComponentInstance } from './componentInstance'
 import { getInuyashaVueOptions } from '../config'
 
 let editorStoreCore: EditorStoreCore | null = null
@@ -37,7 +36,7 @@ function getEditorStoreCore(): EditorStoreCore {
   return editorStoreCore
 }
 
-export const useEditorStore = defineStore('editor', () => {
+export const useEditor = defineStore('editor', () => {
   const core = getEditorStoreCore()
 
   // 编辑器模式
@@ -69,14 +68,9 @@ export const useEditorStore = defineStore('editor', () => {
     )
   }
 
-  // 辅助函数：创建新的 pageConfig 以触发响应式更新
-  // 深拷贝确保嵌套 children 变化时 Vue 能感知并触发重渲染
-  function createNewPageConfig() {
-    const rootComponent = cloneDeep(core.pageConfig.rootComponent)
-    return {
-      ...core.pageConfig,
-      rootComponent
-    }
+  // 用不可变更新后的 root 触发 Vue 响应式（structural sharing，仅变更路径克隆）
+  function syncPageConfig() {
+    pageConfig.value = { ...core.pageConfig }
   }
 
   // 在整个组件树中查找组件（包括 rootComponent 本身）
@@ -108,7 +102,7 @@ export const useEditorStore = defineStore('editor', () => {
     pageConfig.value = { ...core.pageConfig }
 
     // 同步 dataSources 到 dataSourceStore
-    const dataSourceStore = useDataSourceStore()
+    const dataSourceStore = useDataSource()
     dataSourceStore.importDataSources(config.dataSources)
   }
 
@@ -119,35 +113,33 @@ export const useEditorStore = defineStore('editor', () => {
 
   // 添加组件
   function addComponent(component: ComponentSchema, parentId?: ComponentId, index?: number) {
-    core.addComponent(component, parentId, index)
-    pageConfig.value = createNewPageConfig()
+    core.addComponentImmutable(component, parentId, index)
+    syncPageConfig()
   }
 
   // 删除组件（不能删除 PageRoot）
   function deleteComponent(id: ComponentId) {
-    // 如果删除的是当前选中的组件，先取消选中
     if (selectedComponent.value?.id === id) {
       core.selectComponent(null)
       selectedComponent.value = null
     }
 
-    core.deleteComponent(id)
-    // 创建新的 pageConfig 以触发响应式更新
-    pageConfig.value = createNewPageConfig()
+    const result = core.deleteComponentImmutable(id)
+    if (result) {
+      syncPageConfig()
+    }
 
-    // 清理 formState 中的组件状态
-    const formStateStore = useFormStateStore()
+    const formStateStore = useFormState()
     formStateStore.removeComponentState(id)
 
-    // 清理 componentRegistry 中的组件实例
-    const componentRegistry = useComponentRegistry()
+    const componentRegistry = useComponentInstance()
     componentRegistry.unregister(id)
   }
 
   // 更新组件
   function updateComponent(id: ComponentId, updates: Partial<ComponentSchema>) {
-    core.updateComponent(id, updates)
-    pageConfig.value = createNewPageConfig()
+    core.updateComponentImmutable(id, updates)
+    syncPageConfig()
   }
 
   // 选中组件
@@ -163,8 +155,10 @@ export const useEditorStore = defineStore('editor', () => {
     targetIndex?: number,
     slotName?: string
   ) {
-    core.moveComponent(dragId, targetParentId, targetIndex, slotName)
-    pageConfig.value = createNewPageConfig()
+    const result = core.moveComponentImmutable(dragId, targetParentId, targetIndex, slotName)
+    if (result) {
+      syncPageConfig()
+    }
   }
 
   return {

@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Layers as LayersIcon } from 'lucide-vue-next'
-import { useEditorStore } from '@/stores/editor'
-import { useComponentStore } from '@/stores/component'
+import { useEditor, useComponentMeta } from '@inuyasha/vue'
 import type { ComponentSchema } from '@inuyasha/core'
 import LayerTreeItem, { type LayerNode } from './LayerTreeItem.vue'
 
-const editorStore = useEditorStore()
-const componentStore = useComponentStore()
+const editorStore = useEditor()
+const componentStore = useComponentMeta()
 
 const collapsedIds = ref<Set<string>>(new Set())
 
@@ -71,7 +69,7 @@ function buildNodes(components: ComponentSchema[], parent?: ComponentSchema): La
       isSlot: true,
       slotName: getSlotLabel(parent, slot),
       label: `Slot: ${getSlotLabel(parent, slot)}`,
-      children: slotChildren.map(child => makeNode(child)),
+      children: slotChildren.map(child => makeNode(child))
     })
   })
 
@@ -83,7 +81,7 @@ function makeNode(schema: ComponentSchema): LayerNode {
     id: schema.id,
     label: getDisplayLabel(schema),
     schema,
-    children: buildNodes(schema.children || [], schema),
+    children: buildNodes(schema.children || [], schema)
   }
 }
 
@@ -97,11 +95,10 @@ function handleSelect(node: LayerNode) {
   if (!node.schema) return
   editorStore.selectComponent(node.schema.id)
 }
-
 </script>
 
 <template>
-  <div class=" h-full flex flex-col">
+  <div class="h-full flex flex-col">
     <!-- <div class="p-4 border-b border-slate-100">
       <div class="flex items-center gap-2 text-slate-700">
         <LayersIcon :size="16" />
@@ -131,5 +128,3 @@ function handleSelect(node: LayerNode) {
     </div>
   </div>
 </template>
-
-

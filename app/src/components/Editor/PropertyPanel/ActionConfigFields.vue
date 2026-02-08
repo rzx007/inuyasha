@@ -6,7 +6,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from '@/components/ui/select'
 import type {
   ActionConfig,
@@ -17,9 +17,9 @@ import type {
   NavigateToActionConfig,
   CopyToClipboardActionConfig,
   SetLocalStorageActionConfig,
-  DownloadActionConfig,
+  DownloadActionConfig
 } from '@inuyasha/core'
-import { useDataSourceStore } from '@/stores/dataSource'
+import { useDataSource } from '@inuyasha/vue'
 
 interface Props {
   action: ActionConfig
@@ -30,11 +30,11 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const dataSourceStore = useDataSourceStore()
+const dataSourceStore = useDataSource()
 const dataSourceOptions = computed(() =>
   Object.values(dataSourceStore.dataSources).map(ds => ({
     label: `${ds.name || ds.id}`,
-    value: ds.id,
+    value: ds.id
   }))
 )
 </script>
@@ -79,17 +79,15 @@ const dataSourceOptions = computed(() =>
       <label class="text-xs block">目标组件ID</label>
       <Select
         :model-value="(action.config as ControlComponentActionConfig).componentId"
-        @update:model-value="(val: any) => onControlTargetChange(action, val != null ? String(val) : '')"
+        @update:model-value="
+          (val: any) => onControlTargetChange(action, val != null ? String(val) : '')
+        "
       >
         <SelectTrigger class="w-full h-9 text-sm">
           <SelectValue placeholder="选择组件" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem
-            v-for="opt in componentOptions"
-            :key="opt.value"
-            :value="opt.value"
-          >
+          <SelectItem v-for="opt in componentOptions" :key="opt.value" :value="opt.value">
             {{ opt.label }}
           </SelectItem>
         </SelectContent>
@@ -98,18 +96,27 @@ const dataSourceOptions = computed(() =>
     <div>
       <label class="text-xs block">方法名</label>
       <template
-        v-if="getMethodOptionsByComponentId((action.config as ControlComponentActionConfig).componentId).length"
+        v-if="
+          getMethodOptionsByComponentId((action.config as ControlComponentActionConfig).componentId)
+            .length
+        "
       >
         <Select
           :model-value="(action.config as ControlComponentActionConfig).method"
-          @update:model-value="(val: any) => ((action.config as ControlComponentActionConfig).method = val != null ? String(val) : '')"
+          @update:model-value="
+            (val: any) =>
+              ((action.config as ControlComponentActionConfig).method =
+                val != null ? String(val) : '')
+          "
         >
           <SelectTrigger class="w-full h-9 text-sm">
             <SelectValue placeholder="选择方法" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem
-              v-for="m in getMethodOptionsByComponentId((action.config as ControlComponentActionConfig).componentId)"
+              v-for="m in getMethodOptionsByComponentId(
+                (action.config as ControlComponentActionConfig).componentId
+              )"
               :key="m.name"
               :value="m.name"
             >
@@ -137,7 +144,7 @@ const dataSourceOptions = computed(() =>
       <input
         type="checkbox"
         :checked="(action.config as GoToUrlActionConfig).newTab"
-        @change="(e: any) => (action.config as GoToUrlActionConfig).newTab = e.target.checked"
+        @change="(e: any) => ((action.config as GoToUrlActionConfig).newTab = e.target.checked)"
       />
       <span class="text-xs">新标签页打开</span>
     </div>
@@ -187,9 +194,7 @@ const dataSourceOptions = computed(() =>
 
   <!-- 调用数据源 -->
   <template v-else-if="action.type === 'callDataSource'">
-    <div class="text-xs text-gray-500">
-      请在数据源面板配置数据源，然后在此选择。
-    </div>
+    <div class="text-xs text-gray-500">请在数据源面板配置数据源，然后在此选择。</div>
     <div class="space-y-1">
       <label class="text-xs block">数据源</label>
       <Select
@@ -200,11 +205,7 @@ const dataSourceOptions = computed(() =>
           <SelectValue placeholder="选择数据源" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem
-            v-for="ds in dataSourceOptions"
-            :key="ds.value"
-            :value="ds.value"
-          >
+          <SelectItem v-for="ds in dataSourceOptions" :key="ds.value" :value="ds.value">
             {{ ds.label }}
           </SelectItem>
         </SelectContent>
@@ -212,4 +213,3 @@ const dataSourceOptions = computed(() =>
     </div>
   </template>
 </template>
-

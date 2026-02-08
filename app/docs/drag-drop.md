@@ -20,14 +20,14 @@
 ```typescript
 const [collected, dragSource] = useDrag(() => ({
   type: DndTypes.COMPONENT, // 类型标识：新组件
-  item: { 
-    type: DndTypes.COMPONENT, 
+  item: {
+    type: DndTypes.COMPONENT,
     meta: props.meta,
     cloneFn: cloneComponent // 传递克隆函数，在 Drop 时调用
   },
-  collect: (monitor) => ({
-    isDragging: monitor.isDragging(),
-  }),
+  collect: monitor => ({
+    isDragging: monitor.isDragging()
+  })
 }))
 ```
 
@@ -37,8 +37,11 @@ const [collected, dragSource] = useDrag(() => ({
 #### 克隆函数
 
 ```typescript
+import { useEditor } from '@inuyasha/vue'
+
 function cloneComponent(meta: ComponentMeta) {
-  const rootComponent = editorStore.pageConfig.rootComponent
+  const editor = useEditor()
+  const rootComponent = editor.pageConfig.rootComponent
   const existingComponents = rootComponent.children || []
   return createComponent(meta.type, undefined, existingComponents)
 }
@@ -56,10 +59,10 @@ function cloneComponent(meta: ComponentMeta) {
 const [collected, drop] = useDrop(() => ({
   accept: [DndTypes.COMPONENT, DndTypes.EXISTING_COMPONENT], // 接收新组件和已有组件
   drop: (item: DragItem, monitor) => handleDrop(item, monitor, props.slotName),
-  collect: (monitor) => ({
+  collect: monitor => ({
     isOver: monitor.isOver(),
-    canDrop: monitor.canDrop(),
-  }),
+    canDrop: monitor.canDrop()
+  })
 }))
 ```
 
@@ -67,13 +70,20 @@ const [collected, drop] = useDrop(() => ({
 
 `handleDrop` 函数负责处理放置事件：
 
-1. **新组件 (COMPONENT)**:
-   - 调用 `cloneFn(meta)` 创建新实例
-   - 调用 `editorStore.updateComponent` 将其添加到 `children`
+1.  **新组件 (COMPONENT)**:
+    - 调用 `cloneFn(meta)` 创建新实例
+    - 调用 `editor.updateComponent` 将其添加到 `children`
 
-2. **已有组件 (EXISTING_COMPONENT)**:
-   - 调用 `editorStore.moveComponent(dragId, targetParentId, ...)`
-   - 实现跨容器移动或同容器排序
+2.  **已有组件 (EXISTING_COMPONENT)**:
+    - 调用 `editor.moveComponent(dragId, targetParentId, ...)`
+    - 实现跨容器移动或同容器排序
+
+    **使用方式：**
+
+    ```typescript
+    import { useEditor } from '@inuyasha/vue'
+    const editor = useEditor()
+    ```
 
 ---
 
@@ -114,14 +124,23 @@ const [dragCollected, dragSource] = useDrag({
    - 识别为 DndTypes.COMPONENT
    - 执行 cloneFn -> createComponent -> 生成唯一 ID
     ↓
-5. 调用 editorStore.updateComponent
+5. 调用 editor.updateComponent
    - 更新 PageRoot 的 children 数组
     ↓
 6. Store 更新触发响应式重新渲染
 ```
 
+**SDK使用方式：**
+
+```typescript
+import { useEditor } from '@inuyasha/vue'
+const editor = useEditor()
+editor.updateComponent(parentId, { children: [...] })
+```
+
 ### 关键差异 (vs vue-draggable-plus)
 
-1. **手动控制**: 不再依赖 `v-model` 自动同步 DOM 和数据，而是显式调用 Store 方法。
-2. **数据源单一**: 所有状态变更必须通过 `EditorStore`，避免了组件内部直接修改 props 的副作用。
-3. **更细粒度的事件**: 可以精确控制 `canDrag`, `canDrop`, `hover` 等行为。
+1.  **手动控制**: 不再依赖 `v-model` 自动同步 DOM 和数据，而是显式调用 Store 方法。
+2.  **数据源单一**: 所有状态变更必须通过 `EditorStore`，避免了组件内部直接修改 props 的副作用。
+3.  **更细粒度的事件**: 可以精确控制 `canDrag`, `canDrop`, `hover` 等行为。
+4.  **统一的SDK调用**: 所有Store通过 `@inuyasha/vue` 统一导入使用。

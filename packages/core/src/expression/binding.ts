@@ -4,10 +4,10 @@ import type { ExpressionContext } from './types'
 import { findComponentById } from '../component'
 
 /**
- * Resolves the value of a data binding configuration.
- * @param binding - The data binding configuration object.
- * @param context - The expression context containing stores.
- * @returns The resolved value, or undefined if not found.
+ * 解析数据绑定配置的值。
+ * @param binding 数据绑定配置对象
+ * @param context 表达式上下文（包含各类 store）
+ * @returns 解析后的值，如果未找到则返回 undefined
  */
 export function resolveBinding(binding: DataBinding, context: ExpressionContext): any {
   const { editorStore, dataSourceStore, formStateStore } = context
@@ -24,10 +24,10 @@ export function resolveBinding(binding: DataBinding, context: ExpressionContext)
         if (ds && ds.data) {
           // 如果数据源存在，则返回数据源数据和路径
           return binding.path ? get(ds.data, binding.path) : ds.data
-        } else {
+        } 
           // 如果数据源不存在，则返回 undefined
           return undefined
-        }
+        
       }
       return undefined
 

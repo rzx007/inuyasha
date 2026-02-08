@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEditorStore } from '@/stores/editor'
+import { useEditor } from '@inuyasha/vue'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Sparkles, Link, ChevronDown, ChevronRight } from 'lucide-vue-next'
 import DataBindingDialog from '../DataBindingDialog.vue'
 import type { DataBinding } from '@inuyasha/core'
 
-const editorStore = useEditorStore()
+const editorStore = useEditor()
 const isDataBindingDialogVisible = ref(false)
 const currentBindingProp = ref<string | null>(null)
 
@@ -81,7 +81,7 @@ function updateRootStyle(key: string, value: any) {
     ...rootComponent.value.style,
     [key]: value
   }
-  
+
   editorStore.updateComponent(rootComponent.value.id, {
     style: updatedStyle
   })
@@ -91,7 +91,7 @@ function updateRootStyle(key: string, value: any) {
 function updatePageInfo(key: 'name' | 'title', value: string) {
   editorStore.setPageConfig({
     ...pageConfig.value,
-    [key]: value,
+    [key]: value
   })
 }
 
@@ -107,7 +107,7 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
     ...rootComponent.value.props,
     [`${propKey}_binding`]: binding
   }
-  
+
   editorStore.updateComponent(rootComponent.value.id, {
     props: updatedProps
   })
@@ -119,9 +119,7 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
     <!-- 页面基本信息 -->
     <div class="space-y-0 border-b border-slate-100">
       <div class="px-4 py-3 bg-slate-50/50 border-b border-slate-100">
-        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          页面信息
-        </h4>
+        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">页面信息</h4>
       </div>
       <div class="border-b border-slate-100 last:border-0 px-4 py-4">
         <div class="text-xs font-medium text-slate-500 mb-1.5">
@@ -150,9 +148,7 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
     <!-- 页面样式配置 -->
     <div class="space-y-0 border-t border-slate-100">
       <div class="px-4 py-3 bg-slate-50/50 border-b border-slate-100">
-        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-          页面样式
-        </h4>
+        <h4 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">页面样式</h4>
       </div>
       <div class="border-b border-slate-100 last:border-0 px-4 py-4 group">
         <div class="flex items-center justify-between text-xs font-medium text-slate-500 mb-1.5">
@@ -179,9 +175,7 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
           <input
             type="text"
             :value="rootComponent.style?.backgroundColor || '#ffffff'"
-            @input="
-              e => updateRootStyle('backgroundColor', (e.target as HTMLInputElement).value)
-            "
+            @input="e => updateRootStyle('backgroundColor', (e.target as HTMLInputElement).value)"
             class="flex-1 min-w-0 bg-transparent border-none text-sm text-slate-700 focus:ring-0 p-0"
             placeholder="#ffffff"
           />
@@ -189,9 +183,7 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
             :ref="el => (colorPickerRefs['backgroundColor'] = el as HTMLInputElement)"
             type="color"
             :value="rootComponent.style?.backgroundColor || '#ffffff'"
-            @input="
-              e => updateRootStyle('backgroundColor', (e.target as HTMLInputElement).value)
-            "
+            @input="e => updateRootStyle('backgroundColor', (e.target as HTMLInputElement).value)"
             class="opacity-0 absolute w-0 h-0"
             id="color-picker-page-backgroundColor"
           />
@@ -385,4 +377,3 @@ function updatePropBinding(propKey: string, binding: DataBinding | null) {
     />
   </div>
 </template>
-

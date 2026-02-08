@@ -1,11 +1,23 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useEditorStore } from '@/stores/editor'
-import { useDataSourceStore } from '@/stores/dataSource'
-import { useComponentStore } from '@/stores/component'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { useEditor, useDataSource, useComponentMeta } from '@inuyasha/vue'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup, SelectLabel } from '@/components/ui/select'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ChevronRight, ChevronDown, Check } from 'lucide-vue-next'
@@ -19,9 +31,9 @@ interface Props {
 const props = defineProps<Props>()
 const emit = defineEmits(['update:modelValue', 'save'])
 
-const editorStore = useEditorStore()
-const dataSourceStore = useDataSourceStore()
-const componentStore = useComponentStore()
+const editorStore = useEditor()
+const dataSourceStore = useDataSource()
+const componentStore = useComponentMeta()
 const activeTab = ref('dataSource')
 const selectedDataSource = ref<string | null>(null)
 const selectedComponent = ref<string | null>(null)
@@ -33,24 +45,24 @@ const dataSourceTree = computed(() => {
   if (!selectedDataSource.value) return []
   const ds = dataSourceStore.dataSources[selectedDataSource.value]
   if (!ds || !ds.data) return []
-  
+
   // Recursively build tree from data
   return buildTreeFromData(ds.data)
 })
 
 function buildTreeFromData(data: any, prefix = ''): any[] {
   if (typeof data !== 'object' || data === null) return []
-  
+
   return Object.keys(data).map(key => {
     const value = data[key]
     const currentPath = prefix ? `${prefix}.${key}` : key
     const isObject = typeof value === 'object' && value !== null
     const isArray = Array.isArray(value)
-    
+
     return {
       label: key,
       path: currentPath,
-      type: isArray ? 'array' : (isObject ? 'object' : typeof value),
+      type: isArray ? 'array' : isObject ? 'object' : typeof value,
       value: isObject ? undefined : value,
       children: isObject ? buildTreeFromData(value, currentPath) : undefined
     }
@@ -89,17 +101,17 @@ const allComponents = computed(() => {
 // 获取选中组件的属性选项（按分组）
 const componentPropertyOptions = computed(() => {
   if (!selectedComponent.value) return []
-  
+
   const component = allComponents.value.find(c => c.id === selectedComponent.value)
   if (!component) return []
-  
+
   const componentMeta = componentStore.getComponentMeta(component.type)
-  
+
   const options: Array<{
     label: string
     options: Array<{ label: string; value: string }>
   }> = []
-  
+
   // ModelValue 分组
   if (componentMeta?.propsSchema) {
     const modelValueOptions = componentMeta.propsSchema
@@ -115,7 +127,7 @@ const componentPropertyOptions = computed(() => {
       })
     }
   }
-  
+
   // Props 分组
   const propsOptions = Object.keys(component.props).map(key => ({
     label: key,
@@ -127,7 +139,7 @@ const componentPropertyOptions = computed(() => {
       options: propsOptions
     })
   }
-  
+
   // Style 分组
   const styleOptions = Object.keys(component.style).map(key => ({
     label: key,
@@ -139,7 +151,7 @@ const componentPropertyOptions = computed(() => {
       options: styleOptions
     })
   }
-  
+
   return options
 })
 
@@ -154,7 +166,7 @@ watch(
       if (!selectedComp) return
 
       let binding: DataBinding | undefined
-      
+
       // 检查是否是样式绑定
       if (propKey.startsWith('style.')) {
         binding = selectedComp.schema.props[`${propKey}_binding`]
@@ -170,9 +182,9 @@ watch(
         } else if (binding.type === 'component' && binding.componentId) {
           activeTab.value = 'componentState'
           selectedComponent.value = binding.componentId
-          
+
           let simplifiedPath = binding.path || ''
-            
+
           selectedPropertyPath.value = simplifiedPath
         }
       } else {
@@ -194,13 +206,17 @@ function handleSave() {
     binding = {
       type: 'dataSource',
       dataSourceId: selectedDataSource.value,
-      path: dataPath.value,
+      path: dataPath.value
     }
-  } else if (activeTab.value === 'componentState' && selectedComponent.value && selectedPropertyPath.value) {
+  } else if (
+    activeTab.value === 'componentState' &&
+    selectedComponent.value &&
+    selectedPropertyPath.value
+  ) {
     binding = {
       type: 'component',
       componentId: selectedComponent.value,
-      path: selectedPropertyPath.value,
+      path: selectedPropertyPath.value
     }
   }
   if (binding && props.propKey) {
@@ -211,18 +227,18 @@ function handleSave() {
 </script>
 
 <template>
-  <Dialog :open="modelValue" @update:open="(val) => emit('update:modelValue', val)">
+  <Dialog :open="modelValue" @update:open="val => emit('update:modelValue', val)">
     <DialogContent class="max-w-xl h-[600px] flex flex-col">
       <DialogHeader>
         <DialogTitle>数据绑定</DialogTitle>
       </DialogHeader>
-      
+
       <Tabs v-model="activeTab" class="w-full flex-1 flex flex-col min-h-0">
         <TabsList class="grid w-full grid-cols-2">
           <TabsTrigger value="dataSource">数据源</TabsTrigger>
           <TabsTrigger value="componentState">组件状态</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="dataSource" class="flex-1 flex flex-col gap-4 mt-4 min-h-0">
           <div class="space-y-2 shrink-0">
             <label class="text-sm font-medium">数据源</label>
@@ -231,17 +247,13 @@ function handleSave() {
                 <SelectValue placeholder="选择一个数据源" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem
-                  v-for="ds in allDataSources"
-                  :key="ds.id"
-                  :value="ds.id"
-                >
+                <SelectItem v-for="ds in allDataSources" :key="ds.id" :value="ds.id">
                   {{ ds.name }}
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           <div class="space-y-2 shrink-0">
             <label class="text-sm font-medium">数据路径</label>
             <div class="flex gap-2">
@@ -250,61 +262,83 @@ function handleSave() {
           </div>
 
           <div class="flex-1 border rounded-md overflow-hidden flex flex-col">
-             <div class="bg-slate-50 px-3 py-2 border-b text-xs font-medium text-slate-500">
-               数据结构预览 (点击选择)
-             </div>
-             <div class="flex-1 overflow-auto p-2">
-               <div v-if="!selectedDataSource" class="text-slate-400 text-sm text-center py-4">
-                 请先选择数据源
-               </div>
-               <div v-else-if="dataSourceTree.length === 0" class="text-slate-400 text-sm text-center py-4">
-                 该数据源暂无数据，请先运行测试获取数据
-               </div>
-               <div v-else class="space-y-1">
-                 <!-- Recursive Tree Node Component -->
-                 <template v-for="node in dataSourceTree" :key="node.path">
-                   <div class="text-sm">
-                     <div 
-                       class="flex items-center gap-1 hover:bg-slate-100 rounded px-2 py-1 cursor-pointer group"
-                       :class="{ 'bg-blue-50 text-blue-600': dataPath === node.path }"
-                       @click="node.children ? toggleExpand(node.path) : selectPath(node.path)"
-                     >
-                       <div v-if="node.children" class="w-4 h-4 flex items-center justify-center">
-                         <ChevronDown v-if="expandedPaths.has(node.path)" :size="14" />
-                         <ChevronRight v-else :size="14" />
-                       </div>
-                       <div v-else class="w-4 h-4"></div>
-                       
-                       <span class="font-mono">{{ node.label }}</span>
-                       <span v-if="node.type" class="text-xs text-slate-400 ml-2">{{ node.type }}</span>
-                       <span v-if="node.value !== undefined" class="text-xs text-slate-400 ml-auto truncate max-w-[100px]">{{ node.value }}</span>
-                       <Check v-if="dataPath === node.path" :size="14" class="ml-auto text-blue-600" />
-                     </div>
-                     
-                     <!-- Children -->
-                     <div v-if="node.children && expandedPaths.has(node.path)" class="pl-4 border-l border-slate-100 ml-2">
-                       <template v-for="child in node.children" :key="child.path">
-                          <!-- Simplified recursive rendering for 1 level deep to avoid complex component logic in single file -->
-                          <!-- In a real app, extract this to a recursive component -->
-                          <div 
-                             class="flex items-center gap-1 hover:bg-slate-100 rounded px-2 py-1 cursor-pointer"
-                             :class="{ 'bg-blue-50 text-blue-600': dataPath === child.path }"
-                             @click="selectPath(child.path)"
-                           >
-                             <div class="w-4 h-4"></div>
-                             <span class="font-mono">{{ child.label }}</span>
-                             <span v-if="child.type" class="text-xs text-slate-400 ml-2">{{ child.type }}</span>
-                             <Check v-if="dataPath === child.path" :size="14" class="ml-auto text-blue-600" />
-                           </div>
-                       </template>
-                     </div>
-                   </div>
-                 </template>
-               </div>
-             </div>
+            <div class="bg-slate-50 px-3 py-2 border-b text-xs font-medium text-slate-500">
+              数据结构预览 (点击选择)
+            </div>
+            <div class="flex-1 overflow-auto p-2">
+              <div v-if="!selectedDataSource" class="text-slate-400 text-sm text-center py-4">
+                请先选择数据源
+              </div>
+              <div
+                v-else-if="dataSourceTree.length === 0"
+                class="text-slate-400 text-sm text-center py-4"
+              >
+                该数据源暂无数据，请先运行测试获取数据
+              </div>
+              <div v-else class="space-y-1">
+                <!-- Recursive Tree Node Component -->
+                <template v-for="node in dataSourceTree" :key="node.path">
+                  <div class="text-sm">
+                    <div
+                      class="flex items-center gap-1 hover:bg-slate-100 rounded px-2 py-1 cursor-pointer group"
+                      :class="{ 'bg-blue-50 text-blue-600': dataPath === node.path }"
+                      @click="node.children ? toggleExpand(node.path) : selectPath(node.path)"
+                    >
+                      <div v-if="node.children" class="w-4 h-4 flex items-center justify-center">
+                        <ChevronDown v-if="expandedPaths.has(node.path)" :size="14" />
+                        <ChevronRight v-else :size="14" />
+                      </div>
+                      <div v-else class="w-4 h-4"></div>
+
+                      <span class="font-mono">{{ node.label }}</span>
+                      <span v-if="node.type" class="text-xs text-slate-400 ml-2">{{
+                        node.type
+                      }}</span>
+                      <span
+                        v-if="node.value !== undefined"
+                        class="text-xs text-slate-400 ml-auto truncate max-w-[100px]"
+                        >{{ node.value }}</span
+                      >
+                      <Check
+                        v-if="dataPath === node.path"
+                        :size="14"
+                        class="ml-auto text-blue-600"
+                      />
+                    </div>
+
+                    <!-- Children -->
+                    <div
+                      v-if="node.children && expandedPaths.has(node.path)"
+                      class="pl-4 border-l border-slate-100 ml-2"
+                    >
+                      <template v-for="child in node.children" :key="child.path">
+                        <!-- Simplified recursive rendering for 1 level deep to avoid complex component logic in single file -->
+                        <!-- In a real app, extract this to a recursive component -->
+                        <div
+                          class="flex items-center gap-1 hover:bg-slate-100 rounded px-2 py-1 cursor-pointer"
+                          :class="{ 'bg-blue-50 text-blue-600': dataPath === child.path }"
+                          @click="selectPath(child.path)"
+                        >
+                          <div class="w-4 h-4"></div>
+                          <span class="font-mono">{{ child.label }}</span>
+                          <span v-if="child.type" class="text-xs text-slate-400 ml-2">{{
+                            child.type
+                          }}</span>
+                          <Check
+                            v-if="dataPath === child.path"
+                            :size="14"
+                            class="ml-auto text-blue-600"
+                          />
+                        </div>
+                      </template>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
           </div>
         </TabsContent>
-        
+
         <TabsContent value="componentState" class="space-y-4 mt-4 min-h-0 overflow-auto">
           <div class="space-y-2">
             <label class="text-sm font-medium">组件</label>
@@ -313,17 +347,13 @@ function handleSave() {
                 <SelectValue placeholder="选择一个组件" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem
-                  v-for="comp in allComponents"
-                  :key="comp.id"
-                  :value="comp.id"
-                >
+                <SelectItem v-for="comp in allComponents" :key="comp.id" :value="comp.id">
                   {{ comp.label }} ({{ comp.semanticId }})
                 </SelectItem>
               </SelectContent>
             </Select>
           </div>
-          
+
           <div v-if="selectedComponent" class="space-y-2">
             <label class="text-sm font-medium">属性</label>
             <Select v-model="selectedPropertyPath">
@@ -331,10 +361,7 @@ function handleSave() {
                 <SelectValue placeholder="选择要绑定的属性" />
               </SelectTrigger>
               <SelectContent>
-                <SelectGroup
-                  v-for="group in componentPropertyOptions"
-                  :key="group.label"
-                >
+                <SelectGroup v-for="group in componentPropertyOptions" :key="group.label">
                   <SelectLabel>{{ group.label }}</SelectLabel>
                   <SelectItem
                     v-for="option in group.options"
@@ -349,7 +376,7 @@ function handleSave() {
           </div>
         </TabsContent>
       </Tabs>
-      
+
       <DialogFooter class="mt-4">
         <Button variant="outline" @click="emit('update:modelValue', false)">取消</Button>
         <Button @click="handleSave">保存</Button>

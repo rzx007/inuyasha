@@ -1,16 +1,16 @@
 import type { EventBinding } from '@inuyasha/core'
 import { executeEvent as executeEventCore } from '@inuyasha/core/event'
-import { useEditorStore } from '../stores/editor'
-import { useDataSourceStore } from '../stores/dataSource'
-import { useFormStateStore } from '../stores/formState'
-import { useComponentRegistry } from '../stores/componentRegistry'
+import { useEditor } from '../stores/editor'
+import { useDataSource } from '../stores/dataSource'
+import { useFormState } from '../stores/formState'
+import { useComponentInstance } from '../stores/componentInstance'
 import { getInuyashaVueOptions } from '../config'
 
 export function useExecuteEvent() {
-  const editorStore = useEditorStore()
-  const dataSourceStore = useDataSourceStore()
-  const formStateStore = useFormStateStore()
-  const componentRegistry = useComponentRegistry()
+  const editorStore = useEditor()
+  const dataSourceStore = useDataSource()
+  const formStateStore = useFormState()
+  const componentRegistry = useComponentInstance()
   const { toast } = getInuyashaVueOptions()
 
   return async (event: EventBinding) => {

@@ -4,7 +4,7 @@ import { onMounted } from 'vue'
 import { DndProvider } from 'vue3-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { Layers, Database } from 'lucide-vue-next'
-import { useEditorStore } from '@/stores/editor'
+import { useEditor } from '@inuyasha/vue'
 import ComponentPanel from '@/components/Editor/ComponentPanel.vue'
 import DataSourcePanel from '@/components/Editor/DataSourcePanel/index.vue'
 import DebugPanel from '@/components/Editor/DebugPanel.vue'
@@ -14,7 +14,7 @@ import Toolbar from '@/components/Editor/Toolbar.vue'
 import LayersPanel from '@/components/Editor/LayersPanel.vue'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
-const editorStore = useEditorStore()
+const editorStore = useEditor()
 
 const activeLeftTab = ref('components')
 const showDebugPanel = ref(false)

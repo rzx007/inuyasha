@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { useDrop } from 'vue3-dnd'
 import { DndTypes, type DragItem } from '@inuyasha/core'
-import { useEditorStore } from '@/stores/editor'
+import { useEditor } from '@inuyasha/vue'
 
 interface Props {
   parentId: string
   styleObject?: Record<string, any>
 }
 const props = defineProps<Props>()
-const editorStore = useEditorStore()
+const editorStore = useEditor()
 
 // 背景层拖拽逻辑 - 添加到末尾
 const [collected, drop] = useDrop(() => ({
@@ -18,7 +18,7 @@ const [collected, drop] = useDrop(() => ({
     if (monitor.didDrop()) {
       return
     }
-    
+
     // 添加到末尾
     if (item.type === DndTypes.COMPONENT) {
       const { meta, cloneFn } = item
@@ -34,13 +34,13 @@ const [collected, drop] = useDrop(() => ({
         editorStore.moveComponent(draggedId, props.parentId)
       }
     }
-    
+
     return { dropped: true }
   },
-  collect: (monitor) => ({
+  collect: monitor => ({
     isOver: monitor.isOver({ shallow: true }),
-    canDrop: monitor.canDrop(),
-  }),
+    canDrop: monitor.canDrop()
+  })
 }))
 </script>
 
@@ -50,13 +50,14 @@ const [collected, drop] = useDrop(() => ({
     <div
       :ref="drop"
       class="absolute inset-0 pointer-events-auto"
-      :class="{ 'bg-primary/5 ring-2 ring-primary ring-inset': collected.isOver && collected.canDrop }"
+      :class="{
+        'bg-primary/5 ring-2 ring-primary ring-inset': collected.isOver && collected.canDrop
+      }"
     />
-    
+
     <!-- 子组件层（相对定位，z-index 更高） -->
     <div class="relative z-10 pointer-events-auto">
       <slot />
     </div>
   </div>
 </template>
-

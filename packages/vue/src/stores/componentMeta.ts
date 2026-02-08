@@ -5,7 +5,7 @@ import { ComponentRegistry } from '@inuyasha/core/component'
 
 const registry = new ComponentRegistry()
 
-export const useComponentStore = defineStore('component', () => {
+export const useComponentMeta = defineStore('componentMeta', () => {
   // 使用一个计数器来触发响应式更新
   const updateTrigger = ref(0)
 

@@ -1,17 +1,16 @@
 import { computed, ref } from 'vue'
 import { nanoid } from 'nanoid'
-import { useEditorStore } from '@/stores/editor'
-import { useComponentStore } from '@/stores/component'
+import { useEditor, useComponent } from '@inuyasha/vue'
 import type {
   ActionConfig,
   ActionType,
   EventBinding,
-  ControlComponentActionConfig,
+  ControlComponentActionConfig
 } from '@inuyasha/core'
 
 export function useEventPanel() {
-  const editorStore = useEditorStore()
-  const componentStore = useComponentStore()
+  const editorStore = useEditor()
+  const componentStore = useComponentMeta()
   const isEventDialogVisible = ref(false)
   const currentEvent = ref<Partial<EventBinding>>({})
 
@@ -34,11 +33,7 @@ export function useEventPanel() {
     const comp = findComponentById(componentId)
     if (!comp) return []
     const meta = componentStore.getComponentMeta(comp.type)
-    return (
-      meta?.exposedMethods ||
-      meta?.methods?.map(m => ({ name: m.name, label: m.label })) ||
-      []
-    )
+    return meta?.exposedMethods || meta?.methods?.map(m => ({ name: m.name, label: m.label })) || []
   }
 
   const actionTypes: { label: string; value: ActionType }[] = [
@@ -51,7 +46,7 @@ export function useEventPanel() {
     { label: '路由跳转 (Navigate To)', value: 'navigateTo' },
     { label: '复制到剪贴板 (Copy Clipboard)', value: 'copyToClipboard' },
     { label: '设置本地存储 (Set LocalStorage)', value: 'setLocalStorage' },
-    { label: '下载文件 (Download)', value: 'download' },
+    { label: '下载文件 (Download)', value: 'download' }
   ]
 
   const triggerOptions = computed(() => {
@@ -122,7 +117,7 @@ export function useEventPanel() {
       currentEvent.value = {
         id: nanoid(),
         trigger: defaultTrigger,
-        actions: [createDefaultAction()],
+        actions: [createDefaultAction()]
       }
     }
     isEventDialogVisible.value = true
@@ -165,7 +160,7 @@ export function useEventPanel() {
     const eventToSave: EventBinding = {
       id: currentEvent.value.id,
       trigger: currentEvent.value.trigger!,
-      actions: currentEvent.value.actions || [],
+      actions: currentEvent.value.actions || []
     }
     if ((eventToSave as any).action) delete (eventToSave as any).action
     if (existingIndex > -1) {
@@ -197,7 +192,6 @@ export function useEventPanel() {
     handleActionTypeChange,
     handleControlTargetChange,
     handleSaveEvent,
-    deleteEvent,
+    deleteEvent
   }
 }
-

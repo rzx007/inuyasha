@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useEditorStore } from '@/stores/editor'
+import { useEditor } from '@inuyasha/vue'
 import { MousePointer2, Copy, Trash2 } from 'lucide-vue-next'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -9,15 +9,14 @@ import PageSettingsPanel from './PageSettingsPanel.vue'
 import ComponentPropsPanel from './ComponentPropsPanel.vue'
 import ComponentEventsPanel from './ComponentEventsPanel.vue'
 
-const editorStore = useEditorStore()
+const editorStore = useEditor()
 const activeTab = ref('props')
 
 const selectedComponent = computed(() => editorStore.selectedComponent)
 
 // 判断是否显示页面设置
 const showPageSettings = computed(() => {
-  return !selectedComponent.value || 
-         selectedComponent.value?.schema.type === ComponentType.PageRoot
+  return !selectedComponent.value || selectedComponent.value?.schema.type === ComponentType.PageRoot
 })
 
 // 复制组件
@@ -47,16 +46,17 @@ function handleDeleteComponent() {
     <!-- 页面设置视图 -->
     <div v-if="showPageSettings" class="flex-1 flex flex-col overflow-hidden">
       <div class="px-4 py-4 border-b border-slate-100 bg-white">
-        <h2 class="text-lg font-semibold tracking-wider text-slate-900">
-          页面设置
-        </h2>
+        <h2 class="text-lg font-semibold tracking-wider text-slate-900">页面设置</h2>
       </div>
 
       <PageSettingsPanel />
     </div>
 
     <!-- 未选中组件视图 -->
-    <div v-else-if="!selectedComponent" class="flex-1 flex items-center justify-center text-slate-400">
+    <div
+      v-else-if="!selectedComponent"
+      class="flex-1 flex items-center justify-center text-slate-400"
+    >
       <div class="text-center">
         <MousePointer2 :size="48" class="mb-4 text-slate-200 mx-auto" />
         <p class="text-sm font-medium">Select a component to edit</p>
@@ -68,7 +68,10 @@ function handleDeleteComponent() {
       <!-- Header -->
       <div class="px-4 py-4 border-b border-slate-100 bg-white">
         <div class="flex items-center justify-between mb-1">
-          <Badge variant="secondary" class="font-semibold bg-slate-100 text-primary border border-slate-200">
+          <Badge
+            variant="secondary"
+            class="font-semibold bg-slate-100 text-primary border border-slate-200"
+          >
             {{ selectedComponent.schema.type.toUpperCase() }}
           </Badge>
 
@@ -90,9 +93,13 @@ function handleDeleteComponent() {
             </button>
           </div>
         </div>
-        <h2 class="text-lg font-semibold tracking-wider text-slate-900 truncate flex items-center gap-2.5">
+        <h2
+          class="text-lg font-semibold tracking-wider text-slate-900 truncate flex items-center gap-2.5"
+        >
           {{ selectedComponent.schema.label }}
-          <p class="text-xs font-thin font-mono text-slate-400 mt-1">ID: {{ selectedComponent.schema.semanticId }}</p>
+          <p class="text-xs font-thin font-mono text-slate-400 mt-1">
+            ID: {{ selectedComponent.schema.semanticId }}
+          </p>
         </h2>
       </div>
 
@@ -105,11 +112,13 @@ function handleDeleteComponent() {
           <ComponentPropsPanel :component-id="selectedComponent.id" />
         </TabsContent>
 
-        <TabsContent value="events" class="overflow-hidden flex-1 flex flex-col data-[state=inactive]:hidden">
+        <TabsContent
+          value="events"
+          class="overflow-hidden flex-1 flex flex-col data-[state=inactive]:hidden"
+        >
           <ComponentEventsPanel :component-id="selectedComponent.id" />
         </TabsContent>
       </Tabs>
     </div>
   </div>
 </template>
-

@@ -4,7 +4,7 @@ import { ComponentInstanceRegistry } from '@inuyasha/core/component'
 
 const registry = new ComponentInstanceRegistry()
 
-export const useComponentRegistry = defineStore('componentRegistry', () => {
+export const useComponentInstance = defineStore('componentInstance', () => {
   // Store component instances keyed by component ID
   const registryRef = ref(registry)
 

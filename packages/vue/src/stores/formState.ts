@@ -5,7 +5,7 @@ import { FormStateStore } from '@inuyasha/core/state'
 
 const formStateStore = new FormStateStore()
 
-export const useFormStateStore = defineStore('formState', () => {
+export const useFormState = defineStore('formState', () => {
   const states = ref(formStateStore.states)
 
   function setComponentState(componentId: ComponentId, key: string, value: any) {

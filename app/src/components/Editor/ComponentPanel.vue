@@ -3,8 +3,7 @@ import { computed, ref, defineComponent, h, onMounted } from 'vue'
 import type { PropType } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
-import { useComponentStore } from '@/stores/component'
-import { useEditorStore } from '@/stores/editor'
+import { useComponentMeta, useEditor } from '@inuyasha/vue'
 import { createComponent } from '@inuyasha/core/component'
 import type { ComponentMeta } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
@@ -14,8 +13,8 @@ import { DndTypes } from '@inuyasha/core'
 import { allComponents } from '@/config/components'
 import { pageRootMeta } from '@/config/components/pageRoot'
 
-const componentStore = useComponentStore()
-const editorStore = useEditorStore()
+const componentStore = useComponentMeta()
+const editorStore = useEditor()
 
 // 注册组件（确保只注册一次）
 onMounted(() => {
@@ -64,7 +63,7 @@ function cloneComponent(meta: ComponentMeta) {
   // 获取 PageRoot 的 children 用于生成语义化标识
   const rootComponent = editorStore.pageConfig.rootComponent
   const existingComponents = rootComponent.children || []
-  return createComponent(meta.type, undefined, existingComponents)
+  return createComponent(meta, undefined, existingComponents)
 }
 
 // 可拖拽项组件（使用 defineComponent 规范声明）

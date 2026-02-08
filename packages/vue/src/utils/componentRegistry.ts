@@ -9,7 +9,7 @@ import {
   validateComponentSchema as validateComponentSchemaCore,
   generateComponentId as generateComponentIdCore
 } from '@inuyasha/core/component'
-import { useComponentStore } from '../stores/component'
+import { useComponentMeta } from '../stores/componentMeta'
 
 /**
  * 生成语义化唯一标识
@@ -29,8 +29,8 @@ export function createComponent(
   overrides?: Partial<ComponentSchema>,
   existingComponents: ComponentSchema[] = []
 ): ComponentSchema | null {
-  const componentStore = useComponentStore()
-  const meta = componentStore.getComponentMeta(type)
+  const componentMeta = useComponentMeta()
+  const meta = componentMeta.getComponentMeta(type)
 
   if (!meta) {
     console.warn(`Component type ${type} not found`)

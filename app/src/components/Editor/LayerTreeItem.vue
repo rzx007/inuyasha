@@ -4,7 +4,7 @@ import { ChevronDown, ChevronRight, Layers as LayersIcon } from 'lucide-vue-next
 import { Badge } from '@/components/ui/badge'
 import type { ComponentSchema } from '@inuyasha/core'
 import { getIconComponent } from '@/utils/iconMapping'
-import { useComponentStore } from '@inuyasha/vue'
+import { useComponentMeta } from '@inuyasha/vue'
 
 export type LayerNode = {
   id: string
@@ -26,7 +26,7 @@ const props = defineProps<{
 
 defineOptions({ name: 'LayerTreeItem' })
 
-const componentStore = useComponentStore()
+const componentStore = useComponentMeta()
 
 const depth = computed(() => props.depth ?? 0)
 const hasChildren = computed(() => props.node.children && props.node.children.length > 0)
@@ -59,7 +59,9 @@ function handleToggle(e: Event) {
     <div
       class="flex items-center gap-2 px-2 py-1.5 border border-transparent rounded transition-colors cursor-pointer"
       :class="[
-        isSelected ? 'bg-primary/10 text-primary-700 border border-primary/30!' : 'hover:bg-slate-50',
+        isSelected
+          ? 'bg-primary/10 text-primary-700 border border-primary/30!'
+          : 'hover:bg-slate-50',
         node.isSlot ? 'text-slate-500' : 'text-slate-700'
       ]"
       :style="{ paddingLeft }"
@@ -83,12 +85,7 @@ function handleToggle(e: Event) {
       >
         {{ node.slotName || 'Slot' }}
       </Badge>
-      <component
-        v-else
-        :is="iconComp || LayersIcon"
-        :size="14"
-        class="text-slate-500"
-      />
+      <component v-else :is="iconComp || LayersIcon" :size="14" class="text-slate-500" />
 
       <span class="text-sm flex-1 truncate" :title="node.label">
         {{ node.label }}
@@ -117,4 +114,3 @@ function handleToggle(e: Event) {
     </div>
   </div>
 </template>
-

@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { useEditorStore } from '@/stores/editor'
-import { useDataSourceStore } from '@/stores/dataSource'
+import { useEditor, useDataSource } from '@inuyasha/vue'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'vue-router'
 import { Trash2, Play, Save, Bug } from 'lucide-vue-next'
 
-const editorStore = useEditorStore()
-const dataSourceStore = useDataSourceStore()
+const editorStore = useEditor()
+const dataSourceStore = useDataSource()
 const router = useRouter()
 
 const props = defineProps<{
@@ -48,13 +47,13 @@ function handleClear() {
   if (confirm('确定要清空画布吗？')) {
     const clearedRoot = {
       ...editorStore.pageConfig.rootComponent,
-      children: [],
+      children: []
     }
     editorStore.setPageConfig({
       ...editorStore.pageConfig,
       rootComponent: clearedRoot,
       dataSources: {},
-      updatedAt: Date.now(),
+      updatedAt: Date.now()
     })
   }
 }
@@ -66,7 +65,9 @@ function handleClear() {
   >
     <!-- 左侧：标题 -->
     <div class="flex items-center gap-2">
-      <div class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center text-sm font-semibold shadow-sm">
+      <div
+        class="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center text-sm font-semibold shadow-sm"
+      >
         LC
       </div>
       <div class="flex flex-col leading-tight">
@@ -80,29 +81,33 @@ function handleClear() {
         @click="emit('toggleDebug')"
         :variant="props.isDebugMode ? 'default' : 'outline'"
         size="sm"
-        class="px-3 "
+        class="px-3"
       >
         <Bug class="w-4 h-4" />
         {{ props.isDebugMode ? '画布' : '调试' }}
       </Button>
-      <Button @click="handleSave" variant="outline" size="sm" class="px-3 text-slate-600 shadow-none">
+      <Button
+        @click="handleSave"
+        variant="outline"
+        size="sm"
+        class="px-3 text-slate-600 shadow-none"
+      >
         <Save class="w-4 h-4" />
         保存
       </Button>
-      <Button @click="handleClear" variant="outline" size="sm" class="px-3 text-slate-600 shadow-none">
+      <Button
+        @click="handleClear"
+        variant="outline"
+        size="sm"
+        class="px-3 text-slate-600 shadow-none"
+      >
         <Trash2 class="w-4 h-4" />
         清空
       </Button>
-      <Button
-        variant="default"
-        size="sm"
-        class="px-5!"
-        @click="handlePreview"
-      >
-      <Play class="w-4 h-4"/>
-      预览
+      <Button variant="default" size="sm" class="px-5!" @click="handlePreview">
+        <Play class="w-4 h-4" />
+        预览
       </Button>
     </div>
   </div>
 </template>
-

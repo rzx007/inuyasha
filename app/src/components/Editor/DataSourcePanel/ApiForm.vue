@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import VariablePicker from '../VariablePicker.vue'
-import { useResolveVariablesInConfig, useDataSourceStore } from '@inuyasha/vue'
+import { useResolveVariablesInConfig, useDataSource } from '@inuyasha/vue'
 import type { ApiDataSourceConfig, DataSource } from '@inuyasha/core'
 
 const props = defineProps<{
@@ -30,7 +30,7 @@ const body = ref('')
 const activeTab = ref('params')
 
 // Store
-const dataSourceStore = useDataSourceStore()
+const dataSourceStore = useDataSource()
 const resolveVariablesInConfig = useResolveVariablesInConfig()
 
 // Variable Picker State

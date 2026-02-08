@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "immer": "^10.1.1",
     "nanoid": "^5.1.6",
     "lodash-es": "^4.17.21",
     "zod": "3.25.76"

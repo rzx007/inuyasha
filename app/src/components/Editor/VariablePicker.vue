@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { TextCursor, X } from 'lucide-vue-next'
-import { useEditorStore } from '@/stores/editor'
+import { useEditor } from '@inuyasha/vue'
 import type { ComponentSchema } from '@inuyasha/core'
 
 const emit = defineEmits<{
@@ -10,7 +10,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const editorStore = useEditorStore()
+const editorStore = useEditor()
 const { pageConfig } = storeToRefs(editorStore)
 
 const formatVariableName = (name: string) => `{{${name}}}`

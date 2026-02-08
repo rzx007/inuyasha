@@ -26,24 +26,27 @@ export interface TableRow {
 const EXAMPLE_DATA: TableRow[] = [
   { date: '2016-05-03', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' },
   { date: '2016-05-02', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' },
-  { date: '2016-05-04', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' },
+  { date: '2016-05-04', name: 'Tom', address: 'No. 189, Grove St, Los Angeles' }
 ]
 
 // 示例 columns（与 defaultValue 保持一致）
 const EXAMPLE_COLUMNS: TableColumn[] = [
   { prop: 'date', label: 'Date' },
   { prop: 'name', label: 'Name' },
-  { prop: 'address', label: 'Address' },
+  { prop: 'address', label: 'Address' }
 ]
 
 // 双向绑定的 columns
 const columns = defineModel<TableColumn[]>('columns')
 
-const props = withDefaults(defineProps<{
-  data?: TableRow[]
-}>(), {
-  data: () => [],
-})
+const props = withDefaults(
+  defineProps<{
+    data?: TableRow[]
+  }>(),
+  {
+    data: () => []
+  }
+)
 
 // 标记是否是用户手动修改的 columns（用于区分自动生成和手动修改）
 const isManuallyModified = ref(false)
@@ -67,7 +70,7 @@ const generateColumnsFromData = (data: TableRow[]): TableColumn[] => {
   const firstRow = data[0]
   return Object.keys(firstRow).map(key => ({
     prop: key,
-    label: key.charAt(0).toUpperCase() + key.slice(1), // 首字母大写
+    label: key.charAt(0).toUpperCase() + key.slice(1) // 首字母大写
   }))
 }
 
@@ -106,7 +109,7 @@ watch(
     isExample: isExampleData(props.data)
   }),
   (newVal, oldVal) => {
-    console.log("🚀 ~ newVal, oldVal:", newVal, oldVal)
+    console.log('🚀 ~ newVal, oldVal:', newVal, oldVal)
     // 如果用户已经手动修改了 columns，不再自动更新
     if (isManuallyModified.value) {
       return
@@ -122,7 +125,7 @@ watch(
     // 场景 2: 数据结构发生变化（不是示例数据），重新生成 columns
     if (oldVal && newVal.structure !== oldVal.structure && !newVal.isExample) {
       columns.value = generateColumnsFromData(newVal.data)
-      console.log("🚀 ~ columns.value:", columns.value)
+      console.log('🚀 ~ columns.value:', columns.value)
       isManuallyModified.value = false // 重置手动修改标记
       return
     }
@@ -138,22 +141,14 @@ watch(
     }
   },
   {
-    immediate: true,
+    // immediate: true,
     deep: true
   }
 )
-
 </script>
 
 <template>
-  <el-table
-    v-bind="$attrs"
-    :data="data"
-  >
-    <el-table-column
-      v-for="column in computedColumns"
-      :key="column.prop"
-      v-bind="column"
-    />
+  <el-table v-bind="$attrs" :data="data">
+    <el-table-column v-for="column in computedColumns" :key="column.prop" v-bind="column" />
   </el-table>
 </template>

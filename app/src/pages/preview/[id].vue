@@ -1,24 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useEditorStore } from '@/stores/editor'
-import { useComponentStore } from '@/stores/component'
+import { useEditor, useComponent, useDataSource } from '@inuyasha/vue'
 
 import { allComponents } from '@/config/components'
 import { pageRootMeta } from '@/config/components/pageRoot'
 import PreviewRenderer from '@/components/Render/PreviewRenderer.vue'
 import type { PageConfig } from '@inuyasha/core'
 
-import { useDataSourceStore } from '@/stores/dataSource'
-
 const route = useRoute()
-const editorStore = useEditorStore()
-const componentStore = useComponentStore()
-const dataSourceStore = useDataSourceStore()
+const editorStore = useEditor()
+const componentStore = useComponentMeta()
+const dataSourceStore = useDataSource()
 
 const pageConfig = ref<PageConfig | null>(null)
 
-onMounted(async () => { // Make it async
+onMounted(async () => {
+  // Make it async
 
   // Register all components, so the renderer knows about them
   componentStore.registerComponents(allComponents)
@@ -42,7 +40,6 @@ onMounted(async () => { // Make it async
             dataSourceStore.fetchDataSource(ds.id)
           }
         })
-        
       } catch (e) {
         console.error('Failed to load page config for preview:', e)
       }

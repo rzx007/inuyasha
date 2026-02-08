@@ -3,12 +3,12 @@ import { ref } from 'vue'
 import type { DataSource, DataSourceId } from '@inuyasha/core'
 import { DataSourceStore } from '@inuyasha/core/state'
 import type { ExpressionContext } from '@inuyasha/core/expression'
-import { useEditorStore } from './editor'
-import { useFormStateStore } from './formState'
+import { useEditor } from './editor'
+import { useFormState } from './formState'
 
 const dataSourceStore = new DataSourceStore()
 
-export const useDataSourceStore = defineStore('dataSource', () => {
+export const useDataSource = defineStore('dataSource', () => {
   const dataSources = ref(dataSourceStore.dataSources)
 
   function addDataSource(dataSource: Omit<DataSource, 'id'>) {
@@ -42,8 +42,8 @@ export const useDataSourceStore = defineStore('dataSource', () => {
   }
 
   async function fetchDataSource(id: DataSourceId) {
-    const editorStore = useEditorStore()
-    const formStateStore = useFormStateStore()
+    const editorStore = useEditor()
+    const formStateStore = useFormState()
 
     const context: ExpressionContext = {
       editorStore: {
