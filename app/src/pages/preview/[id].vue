@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { useEditor, useComponent, useDataSource } from '@inuyasha/vue'
+import { useEditor, useDataSource, useComponentMeta } from '@inuyasha/vue'
 
 import { allComponents } from '@/config/components'
 import { pageRootMeta } from '@/config/components/pageRoot'

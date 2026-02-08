@@ -1,7 +1,6 @@
 export * from './config'
 export { createInuyashaPlugin } from './plugin'
 export { createInuyasha, type InuyashaInstance, type InuyashaOptions } from './sdk'
-export * from './utils/componentRegistry'
 export * from './stores/componentMeta'
 export * from './stores/componentInstance'
 export * from './stores/dataSource'

@@ -4,7 +4,6 @@ import type { PropType } from 'vue'
 import { Search } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import { useComponentMeta, useEditor } from '@inuyasha/vue'
-import { createComponent } from '@inuyasha/core/component'
 import type { ComponentMeta } from '@inuyasha/core'
 import { ComponentType } from '@inuyasha/core'
 import { getIconComponent } from '@/utils/iconMapping'
@@ -63,7 +62,7 @@ function cloneComponent(meta: ComponentMeta) {
   // 获取 PageRoot 的 children 用于生成语义化标识
   const rootComponent = editorStore.pageConfig.rootComponent
   const existingComponents = rootComponent.children || []
-  return createComponent(meta, undefined, existingComponents)
+  return componentStore.createComponent(meta, undefined, existingComponents)
 }
 
 // 可拖拽项组件（使用 defineComponent 规范声明）

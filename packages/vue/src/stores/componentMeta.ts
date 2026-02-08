@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { ComponentMeta, ComponentType } from '@inuyasha/core'
-import { ComponentRegistry } from '@inuyasha/core/component'
+import type { ComponentMeta, ComponentType, ComponentSchema } from '@inuyasha/core'
+import { ComponentRegistry, createComponent as createComponentCore } from '@inuyasha/core/component'
 
 const registry = new ComponentRegistry()
 
@@ -45,6 +45,15 @@ export const useComponentMeta = defineStore('componentMeta', () => {
     return registry.getCategorizedComponents()
   })
 
+  // 创建组件实例
+  function createComponent(
+    meta: ComponentMeta,
+    overrides?: Partial<ComponentSchema>,
+    existingComponents: ComponentSchema[] = []
+  ): ComponentSchema {
+    return createComponentCore(meta, overrides, existingComponents)
+  }
+
   return {
     componentLibrary: computed(() => registry),
     registerComponent,
@@ -52,6 +61,7 @@ export const useComponentMeta = defineStore('componentMeta', () => {
     getComponentMeta,
     getComponentsByCategory,
     getAllComponents,
-    getCategorizedComponents
+    getCategorizedComponents,
+    createComponent
   }
 })
