@@ -1,6 +1,6 @@
 import { computed, ref } from 'vue'
 import { nanoid } from 'nanoid'
-import { useEditor, useComponent } from '@inuyasha/vue'
+import { useEditor, useComponentMeta } from '@inuyasha/vue'
 import type {
   ActionConfig,
   ActionType,

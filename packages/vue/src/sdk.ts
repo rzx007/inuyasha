@@ -43,11 +43,11 @@ export function createInuyasha(options: InuyashaOptions): InuyashaInstance {
   // 初始化各个状态管理仓库，并将其挂载到实例上
   const instance: InuyashaInstance = {
     stores: {
-      editor: useEditor(),
       componentInstance: useComponentInstance(),
+      componentMeta: useComponentMeta(),
       dataSource: useDataSource(),
-      formState: useFormState(),
-      componentMeta: useComponentMeta()
+      editor: useEditor(),
+      formState: useFormState()
     }
   }
 

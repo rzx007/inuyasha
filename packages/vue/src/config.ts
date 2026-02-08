@@ -1,7 +1,7 @@
 import type { ComponentMeta } from '@inuyasha/core'
 
 export interface InuyashaVueOptions {
-  pageRootMeta: ComponentMeta  // 默认 PageRoot 组件元信息
+  pageRootMeta: ComponentMeta // 默认 PageRoot 组件元信息
   toast?: {
     success?(message: string): void
     error?(message: string): void

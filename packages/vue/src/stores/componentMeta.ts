@@ -46,7 +46,7 @@ export const useComponentMeta = defineStore('componentMeta', () => {
   })
 
   // 创建组件实例
-  function createComponent(
+  function createComponentSchema(
     meta: ComponentMeta,
     overrides?: Partial<ComponentSchema>,
     existingComponents: ComponentSchema[] = []
@@ -62,6 +62,6 @@ export const useComponentMeta = defineStore('componentMeta', () => {
     getComponentsByCategory,
     getAllComponents,
     getCategorizedComponents,
-    createComponent
+    createComponentSchema
   }
 })

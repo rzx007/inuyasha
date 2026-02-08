@@ -62,7 +62,7 @@ function cloneComponent(meta: ComponentMeta) {
   // 获取 PageRoot 的 children 用于生成语义化标识
   const rootComponent = editorStore.pageConfig.rootComponent
   const existingComponents = rootComponent.children || []
-  return componentStore.createComponent(meta, undefined, existingComponents)
+  return componentStore.createComponentSchema(meta, undefined, existingComponents)
 }
 
 // 可拖拽项组件（使用 defineComponent 规范声明）
