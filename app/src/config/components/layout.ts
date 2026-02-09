@@ -15,9 +15,6 @@ export const layoutComponents: ComponentMeta[] = [
     },
     defaultStyle: {
       display: 'flex',
-      flexDirection: 'row',
-      gap: '8px',
-      alignItems: 'center'
     },
     slots: [{ name: 'default', label: '默认插槽', allowDrag: true }],
     propsSchema: [

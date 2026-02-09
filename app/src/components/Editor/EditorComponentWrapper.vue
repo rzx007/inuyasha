@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useResizeObserver, useMutationObserver, useThrottleFn } from '@vueuse/core'
+import { useElementBounding, useEventListener } from '@vueuse/core'
 import { useEditor, useComponentMeta } from '@inuyasha/vue'
 import type { ComponentSchema } from '@inuyasha/core'
 import DynamicRenderer from '@/components/Render/DynamicRenderer.vue'
@@ -216,43 +216,46 @@ const setRef = (el: any) => {
   handleDragPreview(el)
 }
 
-const overlayRef = ref<HTMLElement | null>(null)
 const handleRef = ref<HTMLElement | null>(null)
-const overlayRect = ref({ top: 0, left: 0, width: 0, height: 0 })
 
 const setHandleRef = (el: any) => {
   handleRef.value = el
   handleDragSource(el)
 }
 
-const updateOverlayPosition = useThrottleFn(() => {
-  if (!componentRef.value) {
-    return
-  }
+const { top, left, width, height, update } = useElementBounding(componentRef)
 
-  const rect = componentRef.value.getBoundingClientRect()
-  overlayRect.value = {
-    top: rect.top + window.scrollY,
-    left: rect.left + window.scrollX,
-    width: rect.width,
-    height: rect.height
-  }
-}, 16)
+const overlayRect = computed(() => ({
+  top: top.value,
+  left: left.value,
+  width: width.value,
+  height: height.value
+}))
 
-useResizeObserver(componentRef, updateOverlayPosition)
+const canvasScrollTop = ref(0)
+const overlayZIndex = computed(() => (canvasScrollTop.value > 0 ? 29 : 30))
 
-useMutationObserver(document.body, updateOverlayPosition, {
-  childList: true,
-  subtree: true,
-  attributes: true,
-  attributeFilter: ['class', 'style']
-})
+function syncCanvasScrollTop() {
+  const el = document.querySelector('.canvas-content')
+  canvasScrollTop.value = el ? (el as HTMLElement).scrollTop : 0
+}
 
 watch([selectedId, () => props.schema.id], () => {
-  if (selectedId.value === props.schema.id || dropCollected.isOver) {
-    updateOverlayPosition()
+  if (selectedId.value === props.schema.id || dropCollected.value.isOver) {
+    syncCanvasScrollTop()
+    update()
   }
 })
+
+useEventListener(
+  () => document.querySelector('.canvas-content'),
+  'scroll',
+  () => {
+    syncCanvasScrollTop()
+    update()
+  },
+  { passive: true }
+)
 </script>
 
 <template>
@@ -271,19 +274,15 @@ watch([selectedId, () => props.schema.id], () => {
     <DynamicRenderer :schema="schema" />
   </div>
 
-  <Teleport
-    v-if="selectedId === schema.id || dropCollected.isOver"
-    to="body"
-  >
+  <Teleport v-if="selectedId === schema.id || dropCollected.isOver" to="body">
     <div
-      ref="overlayRef"
       class="component-overlay fixed pointer-events-none"
       :style="{
         top: overlayRect.top + 'px',
         left: overlayRect.left + 'px',
         width: overlayRect.width + 'px',
         height: overlayRect.height + 'px',
-        zIndex: 49
+        zIndex: overlayZIndex
       }"
     >
       <div
@@ -319,12 +318,7 @@ watch([selectedId, () => props.schema.id], () => {
           title="Delete"
           @click.stop="handleDeleteButtonClick"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-          >
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
             <path
               fill="currentColor"
               d="M7 21q-.825 0-1.412-.587T5 19V6H4V4h5V3h6v1h5v2h-1v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zM9 17h2V8H9zm4 0h2V8h-2zM7 6v13z"
