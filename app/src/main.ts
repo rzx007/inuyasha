@@ -20,6 +20,7 @@ app.use(ElementPlus) // 全局注册，供低代码渲染器使用全量组件
 
 // 批量注册 Materials 组件
 Object.entries(materialsComponents).forEach(([name, component]) => {
+  console.log("🚀 ~ name:", name)
   app.component(name, component)
 })
 

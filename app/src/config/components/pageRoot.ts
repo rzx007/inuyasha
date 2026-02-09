@@ -8,13 +8,12 @@ import { ComponentType } from '@inuyasha/core'
 export const pageRootMeta: ComponentMeta = {
   type: ComponentType.PageRoot,
   name: '页面根元素',
-  icon: 'Layout',
+  icon: 'LayoutDashboard',
   componentName: 'ZPageRoot',
   category: 'layout',
   canNest: true,
   display: 'block',
   defaultProps: {},
   defaultStyle: {},
-  propsSchema: [],
+  propsSchema: []
 }
-

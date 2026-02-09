@@ -9,10 +9,26 @@ import { EventBindingSchema } from './event'
 export type ComponentId = string
 
 const componentTypeValues = [
-  'container', 'text', 'image', 'button', 'divider',
-  'row', 'col', 'card', 'collapse', 'tabs', 'pageRoot',
-  'table', 'statistic', 'chart', 'list',
-  'input', 'select', 'datePicker', 'upload',
+  'container',
+  'text',
+  'image',
+  'button',
+  'divider',
+  'flex-container',
+  'row',
+  'col',
+  'card',
+  'collapse',
+  'tabs',
+  'pageRoot',
+  'table',
+  'statistic',
+  'chart',
+  'list',
+  'input',
+  'select',
+  'datePicker',
+  'upload'
 ] as const
 
 export const ComponentTypeSchema = z.enum(componentTypeValues)
@@ -25,6 +41,7 @@ export const ComponentType = {
   Image: 'image' as const,
   Button: 'button' as const,
   Divider: 'divider' as const,
+  FlexContainer: 'flex-container' as const,
   Row: 'row' as const,
   Col: 'col' as const,
   Card: 'card' as const,
@@ -38,36 +55,40 @@ export const ComponentType = {
   Input: 'input' as const,
   Select: 'select' as const,
   DatePicker: 'datePicker' as const,
-  Upload: 'upload' as const,
+  Upload: 'upload' as const
 } satisfies Record<string, ComponentType>
 
 export const ComponentPropsSchema = z.record(z.any())
 export type ComponentProps = z.infer<typeof ComponentPropsSchema>
 
-export const ComponentStyleSchema = z.object({
-  width: z.union([z.string(), z.number()]).optional(),
-  height: z.union([z.string(), z.number()]).optional(),
-  padding: z.union([z.string(), z.number()]).optional(),
-  margin: z.union([z.string(), z.number()]).optional(),
-  backgroundColor: z.string().optional(),
-  color: z.string().optional(),
-  fontSize: z.union([z.string(), z.number()]).optional(),
-  fontWeight: z.union([z.string(), z.number()]).optional(),
-  textAlign: z.enum(['left', 'center', 'right']).optional(),
-  border: z.string().optional(),
-  borderRadius: z.union([z.string(), z.number()]).optional(),
-}).catchall(z.any())
+export const ComponentStyleSchema = z
+  .object({
+    width: z.union([z.string(), z.number()]).optional(),
+    height: z.union([z.string(), z.number()]).optional(),
+    padding: z.union([z.string(), z.number()]).optional(),
+    margin: z.union([z.string(), z.number()]).optional(),
+    backgroundColor: z.string().optional(),
+    color: z.string().optional(),
+    fontSize: z.union([z.string(), z.number()]).optional(),
+    fontWeight: z.union([z.string(), z.number()]).optional(),
+    textAlign: z.enum(['left', 'center', 'right']).optional(),
+    border: z.string().optional(),
+    borderRadius: z.union([z.string(), z.number()]).optional()
+  })
+  .catchall(z.any())
 export type ComponentStyle = z.infer<typeof ComponentStyleSchema>
 
 export const ComponentDataSourceSchema = z.object({
   type: z.enum(['static', 'api', 'expression']),
   value: z.any().optional(),
-  api: z.object({
-    url: z.string(),
-    method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).optional(),
-    params: z.record(z.any()).optional(),
-  }).optional(),
-  expression: z.string().optional(),
+  api: z
+    .object({
+      url: z.string(),
+      method: z.enum(['GET', 'POST', 'PUT', 'DELETE']).optional(),
+      params: z.record(z.any()).optional()
+    })
+    .optional(),
+  expression: z.string().optional()
 })
 export type ComponentDataSource = z.infer<typeof ComponentDataSourceSchema>
 
@@ -93,14 +114,14 @@ const ComponentSchemaSchema: z.ZodType<ComponentSchema> = z.lazy(() =>
     style: ComponentStyleSchema,
     children: z.array(ComponentSchemaSchema).optional(),
     dataSource: ComponentDataSourceSchema.optional(),
-    events: z.array(EventBindingSchema).optional(),
+    events: z.array(EventBindingSchema).optional()
   })
 )
 export { ComponentSchemaSchema }
 
 const PropSchemaOptionSchema = z.object({
   label: z.string(),
-  value: z.any(),
+  value: z.any()
 })
 
 export const ComponentPropSchemaSchema = z.object({
@@ -113,28 +134,28 @@ export const ComponentPropSchemaSchema = z.object({
   description: z.string().optional(),
   bindable: z.boolean().optional(),
   vModel: z.boolean().optional(),
-  storeInProps: z.boolean().optional(),
+  storeInProps: z.boolean().optional()
 })
 export type ComponentPropSchema = z.infer<typeof ComponentPropSchemaSchema>
 
 export const ComponentTriggerSchema = z.object({
   label: z.string(),
   value: z.string(),
-  event: z.string(),
+  event: z.string()
 })
 export type ComponentTrigger = z.infer<typeof ComponentTriggerSchema>
 
 export const ComponentSlotSchema = z.object({
   name: z.string(),
   label: z.string(),
-  allowDrag: z.boolean().optional(),
+  allowDrag: z.boolean().optional()
 })
 export type ComponentSlot = z.infer<typeof ComponentSlotSchema>
 
 export const ComponentMethodSchema = z.object({
   name: z.string(),
   label: z.string(),
-  params: z.array(z.string()).optional(),
+  params: z.array(z.string()).optional()
 })
 export type ComponentMethod = z.infer<typeof ComponentMethodSchema>
 
@@ -147,12 +168,12 @@ export const ComponentMetaSchema = z.object({
   defaultStyle: ComponentStyleSchema,
   propsSchema: z.array(ComponentPropSchemaSchema),
   canNest: z.boolean().optional(),
-  display: z.enum(['block', 'inline-block']).optional(),
+  display: z.enum(['block', 'inline-block', 'flex']).optional(),
   componentName: z.string().optional(),
   triggers: z.array(ComponentTriggerSchema).optional(),
   slots: z.array(ComponentSlotSchema).optional(),
   methods: z.array(ComponentMethodSchema).optional(),
   exposedMethods: z.array(z.object({ name: z.string(), label: z.string() })).optional(),
-  useDynamicSlots: z.boolean().optional(),
+  useDynamicSlots: z.boolean().optional()
 })
 export type ComponentMeta = z.infer<typeof ComponentMetaSchema>

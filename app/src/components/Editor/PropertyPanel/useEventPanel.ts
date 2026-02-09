@@ -155,6 +155,7 @@ export function useEventPanel() {
   function handleSaveEvent() {
     if (!selectedComponent.value || !currentEvent.value.id) return
     const events = [...(selectedComponent.value.schema.events || [])]
+    console.log("🚀 ~ handleSaveEvent ~ events:", events)
     const existingIndex = events.findIndex(e => e.id === currentEvent.value.id)
 
     const eventToSave: EventBinding = {
@@ -175,6 +176,7 @@ export function useEventPanel() {
   function deleteEvent(id: string) {
     if (!selectedComponent.value) return
     const events = selectedComponent.value.schema.events?.filter(e => e.id !== id) || []
+    console.log("🚀 ~ deleteEvent ~ events:", events)
     editorStore.updateComponent(selectedComponent.value.id, { events })
   }
 

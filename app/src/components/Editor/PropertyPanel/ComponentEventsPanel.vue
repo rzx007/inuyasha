@@ -44,7 +44,9 @@ const {
 <template>
   <div class="p-4 flex-1 overflow-y-auto">
     <div class="flex justify-end mb-4">
-      <Button @click="() => openAddEventDialog()">添加事件</Button>
+      <Button @click="() => openAddEventDialog()">
+        添加事件
+      </Button>
     </div>
     <div v-if="selectedComponent?.schema.events && selectedComponent.schema.events.length > 0">
       <div
@@ -52,8 +54,13 @@ const {
         :key="eventItem.id"
         class="p-2 border rounded mb-2 flex justify-between items-start bg-white"
       >
-        <div class="cursor-pointer flex-1" @click="openAddEventDialog(eventItem)">
-          <div class="font-bold text-sm">{{ eventItem.trigger }}</div>
+        <div
+          class="cursor-pointer flex-1"
+          @click="openAddEventDialog(eventItem)"
+        >
+          <div class="font-bold text-sm">
+            {{ eventItem.trigger }}
+          </div>
           <div class="text-xs text-gray-500 mt-1">
             <template v-if="eventItem.actions && eventItem.actions.length">
               {{ eventItem.actions.length }} 个动作: 
@@ -67,15 +74,28 @@ const {
             </template>
           </div>
         </div>
-        <Button variant="ghost" size="icon" class="h-6 w-6" @click.stop="deleteEvent(eventItem.id)">
+        <Button
+          variant="ghost"
+          size="icon"
+          class="h-6 w-6"
+          @click.stop="deleteEvent(eventItem.id)"
+        >
           <Trash2 class="w-4 h-4 text-red-500" />
         </Button>
       </div>
     </div>
-    <div v-else class="text-center text-gray-400 text-sm">暂无事件配置</div>
+    <div
+      v-else
+      class="text-center text-gray-400 text-sm"
+    >
+      暂无事件配置
+    </div>
 
     <!-- 事件配置对话框 -->
-    <Dialog :open="isEventDialogVisible" @update:open="val => (isEventDialogVisible = val)">
+    <Dialog
+      :open="isEventDialogVisible"
+      @update:open="val => (isEventDialogVisible = val)"
+    >
       <DialogContent class="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>事件配置</DialogTitle>
@@ -83,7 +103,7 @@ const {
         
         <div class="space-y-4">
           <!-- 触发器选择 -->
-           <div class="space-y-2">
+          <div class="space-y-2">
             <label class="text-sm font-medium">触发器</label>
             <Select v-model="currentEvent.trigger">
               <SelectTrigger class="w-full">
@@ -103,8 +123,14 @@ const {
 
           <div class="border-t pt-4">
             <div class="flex justify-between items-center mb-2">
-              <h3 class="font-medium">动作列表</h3>
-              <Button size="sm" variant="outline" @click="addAction">
+              <h3 class="font-medium">
+                动作列表
+              </h3>
+              <Button
+                size="sm"
+                variant="outline"
+                @click="addAction"
+              >
                 <Plus class="w-4 h-4 mr-1" /> 添加动作
               </Button>
             </div>
@@ -116,7 +142,12 @@ const {
                 class="border rounded p-3 bg-gray-50 relative"
               >
                 <div class="absolute right-2 top-2">
-                   <Button variant="ghost" size="icon" class="h-6 w-6" @click="removeAction(index)">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    class="h-6 w-6"
+                    @click="removeAction(index)"
+                  >
                     <Trash2 class="w-3 h-3 text-gray-400 hover:text-red-500" />
                   </Button>
                 </div>
@@ -160,8 +191,15 @@ const {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" @click="isEventDialogVisible = false">取消</Button>
-          <Button @click="handleSaveEvent">保存</Button>
+          <Button
+            variant="outline"
+            @click="isEventDialogVisible = false"
+          >
+            取消
+          </Button>
+          <Button @click="handleSaveEvent">
+            保存
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

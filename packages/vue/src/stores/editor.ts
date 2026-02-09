@@ -140,6 +140,13 @@ export const useEditor = defineStore('editor', () => {
   function updateComponent(id: ComponentId, updates: Partial<ComponentSchema>) {
     core.updateComponentImmutable(id, updates)
     syncPageConfig()
+    // 如果当前选中的是被更新的组件，需要重新获取新的引用
+    if (selectedComponent.value?.id === id) {
+      const updated = findComponentInTree(id)
+      if (updated) {
+        selectedComponent.value = { id: updated.id, schema: updated }
+      }
+    }
   }
 
   // 选中组件
