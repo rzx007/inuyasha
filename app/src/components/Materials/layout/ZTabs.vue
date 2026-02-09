@@ -18,8 +18,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <el-tabs v-bind="$attrs">
-    <el-tab-pane v-for="item in items" :key="item.name" v-bind="item" :label="item.title">
-      <slot :name="item.name"></slot>
+    <el-tab-pane
+      v-for="item in items"
+      :key="item.name"
+      v-bind="item"
+      :label="item.title"
+    >
+      <slot :name="item.name" />
     </el-tab-pane>
   </el-tabs>
 </template>

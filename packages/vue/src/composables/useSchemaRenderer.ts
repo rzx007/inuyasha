@@ -22,6 +22,10 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return s ? componentStore.getComponentMeta(s.type) : undefined
   })
 
+  /**
+   * 解析组件的 props
+   */
+
   const resolvedProps = computed(() => {
     const s = toValue(schema)
     if (!s) return {}
@@ -38,6 +42,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return newProps
   })
 
+  /**
+   * 解析组件的 style
+   */
   const resolvedStyle = computed(() => {
     const s = toValue(schema)
     if (!s) return {}
@@ -56,6 +63,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return newStyle
   })
 
+  /**
+   * 处理组件的事件
+   */
   function handleEvent(trigger: string) {
     const s = toValue(schema)
     if (!s) return
@@ -66,6 +76,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     }
   }
 
+  /**
+   * 解析组件的 modelValue 绑定
+   */
   const modelValueBindings = computed(() => {
     const s = toValue(schema)
     const meta = componentMeta.value
@@ -83,6 +96,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return bindings
   })
 
+  /**
+   * 解析组件的 modelValue 事件
+   */
   const modelValueEvents = computed(() => {
     const s = toValue(schema)
     const meta = componentMeta.value
@@ -110,6 +126,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return events
   })
 
+  /**
+   * 解析组件的动态事件
+   */
   const dynamicEvents = computed(() => {
     const meta = componentMeta.value
     if (!meta?.triggers) return {}
@@ -122,6 +141,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return events
   })
 
+  /**
+   * 获取组件的 slot 子组件
+   */
   function getSlotChildren(slotName?: string) {
     const s = toValue(schema)
     if (!s?.children) return []
@@ -137,6 +159,10 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     () => componentMeta.value?.propsSchema?.some((s: ComponentPropSchema) => s.vModel) || false
   )
 
+  /**
+   * 获取组件的动态 slot 子组件
+   */
+
   const dynamicSlotItems = computed(() => {
     const meta = componentMeta.value
     if (!meta?.useDynamicSlots || !Array.isArray(resolvedProps.value.items)) {
@@ -145,6 +171,9 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     return resolvedProps.value.items
   })
 
+  /**
+   * 初始化组件的 modelValue
+   */
   function initVModel() {
     const s = toValue(schema)
     const meta = componentMeta.value

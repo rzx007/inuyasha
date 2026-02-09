@@ -22,8 +22,13 @@ interface Props {
 const props = defineProps<Props>()
 
 const editor = useEditor()
-const componentRegistry = useComponentInstance()
+const componentInstance = useComponentInstance()
 const componentRef = ref(null)
+
+const forwardRef = ref(null)
+defineExpose({
+  getRef: () => forwardRef.value
+})
 
 const {
   resolvedProps,
@@ -42,15 +47,50 @@ const {
 onMounted(() => {
   initVModel()
   if (componentRef.value) {
-    componentRegistry.register(props.schema.id, componentRef.value)
+    componentInstance.register(props.schema.id, componentRef.value)
   }
+  forwardRef.value = componentRef.value
 })
 
 onUnmounted(() => {
-  componentRegistry.unregister(props.schema.id)
+  componentInstance.unregister(props.schema.id)
+  forwardRef.value = null
 })
 
-const styleObject = computed(() => resolvedStyle.value)
+const mergedProps = computed(() =>
+  needsModelValue.value
+    ? { ...resolvedProps.value, ...modelValueBindings.value }
+    : resolvedProps.value
+)
+const mergedEvents = computed(() =>
+  needsModelValue.value
+    ? { ...dynamicEvents.value, ...modelValueEvents.value }
+    : dynamicEvents.value
+)
+
+const slotChildrenMap = computed(() => {
+  const map: Record<string, ComponentSchema[]> = {}
+  const slots = componentMeta.value?.slots ?? []
+  for (const slot of slots) {
+    map[slot.name] = getSlotChildren(slot.name)
+  }
+  for (const item of dynamicSlotItems.value) {
+    map[item.name] = getSlotChildren(item.name)
+  }
+  return map
+})
+
+const allSlotItems = computed(() => {
+  const metaSlots = (componentMeta.value?.slots ?? []).map(s => ({
+    name: s.name,
+    allowDrag: s.allowDrag ?? false
+  }))
+  const dynamicSlots = dynamicSlotItems.value.map(item => ({
+    name: item.name,
+    allowDrag: true
+  }))
+  return [...metaSlots, ...dynamicSlots]
+})
 
 const children = computed({
   get: () => props.schema.children || [],
@@ -64,7 +104,7 @@ const children = computed({
   <PageRootDropZone
     v-if="schema.type === ComponentType.PageRoot"
     :parent-id="schema.id"
-    :style-object="styleObject"
+    :style-object="resolvedStyle"
   >
     <EditorComponentWrapper
       v-for="(child, index) in children"
@@ -85,15 +125,18 @@ const children = computed({
   <template v-else-if="canUseDynamicRender">
     <component
       :is="componentMeta?.componentName"
-      v-if="needsModelValue"
       ref="componentRef"
-      v-bind="{ ...resolvedProps, ...modelValueBindings }"
-      :style="styleObject"
-      v-on="{ ...dynamicEvents, ...modelValueEvents }"
+      v-bind="mergedProps"
+      :style="resolvedStyle"
+      v-on="mergedEvents"
     >
-      <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
+      <template
+        v-for="slot in allSlotItems"
+        :key="slot.name"
+        #[slot.name]
+      >
         <EditorComponentWrapper
-          v-for="(child, index) in getSlotChildren(slot.name)"
+          v-for="(child, index) in slotChildrenMap[slot.name] ?? []"
           :key="child.id"
           :schema="child"
           :index="index"
@@ -101,49 +144,8 @@ const children = computed({
         />
 
         <SlotDropWrapper
-          v-if="slot.allowDrag && getSlotChildren(slot.name).length === 0"
+          v-if="slot.allowDrag && (slotChildrenMap[slot.name] ?? []).length === 0"
           :slot-name="slot.name"
-          :parent-id="schema.id"
-        />
-      </template>
-    </component>
-
-    <component
-      :is="componentMeta?.componentName"
-      v-else
-      ref="componentRef"
-      v-bind="resolvedProps"
-      :style="styleObject"
-      v-on="dynamicEvents"
-    >
-      <template v-for="slot in componentMeta?.slots" :key="slot.name" #[slot.name]>
-        <EditorComponentWrapper
-          v-for="(child, index) in getSlotChildren(slot.name)"
-          :key="child.id"
-          :schema="child"
-          :index="index"
-          :parent-id="schema.id"
-        />
-
-        <SlotDropWrapper
-          v-if="slot.allowDrag && getSlotChildren(slot.name).length === 0"
-          :slot-name="slot.name"
-          :parent-id="schema.id"
-        />
-      </template>
-
-      <template v-for="item in dynamicSlotItems" :key="item.name" #[item.name]>
-        <EditorComponentWrapper
-          v-for="(child, index) in getSlotChildren(item.name)"
-          :key="child.id"
-          :schema="child"
-          :index="index"
-          :parent-id="schema.id"
-        />
-
-        <SlotDropWrapper
-          v-if="getSlotChildren(item.name).length === 0"
-          :slot-name="item.name"
           :parent-id="schema.id"
         />
       </template>
@@ -154,7 +156,13 @@ const children = computed({
     </component>
   </template>
 
-  <div v-else :style="styleObject" class="p-4 border border-dashed border-red-400 bg-red-50">
-    <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
+  <div
+    v-else
+    :style="resolvedStyle"
+    class="p-4 border border-dashed border-red-400 bg-red-50"
+  >
+    <div class="text-red-500 text-sm">
+      未知组件类型: {{ schema.type }}
+    </div>
   </div>
 </template>

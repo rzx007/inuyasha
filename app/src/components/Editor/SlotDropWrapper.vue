@@ -42,7 +42,9 @@ function handleDrop(item: DragItem, monitor: DropTargetMonitor) {
   // 2. 处理已存在组件移动到空插槽 (EXISTING_COMPONENT)
   if (item.type === DndTypes.EXISTING_COMPONENT) {
     const draggedId = item.id
-    if (!draggedId) return
+    if (!draggedId) {
+      return
+    }
 
     // 移动到容器末尾
     editorStore.moveComponent(draggedId, props.parentId, undefined, props.slotName)
