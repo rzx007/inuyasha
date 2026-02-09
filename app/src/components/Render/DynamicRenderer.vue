@@ -5,7 +5,7 @@ import { ComponentType } from '@inuyasha/core'
 import { useEditor, useComponentInstance, useSchemaRenderer } from '@inuyasha/vue'
 
 const EditorComponentWrapper = defineAsyncComponent(
-  () => import('@/components/Editor/EditorComponentWrapper.vue')
+  () => import('@/components/Editor/EditorComponentWrapper/index.vue')
 )
 
 const SlotDropWrapper = defineAsyncComponent(
@@ -130,11 +130,7 @@ const children = computed({
       :style="resolvedStyle"
       v-on="mergedEvents"
     >
-      <template
-        v-for="slot in allSlotItems"
-        :key="slot.name"
-        #[slot.name]
-      >
+      <template v-for="slot in allSlotItems" :key="slot.name" #[slot.name]>
         <EditorComponentWrapper
           v-for="(child, index) in slotChildrenMap[slot.name] ?? []"
           :key="child.id"
@@ -156,13 +152,7 @@ const children = computed({
     </component>
   </template>
 
-  <div
-    v-else
-    :style="resolvedStyle"
-    class="p-4 border border-dashed border-red-400 bg-red-50"
-  >
-    <div class="text-red-500 text-sm">
-      未知组件类型: {{ schema.type }}
-    </div>
+  <div v-else :style="resolvedStyle" class="p-4 border border-dashed border-red-400 bg-red-50">
+    <div class="text-red-500 text-sm">未知组件类型: {{ schema.type }}</div>
   </div>
 </template>
