@@ -8,7 +8,7 @@ export function useComponentDragDrop(
   componentRef: Ref<HTMLElement | null>,
   schema: ComponentSchema,
   displayType: ComputedRef<string>,
-  index?: number,
+  index?: number | (() => number | undefined),
   parentId?: string
 ) {
   const editorStore = useEditor()
@@ -18,7 +18,7 @@ export function useComponentDragDrop(
     item: () => ({
       type: DndTypes.EXISTING_COMPONENT,
       id: schema.id,
-      index,
+      index: typeof index === 'function' ? index() : index,
       parentId,
       display: displayType.value
     }),
@@ -70,7 +70,7 @@ export function useComponentDragDrop(
       }
       const dragId = item.id
       const dragIndex = item.index
-      const hoverIndex = index
+      const hoverIndex = typeof index === 'function' ? index() : index
       if (!dragId || dragIndex === undefined || hoverIndex === undefined) {
         return
       }
@@ -104,7 +104,8 @@ export function useComponentDragDrop(
         return
       }
 
-      let targetIndex = index !== undefined ? index : 0
+      const idx = typeof index === 'function' ? index() : index
+      let targetIndex = idx !== undefined ? idx : 0
       const hoverRect = componentRef.value.getBoundingClientRect()
       const clientOffset = monitor.getClientOffset()
 

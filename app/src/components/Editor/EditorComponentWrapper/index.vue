@@ -32,7 +32,7 @@ const {
   dropCollected,
   dropTarget,
   indicatorPosition
-} = useComponentDragDrop(componentRef, props.schema, displayType, props.index, props.parentId)
+} = useComponentDragDrop(componentRef, props.schema, displayType, () => props.index, props.parentId)
 
 const { overlayRect, overlayZIndex, shouldShowOverlay, update } = useComponentOverlay(
   componentRef,
