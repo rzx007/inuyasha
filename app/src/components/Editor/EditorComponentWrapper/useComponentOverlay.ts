@@ -1,5 +1,5 @@
 import { computed, ref, type ComputedRef, type Ref } from 'vue'
-import { useElementBounding, useEventListener } from '@vueuse/core'
+import { useElementBounding, useEventListener, useResizeObserver } from '@vueuse/core'
 
 export function useComponentOverlay(
   componentRef: Ref<HTMLElement | null>,
@@ -33,6 +33,13 @@ export function useComponentOverlay(
       update()
     },
     { passive: true }
+  )
+
+  useResizeObserver(
+    () => document.querySelector('.canvas-content'),
+    () => {
+      update()
+    }
   )
 
   return {

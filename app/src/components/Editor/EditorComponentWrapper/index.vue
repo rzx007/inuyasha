@@ -94,7 +94,7 @@ watch([selectedId, () => props.schema.id], () => {
 <style scoped>
 .component-wrapper {
   outline: none;
-  transition: all 0.2s ease;
+  transition: box-shadow 0.2s ease, outline 0.2s ease;
 }
 .component-wrapper:hover {
   box-shadow: 0 0 0 1px var(--el-color-primary-light-3);
