@@ -131,19 +131,29 @@ const children = computed({
       v-on="mergedEvents"
     >
       <template v-for="slot in allSlotItems" :key="slot.name" #[slot.name]>
-        <EditorComponentWrapper
-          v-for="(child, index) in slotChildrenMap[slot.name] ?? []"
-          :key="child.id"
-          :schema="child"
-          :index="index"
-          :parent-id="schema.id"
-        />
-
         <SlotDropWrapper
-          v-if="slot.allowDrag && (slotChildrenMap[slot.name] ?? []).length === 0"
+          v-if="slot.allowDrag"
           :slot-name="slot.name"
           :parent-id="schema.id"
-        />
+          :has-children="(slotChildrenMap[slot.name] ?? []).length > 0"
+        >
+          <EditorComponentWrapper
+            v-for="(child, index) in slotChildrenMap[slot.name] ?? []"
+            :key="child.id"
+            :schema="child"
+            :index="index"
+            :parent-id="schema.id"
+          />
+        </SlotDropWrapper>
+        <template v-else>
+          <EditorComponentWrapper
+            v-for="(child, index) in slotChildrenMap[slot.name] ?? []"
+            :key="child.id"
+            :schema="child"
+            :index="index"
+            :parent-id="schema.id"
+          />
+        </template>
       </template>
 
       <template v-if="schema.type === ComponentType.Text">

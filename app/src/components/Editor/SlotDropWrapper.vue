@@ -6,8 +6,11 @@ import { useEditor } from '@inuyasha/vue'
 interface Props {
   slotName?: string
   parentId: string
+  hasChildren?: boolean
 }
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  hasChildren: false
+})
 
 const editorStore = useEditor()
 
@@ -64,13 +67,32 @@ const [collected, drop] = useDrop(() => ({
 </script>
 
 <template>
-  <div
-    :ref="drop"
-    class="empty-slot-placeholder min-h-[50px] w-full p-1 border border-dashed border-gray-300 bg-gray-50/50 rounded"
-    :class="{
-      'ring-2 ring-primary ring-inset bg-primary/5': collected.isOver && collected.canDrop
-    }"
-  >
-    <div class="text-center text-gray-400 text-sm py-2">拖拽组件至此</div>
+  <div :ref="drop" class="slot-drop-wrapper relative w-full h-full min-h-[50px]">
+    <!-- 放置层（绝对定位，全覆盖） -->
+    <div
+      class="absolute inset-0 z-0 transition-all duration-200 rounded"
+      :class="[
+        hasChildren ? 'opacity-0' : 'border border-dashed border-gray-300 bg-gray-50/50',
+        {
+          'ring-2 ring-primary ring-inset bg-primary/5 !opacity-100':
+            collected.isOver && collected.canDrop
+        }
+      ]"
+    >
+      <div
+        v-if="!hasChildren"
+        class="absolute inset-0 flex items-center justify-center text-gray-400 text-sm pointer-events-none"
+      >
+        拖拽组件至此
+      </div>
+    </div>
+
+    <!-- 内容层（相对定位，z-index 更高） -->
+    <div class="relative z-10 pointer-events-none h-full">
+      <!-- 恢复子元素的指针事件 -->
+      <div class="pointer-events-auto h-full">
+        <slot />
+      </div>
+    </div>
   </div>
 </template>
