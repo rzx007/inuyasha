@@ -25,6 +25,7 @@
     "@element-plus/icons-vue": "^2.3.2",
     "@inuyasha/core": "workspace:*",
     "@inuyasha/utils": "workspace:*",
+    "@inuyasha/ai-renderer": "workspace:*",
     "@inuyasha/vue": "workspace:*",
     "@shikijs/monaco": "^3.17.1",
     "@tailwindcss/vite": "^4.1.17",

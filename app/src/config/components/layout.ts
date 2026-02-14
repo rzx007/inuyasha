@@ -85,7 +85,6 @@ export const layoutComponents: ComponentMeta[] = [
     display: 'block',
     componentName: 'ElCard',
     defaultProps: {
-      title: '卡片标题',
       shadow: 'always'
     },
     defaultStyle: {
@@ -94,17 +93,10 @@ export const layoutComponents: ComponentMeta[] = [
       backgroundColor: '#fff'
     },
     slots: [
-      { name: 'header', label: 'Header', allowDrag: true },
-      { name: 'default', label: 'Default', allowDrag: true }
+      { name: 'header', label: 'Header (卡片标题区)', allowDrag: true },
+      { name: 'default', label: 'Default (卡片内容区)', allowDrag: true }
     ],
     propsSchema: [
-      {
-        key: 'title',
-        label: '标题',
-        type: 'text',
-        defaultValue: '卡片标题',
-        bindable: true
-      },
       {
         key: 'shadow',
         label: '阴影',

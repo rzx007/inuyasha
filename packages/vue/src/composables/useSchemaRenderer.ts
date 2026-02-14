@@ -148,7 +148,12 @@ export function useSchemaRenderer(schema: MaybeRefOrGetter<ComponentSchema>) {
     const s = toValue(schema)
     if (!s?.children) return []
     if (!slotName) {
+      // 无参数：返回没有 _slot 的子组件
       return s.children.filter(child => !child.props?._slot)
+    }
+    if (slotName === 'default') {
+      // default 插槽：匹配 _slot === 'default' 或没有 _slot 的子组件（回退兼容）
+      return s.children.filter(child => !child.props?._slot || child.props._slot === 'default')
     }
     return s.children.filter(child => child.props?._slot === slotName)
   }

@@ -3,7 +3,7 @@ import { ref, computed } from 'vue'
 import { onMounted } from 'vue'
 import { DndProvider } from 'vue3-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
-import { Layers, Database } from 'lucide-vue-next'
+import { Layers, Database, Sparkles } from 'lucide-vue-next'
 import { useEditor } from '@inuyasha/vue'
 import ComponentPanel from '@/components/Editor/ComponentPanel.vue'
 import DataSourcePanel from '@/components/Editor/DataSourcePanel/index.vue'
@@ -12,6 +12,7 @@ import Canvas from '@/components/Editor/Canvas.vue'
 import PropertyPanel from '@/components/Editor/PropertyPanel/index.vue'
 import Toolbar from '@/components/Editor/Toolbar.vue'
 import LayersPanel from '@/components/Editor/LayersPanel.vue'
+import AIPanel from '@/components/Editor/AIPanel.vue'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 const editorStore = useEditor()
@@ -59,6 +60,9 @@ onMounted(() => {
                 <Layers :size="16" />
                 <!-- <span>层级</span> -->
               </TabsTrigger>
+              <TabsTrigger value="ai" class="tabs-trigger-editor" title="AI 助手">
+                <Sparkles :size="16" />
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="layers" class="h-full overflow-y-auto">
               <LayersPanel />
@@ -68,6 +72,9 @@ onMounted(() => {
             </TabsContent>
             <TabsContent value="data" class="h-full overflow-y-auto">
               <DataSourcePanel />
+            </TabsContent>
+            <TabsContent value="ai" class="h-full overflow-hidden">
+              <AIPanel />
             </TabsContent>
           </Tabs>
         </div>
